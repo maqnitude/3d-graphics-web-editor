@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>3D Sandbox with Editor</title>
+
+    <script src="lib/bootstrap-5.3.3-dist/js/bootstrap.bundle.js"></script>
+
+    <link href="lib/bootstrap-5.3.3-dist/css/bootstrap.css" rel="stylesheet">
+    <link href="lib/bootstrap-icons-1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+  </head>
+  <body class="vw-100 vh-100 d-flex flex-column">
+    <div id="MenuBar" class="container-fluid border p-0 m-0">
+      <ul class="d-flex flex-row p-0 m-0" style="list-style-type: none;">
+        <li class="dropdown">
+          <button id="File" class="btn btn-sm btn-menu dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            File
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="menubarFile">
+            <li><a class="dropdown-item" href="#">Action</a></li>
+            <li><a class="dropdown-item" href="#">Another action</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Something else here</a></li>
+          </ul>
+        </li>
+        <li class="dropdown">
+          <button id="Edit" class="btn btn-sm btn-menu dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            Edit
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="menubarEdit">
+            <li><a class="dropdown-item" href="#">Action</a></li>
+            <li><a class="dropdown-item" href="#">Another action</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Something else here</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <div id="MainToolBar" class="container-fluid border p-0 m-0">
+      <ul id="PlayModeControls" class="d-flex flex-row justify-content-center px-0 py-1 m-0">
+        <li class="d-flex align-items-center">
+          <a id="Play" class="btn btn-primary btn-control" role="button" aria-disabled="true">
+            <i class="bi bi-play-fill"></i>
+          </a>
+          <a id="Pause" class="btn btn-primary btn-control ms-2 disabled" role="button" aria-disabled="true">
+            <i class="bi bi-pause-fill"></i>
+          </a>
+          <a id="Stop" class="btn btn-primary btn-control ms-2 disabled" role="button" aria-disabled="true">
+            <i class="bi bi-stop-fill"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div id="MainContent" class="flex-fill d-flex flex-row border m-0">
+      <div id="SceneTree" class="flex-grow-1 border m-1" style="flex-basis: 20vw;">
+      </div>
+
+      <div class="vertical-resizer border" style=" width: 4px; cursor: col-resize;"></div>
+
+      <div id="LevelViewport" class="flex-grow-1 border m-1" style="flex-basis: 60vw;">
+        <div id="ViewportControls" class="container-fluid border p-0 m-0">
+          <ul class="d-flex flex-row p-1 m-0">
+            <li class="d-flex align-items-center">
+              <a id="Select" class="btn btn-secondary btn-control" role="button" aria-disabled="true">
+                <i class="bi bi-cursor-fill"></i>
+              </a>
+              <div class="vr mx-1"></div>
+              <a id="Translate" class="btn btn-secondary btn-control" role="button" aria-disabled="true">
+                <i class="bi bi-arrows-move"></i>
+              </a>
+              <a id="Rotate" class="btn btn-secondary btn-control ms-1" role="button" aria-disabled="true">
+                <i class="bi bi-arrow-clockwise"></i>
+              </a>
+              <a id="Scale" class="btn btn-secondary btn-control ms-1" role="button" aria-disabled="true">
+                <i class="bi bi-arrows-angle-expand"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="vertical-resizer border" style="width: 4px; cursor: col-resize;"></div>
+
+      <div id="Properties" class="flex-grow-1 border m-1" style="flex-basis: 20vw;">
+      </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

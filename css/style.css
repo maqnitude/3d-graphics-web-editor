@@ -1,0 +1,18 @@
+/*
+* Cusom css
+*/
+.btn-menu {
+  --bs-btn-font-size: .75rem;
+}
+.btn-control {
+  --bs-btn-font-size: .75rem;
+  --bs-btn-padding-x: .5rem;
+  --bs-btn-padding-y: .125rem;
+}
+
+/*
+* Extensions
+*/
+.dropdown-item {
+  font-size: .75rem;
+}
