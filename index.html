@@ -6,8 +6,6 @@
 
     <title>3D Sandbox with Editor</title>
 
-    <script src="lib/bootstrap-5.3.3-dist/js/bootstrap.bundle.js"></script>
-
     <link href="lib/bootstrap-5.3.3-dist/css/bootstrap.css" rel="stylesheet">
     <link href="lib/bootstrap-icons-1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
@@ -56,13 +54,13 @@
       </ul>
     </div>
 
-    <div id="MainContent" class="flex-fill d-flex flex-row border m-0">
-      <div id="SceneTree" class="flex-grow-1 border m-1" style="flex-basis: 20vw;">
+    <div id="MainContent" class="flex-grow-1 d-flex flex-row border m-0">
+      <div id="SceneTree" class="flex-grow-1 flex-shrink-1 border m-1" style="flex-basis: 20%;">
       </div>
 
-      <div class="vertical-resizer border" style=" width: 4px; cursor: col-resize;"></div>
+      <div class="vertical-resizer border" style="width: 4px; cursor: col-resize;"></div>
 
-      <div id="LevelViewport" class="flex-grow-1 border m-1" style="flex-basis: 60vw;">
+      <div id="LevelViewport" class="flex-grow-1 flex-shrink-1 d-flex flex-column border m-1" style="flex-basis: 60%;">
         <div id="ViewportControls" class="container-fluid border p-0 m-0">
           <ul class="d-flex flex-row p-1 m-0">
             <li class="d-flex align-items-center">
@@ -86,9 +84,19 @@
 
       <div class="vertical-resizer border" style="width: 4px; cursor: col-resize;"></div>
 
-      <div id="Properties" class="flex-grow-1 border m-1" style="flex-basis: 20vw;">
+      <div id="Properties" class="flex-grow-1 flex-shrink-1 border m-1" style="flex-basis: 20%;">
       </div>
     </div>
+
+    <script src="lib/bootstrap-5.3.3-dist/js/bootstrap.bundle.js"></script>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./lib/three.js-r164/build/three.module.js"
+        }
+      }
+    </script>
 
     <script type="module" src="js/main.js"></script>
   </body>
