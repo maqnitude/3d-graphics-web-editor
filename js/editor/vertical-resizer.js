@@ -1,4 +1,7 @@
-function VerticalResizer() {
+function VerticalResizer(editor) {
+  const eventDispatcher = editor.eventDispatcher;
+  const events = editor.events;
+
   var vResizers = document.getElementsByClassName("vertical-resizer");
 
   for (let i = 0; i < vResizers.length; i++) {
@@ -55,8 +58,7 @@ function VerticalResizer() {
         child.style.width = "100%";
       }
 
-      leftSibling.dispatchEvent(new Event("resizing"));
-      rightSibling.dispatchEvent(new Event("resizing"));
+      eventDispatcher.dispatchEvent(events.windowResize);
     });
 
     window.addEventListener("mouseup", function(e) {
