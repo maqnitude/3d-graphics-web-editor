@@ -58,7 +58,7 @@ function VerticalResizer(editor) {
         child.style.width = "100%";
       }
 
-      eventDispatcher.dispatchEvent(events.windowResize);
+      eventDispatcher.dispatchEvent(events.windowResized);
     });
 
     window.addEventListener("mouseup", function(e) {
