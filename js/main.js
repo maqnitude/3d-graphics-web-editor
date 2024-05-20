@@ -27,6 +27,33 @@ window.addEventListener("resize", function(e) {
   editor.eventDispatcher.dispatchEvent(editor.events.windowResized);
 });
 
+// add click event listener to each group item
+document.querySelectorAll('.list-group-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.list-group-item').forEach(function(otherItem) {
+      // unselect all other items
+      otherItem.classList.remove('active');
+    });
+    // select the clicked item
+    this.classList.add('active');
+  });
+});
+
+// add click event listener to "Add" button in the popup modal
+document.getElementById('AddObject').addEventListener('click', function() {
+  const activeItems = document.getElementsByClassName('active');
+  if (activeItems.length > 0) {
+    const selectedObject = activeItems[0].getAttribute('object-name');
+    console.log('Adding object: ' + selectedObject);
+    switch (selectedObject) {
+      case 'Sphere':
+        break;
+      case 'Box':
+        break;
+    }
+  }
+});
+
 // without this zooming in and out is fucking laggy, don't know why
 function animate() {
   requestAnimationFrame(animate);
