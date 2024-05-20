@@ -7,6 +7,7 @@ class Editor {
     this.events = {
       rendererCreated: new Event("rendererCreated"),
       windowResized: new Event("windowResized"),
+      objectAdded: new Event("objectAdded"),
     };
   }
 }

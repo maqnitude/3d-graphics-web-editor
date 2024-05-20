@@ -56,6 +56,34 @@
 
     <div id="MainContent" class="flex-grow-1 d-flex flex-row border m-0">
       <div id="SceneTree" class="flex-grow-1 flex-shrink-1 border m-1" style="flex-basis: 20%;">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addObjectModal">
+          <i class="bi bi-plus"></i>
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="addObjectModal" tabindex="-1" aria-labelledby="addObjectModalLabel" aria-hidden="true">
+          <div class="modal-dialog model-dialog-scrollable">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addObjectModalLabel">Add object</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="list-group">
+                  <a href="#" class="list-group-item list-group-item-action" object-name="Sphere">Sphere</a>
+                  <a href="#" class="list-group-item list-group-item-action" object-name="Box">Box</a>
+                  <a href="#" class="list-group-item list-group-item-action" object-name="Plane">Plane</a>
+                  <!-- Add more items here -->
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="AddObject">Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="vertical-resizer border" style="width: 4px; cursor: col-resize;"></div>

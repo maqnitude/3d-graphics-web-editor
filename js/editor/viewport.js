@@ -12,9 +12,16 @@ class Viewport {
     // Default camera: perspective
     this.currentCamera = this.perspectiveCamera;
 
+    // try adding object to scene
+    // const geometry = new THREE.BoxGeometry(1, 1, 1);
+    // const material = new THREE.MeshBasicMaterial({
+    //   color: 0x00ff00,
+    // });
+    // const cube = new THREE.Mesh( geometry, material );
+
     this.scene = new THREE.Scene();
     this.sceneHelper = new THREE.Scene();
-
+    // this.scene.add(cube);
     this.grid = this.createGrid();
 
     //
@@ -25,6 +32,10 @@ class Viewport {
     )
     this.editor.eventDispatcher.addEventListener(
       this.editor.events.windowResized.type,
+      this.render.bind(this)
+    )
+    this.editor.eventDispatcher.addEventListener(
+      this.editor.events.objectAdded.type,
       this.render.bind(this)
     )
   }
