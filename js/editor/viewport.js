@@ -31,7 +31,7 @@ class Viewport {
     );
     this.editor.eventDispatcher.addEventListener(
       this.editor.events.objectAdded.type,
-      this.render.bind(this)
+      this.onObjectAdded.bind(this)
     );
 
     this.controls.addEventListener(
@@ -104,6 +104,12 @@ class Viewport {
   }
 
   // Methods
+  
+  addObject(object) {
+    this.scene.add(object.mesh);
+
+    this.editor.eventDispatcher.dispatchEvent(this.editor.events.objectAdded);
+  }
 
   updateAspectRatio() {
     this.currentCamera.aspect = this.container.clientWidth / this.container.clientHeight;
@@ -121,6 +127,14 @@ class Viewport {
     this.renderer.autoClear = false;
     this.renderer.render(this.grid, this.currentCamera);
     this.renderer.autoClear = true;
+  }
+
+  // Events handlers
+  
+  onObjectAdded() {
+    this.render();
+
+    console.log("Object added successfully");
   }
 }
 
