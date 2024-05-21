@@ -17,6 +17,11 @@ levelViewport.appendChild(viewport.container);
 // TODO: put this in viewport (viewport.controls for example)
 // zooming in and out is very laggy
 const controls = new OrbitControls(viewport.currentCamera, viewport.renderer.domElement);
+controls.update(); // the update method itself triggers the "change" event
+
+controls.addEventListener("change", function() {
+  viewport.render();
+});
 
 // Temporary solution
 // TODO: create the renderer in editor.js and pass the renderer through a 
@@ -50,16 +55,9 @@ document.getElementById('AddObject').addEventListener('click', function() {
         break;
       case 'Box':
         break;
+      case 'Plane':
+        break;
     }
   }
 });
 
-// without this zooming in and out is fucking laggy, don't know why
-function animate() {
-  requestAnimationFrame(animate);
-
-  controls.update();
-  viewport.render();
-}
-
-animate();
