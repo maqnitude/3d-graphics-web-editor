@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 class Viewport {
   constructor(editor) {
@@ -12,16 +13,10 @@ class Viewport {
     // Default camera: perspective
     this.currentCamera = this.perspectiveCamera;
 
-    // try adding object to scene
-    // const geometry = new THREE.BoxGeometry(1, 1, 1);
-    // const material = new THREE.MeshBasicMaterial({
-    //   color: 0x00ff00,
-    // });
-    // const cube = new THREE.Mesh( geometry, material );
+    this.controls = new OrbitControls(this.currentCamera, this.renderer.domElement);
 
     this.scene = new THREE.Scene();
     this.sceneHelper = new THREE.Scene();
-    // this.scene.add(cube);
     this.grid = this.createGrid();
 
     //
@@ -29,15 +24,20 @@ class Viewport {
     this.editor.eventDispatcher.addEventListener(
       this.editor.events.rendererCreated.type,
       this.render.bind(this)
-    )
+    );
     this.editor.eventDispatcher.addEventListener(
       this.editor.events.windowResized.type,
       this.render.bind(this)
-    )
+    );
     this.editor.eventDispatcher.addEventListener(
       this.editor.events.objectAdded.type,
+      this.onObjectAdded.bind(this)
+    );
+
+    this.controls.addEventListener(
+      "change",
       this.render.bind(this)
-    )
+    );
   }
 
   // Initializers
@@ -104,6 +104,12 @@ class Viewport {
   }
 
   // Methods
+  
+  addObject(object) {
+    this.scene.add(object.mesh);
+
+    this.editor.eventDispatcher.dispatchEvent(this.editor.events.objectAdded);
+  }
 
   updateAspectRatio() {
     this.currentCamera.aspect = this.container.clientWidth / this.container.clientHeight;
@@ -121,6 +127,14 @@ class Viewport {
     this.renderer.autoClear = false;
     this.renderer.render(this.grid, this.currentCamera);
     this.renderer.autoClear = true;
+  }
+
+  // Events handlers
+  
+  onObjectAdded() {
+    this.render();
+
+    console.log("Object added successfully");
   }
 }
 
