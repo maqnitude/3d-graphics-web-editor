@@ -8,10 +8,15 @@ import { Sphere } from "./threejs/objects/sphere.js";
 
 const editor = new Editor();
 
-// Editor interactions
-VerticalResizer( editor );
-
+const sceneTree = document.getElementById( "SceneTree" );
 const levelViewport = document.getElementById( "LevelViewport" );
+const propertiesPanel = document.getElementById( "PropertiesPanel" );
+
+const leftVerticalResizer = new VerticalResizer( editor, sceneTree, levelViewport);
+leftVerticalResizer.addToDOM();
+
+const rightVerticalResizer = new VerticalResizer( editor, levelViewport, propertiesPanel);
+rightVerticalResizer.addToDOM();
 
 const viewport = new Viewport( editor );
 levelViewport.appendChild( viewport.container );
