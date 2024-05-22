@@ -27,8 +27,12 @@ class Viewport {
     this.transformControls = new TransformControls( this.currentCamera, this.renderer.domElement );
     this.sceneHelper.add( this.transformControls );
 
-    //
+    this.setupEventListeners();
+  }
 
+  // Initializers
+  
+  setupEventListeners() {
     document.addEventListener("mousedown", (event) => this.onMouseDown(event));
 
     document.addEventListener("mouseup", (event) => this.onMouseUp(event));
@@ -69,8 +73,6 @@ class Viewport {
       }
     );
   }
-
-  // Initializers
 
   createContainer() {
     const container = document.createElement( "div" );
