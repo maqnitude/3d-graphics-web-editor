@@ -4,21 +4,21 @@ const mouse = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
 
 class Selector {
-  constructor(editor, viewport) {
+  constructor( editor, viewport ) {
     this.editor = editor;
     this.viewport = viewport;
     this.events = editor.events;
 
     this.editor.eventDispatcher.addEventListener(
       this.editor.events.intersectionsDetected.type,
-      (e) => {
-        const intersects = e.detail.intersects;
-        console.log(intersects);
+      ( event ) => {
+        const intersects = event.detail.intersects;
+
         if (intersects.length > 0) {
-          const object = intersects[0].object;
-          this.select(object);
+          const object = intersects[ 0 ].object;
+          this.select( object );
         } else {
-          this.select(null);
+          this.select( null );
         }
       }
     )
@@ -27,17 +27,17 @@ class Selector {
   getIntersects( raycaster ) {
     const objects = [];
 
-    this.viewport.scene.traverseVisible( function ( child ) {
+    this.viewport.scene.traverseVisible( function( child ) {
       objects.push( child );
     });
 
     return raycaster.intersectObjects( objects, false );
   }
 
-  getPointerIntersects(point, camera) {
-    console.log(point);
+  getPointerIntersects( point, camera ) {
+    // Convert mouse position to NDC
     mouse.set( (point.x * 2) - 1, -(point.y * 2) + 1);
-    raycaster.setFromCamera( mouse, camera);
+    raycaster.setFromCamera( mouse, camera );
     
     return this.getIntersects( raycaster );
   }
