@@ -5,11 +5,14 @@ class Editor {
     this.eventDispatcher = new EventTarget();
 
     this.events = {
-      rendererCreated: new Event("rendererCreated"),
-      windowResized: new Event("windowResized"),
-      objectAdded: new Event("objectAdded"),
-      intersectionsDetected: new Event("intersectionsDetected"),
-      objectSelected: new Event("objectSelected"),
+      rendererCreated: new Event( "rendererCreated" ),
+
+      windowResized: new Event( "windowResized" ),
+
+      objectAdded: new Event( "objectAdded" ),
+
+      intersectionsDetected: new Event( "intersectionsDetected" ),
+      objectSelected: new Event( "objectSelected" ),
     };
   }
 }

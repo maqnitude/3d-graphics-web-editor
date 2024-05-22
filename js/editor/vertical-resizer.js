@@ -1,76 +1,92 @@
-function VerticalResizer(editor) {
-  const eventDispatcher = editor.eventDispatcher;
-  const events = editor.events;
+class VerticalResizer {
+  constructor( editor, leftSibling, rightSibling ) {
+    this.eventDispatcher = editor.eventDispatcher;
+    this.events = editor.events;
 
-  var vResizers = document.getElementsByClassName("vertical-resizer");
+    this.container = document.createElement( "div" );
+    this.container.setAttribute( "id", "vertical-resizer" );
+    this.container.setAttribute(
+      "class",
+      "border"
+    );
+    this.container.setAttribute(
+      "style",
+      "width: 4px; cursor: col-resize;"
+    );
 
-  for (let i = 0; i < vResizers.length; i++) {
-    let isResizing = false;
-    let resizer = vResizers[i];
+    this.leftSibling = leftSibling;
+    this.rightSibling = rightSibling;
 
-    let leftSibling = resizer.previousElementSibling;
-    let rightSibling = resizer.nextElementSibling;
+    this.isResizing = false;
 
-    let startX;
+    this.addEventListeners();
+  }
 
-    resizer.addEventListener("mousedown", function(e) {
-      e.preventDefault();
+  startX = 0;
 
-      isResizing = true;
-      startX = e.clientX;
+  addEventListeners() {
+    this.container.addEventListener( "mousedown", ( event ) => {
+      event.preventDefault();
+
+      this.isResizing = true;
+      this.startX = event.clientX;
     });
 
-    window.addEventListener("mousemove", function(e) {
-      if (!isResizing) return;
+    window.addEventListener( "mousemove", ( event ) => {
+      if (!this.isResizing) return;
 
-      let deltaX = e.clientX - startX;
-      startX = e.clientX;
+      let deltaX = event.clientX - this.startX;
+      this.startX = event.clientX;
 
-      let leftWidth = leftSibling.getBoundingClientRect().width + deltaX;
-      let rightWidth = rightSibling.getBoundingClientRect().width - deltaX;
+      let leftWidth = this.leftSibling.getBoundingClientRect().width + deltaX;
+      let rightWidth = this.rightSibling.getBoundingClientRect().width - deltaX;
 
-      let leftWidthPercent = leftWidth / leftSibling.parentElement.getBoundingClientRect().width * 100;
-      let rightWidthPercent = rightWidth / rightSibling.parentElement.getBoundingClientRect().width * 100;
+      let leftWidthPercent = leftWidth / this.leftSibling.parentElement.getBoundingClientRect().width * 100;
+      let rightWidthPercent = rightWidth / this.rightSibling.parentElement.getBoundingClientRect().width * 100;
 
       // If the child is gonna get smaller then make it smaller first
       // Also prevents the fucker from growing twice as fast, due to + or - 2*deltaX
       if (deltaX < 0) {
-        for (let child of leftSibling.children) {
-          child.style.width = `${leftSibling.clientWidth + deltaX}px`;
+        for (let child of this.leftSibling.children) {
+          child.style.width = `${this.leftSibling.clientWidth + deltaX}px`;
         }
       }
       if (deltaX > 0) {
-        for (let child of rightSibling.children) {
-          child.style.width = `${rightSibling.clientWidth - deltaX}px`;
+        for (let child of this.rightSibling.children) {
+          child.style.width = `${this.rightSibling.clientWidth - deltaX}px`;
         }
       }
 
       // With flex-row, flex-basis controls width
       // DO NOT use px, use % instead, otherwise it will fuck up on window resize
-      leftSibling.style.flexBasis = `${leftWidthPercent}%`;
-      rightSibling.style.flexBasis = `${rightWidthPercent}%`;
+      this.leftSibling.style.flexBasis = `${leftWidthPercent}%`;
+      this.rightSibling.style.flexBasis = `${rightWidthPercent}%`;
 
       // Make sure these mfs stick to the resizer
-      for (let child of leftSibling.children) {
+      for (let child of this.leftSibling.children) {
         child.style.width = "100%";
       }
-      for (let child of rightSibling.children) {
+      for (let child of this.rightSibling.children) {
         child.style.width = "100%";
       }
 
-      eventDispatcher.dispatchEvent(events.windowResized);
+      this.eventDispatcher.dispatchEvent(this.events.windowResized);
     });
 
-    window.addEventListener("mouseup", function(e) {
-      isResizing = false;
+    window.addEventListener("mouseup", ( event ) => {
+      this.isResizing = false;
 
-      for (let child of leftSibling.children) {
+      for (let child of this.leftSibling.children) {
         child.style.width = "100%";
       }
-      for (let child of rightSibling.children) {
+      for (let child of this.rightSibling.children) {
         child.style.width = "100%";
       }
     });
+  }
+
+  addToDOM() {
+    this.rightSibling.parentNode.insertBefore( this.container, this.rightSibling );
   }
 }
 
