@@ -8,6 +8,8 @@ class Editor {
       rendererCreated: new Event("rendererCreated"),
       windowResized: new Event("windowResized"),
       objectAdded: new Event("objectAdded"),
+      intersectionsDetected: new Event("intersectionsDetected"),
+      objectSelected: new Event("objectSelected"),
     };
   }
 }

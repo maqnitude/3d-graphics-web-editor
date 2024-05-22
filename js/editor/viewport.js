@@ -1,9 +1,12 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { TransformControls } from "three/addons/controls/TransformControls.js";
+import { Selector } from "./selector.js";
 
 class Viewport {
   constructor(editor) {
     this.editor = editor;
+    this.selector = new Selector(this.editor, this);
     this.container = this.createContainer();
     this.renderer = this.createRenderer();
 
@@ -13,14 +16,18 @@ class Viewport {
     // Default camera: perspective
     this.currentCamera = this.perspectiveCamera;
 
-    this.controls = new OrbitControls(this.currentCamera, this.renderer.domElement);
+    this.orbitControls = new OrbitControls(this.currentCamera, this.renderer.domElement);
 
     this.scene = new THREE.Scene();
     this.sceneHelper = new THREE.Scene();
     this.grid = this.createGrid();
 
-    //
+    this.transformControls = new TransformControls(this.currentCamera, this.renderer.domElement);
+    this.sceneHelper.add(this.transformControls);
 
+    //
+    document.addEventListener('mousedown', (e) => this.onMouseDown(e));
+    document.addEventListener('mouseup', (e) => this.onMouseUp(e));
     this.editor.eventDispatcher.addEventListener(
       this.editor.events.rendererCreated.type,
       this.render.bind(this)
@@ -33,10 +40,24 @@ class Viewport {
       this.editor.events.objectAdded.type,
       this.onObjectAdded.bind(this)
     );
-
-    this.controls.addEventListener(
+    this.editor.eventDispatcher.addEventListener(
+      this.editor.events.objectSelected.type,
+      this.onObjectSelected.bind(this)
+    );
+    this.orbitControls.addEventListener(
       "change",
       this.render.bind(this)
+    );
+    this.transformControls.addEventListener(
+      "change",
+      this.render.bind(this)
+    );
+
+    this.transformControls.addEventListener(
+      "dragging-changed",
+      (e) => {
+        this.orbitControls.enabled = !e.value;
+      }
     );
   }
 
@@ -107,8 +128,12 @@ class Viewport {
   
   addObject(object) {
     this.scene.add(object.mesh);
-
     this.editor.eventDispatcher.dispatchEvent(this.editor.events.objectAdded);
+  }
+
+  getMousePosition( dom, x, y ) {
+    const rect = dom.getBoundingClientRect();
+    return [( x - rect.left ) / rect.width, ( y - rect.top ) / rect.height ];
   }
 
   updateAspectRatio() {
@@ -126,6 +151,7 @@ class Viewport {
 
     this.renderer.autoClear = false;
     this.renderer.render(this.grid, this.currentCamera);
+    this.renderer.render(this.sceneHelper, this.currentCamera);
     this.renderer.autoClear = true;
   }
 
@@ -133,8 +159,44 @@ class Viewport {
   
   onObjectAdded() {
     this.render();
+  }
 
-    console.log("Object added successfully");
+  onObjectSelected( e ) {
+    const object = e.detail.object;
+    console.log("Inside onObjectSelected: ", object);
+    this.transformControls.detach();
+    if (object !== null && object !== this.scene && object !== this.currentCamera) {
+      this.transformControls.attach(object);
+      console.log(this.transformControls.object.visible);
+    }
+    this.render();
+    console.log(this.transformControls.object.visible);
+  }
+
+  onDownPosition = new THREE.Vector2();
+  onUpPosition = new THREE.Vector2();
+
+  onMouseDown(e) {
+    const array = this.getMousePosition( this.container, e.clientX, e.clientY );
+    this.onDownPosition.fromArray(array);
+  }
+
+  onMouseUp(e) {
+    const array = this.getMousePosition( this.container, e.clientX, e.clientY );
+    this.onUpPosition.fromArray(array);
+    if ( this.onDownPosition.distanceTo( this.onUpPosition ) === 0) {
+      const intersects = this.selector.getPointerIntersects( this.onUpPosition, this.currentCamera );
+      this.editor.eventDispatcher.dispatchEvent(
+        new CustomEvent(
+          this.editor.events.intersectionsDetected.type, 
+          {
+            detail: {
+              intersects: intersects,
+            }
+          }
+        )
+      );
+    }
   }
 }
 
