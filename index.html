@@ -57,13 +57,14 @@
     <div id="MainContent" class="flex-grow-1 d-flex flex-row border m-0">
       <div id="SceneTree" class="flex-grow-1 flex-shrink-1 border m-1" style="flex-basis: 20%;">
         <!-- Button trigger modal -->
-        <!-- This cunt's width changes with the parent, don't fucking know why -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddObjectModal">
-          <i class="bi bi-plus"></i>
-        </button>
+        <!-- Add ButtonContainer div to prevent the buttons from growing their width into 100% -->
+        <div id="ButtonContainer">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddObjectModal">
+            <i class="bi bi-plus"></i>
+          </button>
+        </div>
 
         <!-- Modal -->
-        <!-- This shit doesn't close after adding the object -->
         <div id="AddObjectModal" class="modal fade" tabindex="-1" aria-labelledby="AddObjectModalLabel" aria-hidden="true">
           <div class="modal-dialog model-dialog-scrollable">
             <div class="modal-content">
