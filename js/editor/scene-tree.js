@@ -11,6 +11,7 @@ class Node {
 
     this.container = document.createElement( "li" );
     this.container.setAttribute( "id", `Node-${ object.id }` );
+    this.container.setAttribute( "style", "list-style-type: none;" );
     this.container.draggable = draggable;
 
     const listGroupId = `ListGroup-${ object.id }`;
