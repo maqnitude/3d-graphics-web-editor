@@ -12,6 +12,10 @@ class Selector {
     this.editor.eventDispatcher.addEventListener(
       this.editor.events.intersectionsDetected.type,
       ( event ) => {
+        if (event.detail.ignore) {
+          return;
+        }
+
         const intersects = event.detail.intersects;
 
         if (intersects.length > 0) {

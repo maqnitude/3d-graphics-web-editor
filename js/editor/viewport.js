@@ -6,6 +6,7 @@ import { TransformControls } from "three/addons/controls/TransformControls.js";
 import { Selector } from "./selector.js";
 
 class Viewport {
+  ignoreSelector = false;
   constructor( editor ) {
     this.editor = editor;
     this.eventDispatcher = editor.eventDispatcher;
@@ -75,6 +76,41 @@ class Viewport {
         this.orbitControls.enabled = !event.value;
       }
     );
+
+    const translateButton = document.getElementById("Translate");
+    translateButton.classList.remove('btn-secondary');
+    translateButton.classList.add('btn-primary');
+    const rotateButton = document.getElementById("Rotate");
+    const scaleButton = document.getElementById("Scale");
+    const transformButtons = [translateButton, rotateButton, scaleButton];
+    for (let button of transformButtons) {
+      button.addEventListener('mouseenter', () => {
+        this.ignoreSelector = true;
+      })
+      button.addEventListener('mouseleave', () => {
+        this.ignoreSelector = false;
+      })
+      button.onclick = () => {
+        for (let button of transformButtons) {
+          button.classList.add('btn-secondary');
+        }
+        button.classList.remove('btn-secondary');
+        button.classList.add('btn-primary');
+        this.eventDispatcher.dispatchEvent(new CustomEvent (
+            this.events.transformModeChanged.type,
+            {
+              detail: {
+                mode: button.id.toLowerCase(),
+              }
+            }
+          )
+        )
+      }
+    }
+    this.eventDispatcher.addEventListener(
+      this.events.transformModeChanged.type,
+      this.onTransformModeChanged.bind(this)
+    )
   }
 
   createContainer() {
@@ -201,18 +237,24 @@ class Viewport {
 
     if (this.onDownPosition.distanceTo( this.onUpPosition ) === 0) {
       const intersects = this.selector.getPointerIntersects( this.onUpPosition, this.currentCamera );
-
       this.eventDispatcher.dispatchEvent(
         new CustomEvent(
           this.events.intersectionsDetected.type, 
           {
             detail: {
               intersects: intersects,
+              // this prop prevents the selector from selecting a new object via the passed intersects
+              ignore: this.ignoreSelector,
             }
           }
         )
       );
     }
+  }
+
+  onTransformModeChanged( event ) {
+    const mode = event.detail.mode;
+    this.transformControls.setMode(mode);
   }
 }
 

@@ -13,6 +13,8 @@ class Editor {
 
       intersectionsDetected: new Event( "intersectionsDetected" ),
       objectSelected: new Event( "objectSelected" ),
+
+      transformModeChanged: new Event( "transformModeChanged" ),
     };
   }
 }
