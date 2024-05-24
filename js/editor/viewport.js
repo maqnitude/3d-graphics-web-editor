@@ -8,6 +8,9 @@ import { Selector } from "./selector.js";
 class Viewport {
   constructor( editor ) {
     this.editor = editor;
+    this.eventDispatcher = editor.eventDispatcher;
+    this.events = editor.events;
+
     this.selector = new Selector( this.editor, this );
     this.container = this.createContainer();
     this.renderer = this.createRenderer();
@@ -37,22 +40,22 @@ class Viewport {
 
     document.addEventListener("mouseup", (event) => this.onMouseUp(event));
 
-    this.editor.eventDispatcher.addEventListener(
-      this.editor.events.rendererCreated.type,
+    this.eventDispatcher.addEventListener(
+      this.events.rendererCreated.type,
       this.render.bind( this )
     );
 
-    this.editor.eventDispatcher.addEventListener(
-      this.editor.events.windowResized.type,
+    this.eventDispatcher.addEventListener(
+      this.events.windowResized.type,
       this.render.bind( this )
     );
 
-    this.editor.eventDispatcher.addEventListener(
-      this.editor.events.objectAdded.type,
+    this.eventDispatcher.addEventListener(
+      this.events.objectAdded.type,
       this.onObjectAdded.bind( this )
     );
-    this.editor.eventDispatcher.addEventListener(
-      this.editor.events.objectSelected.type,
+    this.eventDispatcher.addEventListener(
+      this.events.objectSelected.type,
       this.onObjectSelected.bind( this )
     );
 
@@ -96,7 +99,7 @@ class Viewport {
 
     this.container.appendChild( renderer.domElement );
 
-    this.editor.eventDispatcher.dispatchEvent( this.editor.events.rendererCreated );
+    this.eventDispatcher.dispatchEvent( this.events.rendererCreated );
 
     return renderer;
   }
@@ -139,7 +142,7 @@ class Viewport {
   
   addObject( object ) {
     this.scene.add( object.mesh );
-    this.editor.eventDispatcher.dispatchEvent( this.editor.events.objectAdded );
+    this.eventDispatcher.dispatchEvent( this.events.objectAdded );
   }
 
   getMousePosition( dom, x, y ) {
@@ -199,9 +202,9 @@ class Viewport {
     if (this.onDownPosition.distanceTo( this.onUpPosition ) === 0) {
       const intersects = this.selector.getPointerIntersects( this.onUpPosition, this.currentCamera );
 
-      this.editor.eventDispatcher.dispatchEvent(
+      this.eventDispatcher.dispatchEvent(
         new CustomEvent(
-          this.editor.events.intersectionsDetected.type, 
+          this.events.intersectionsDetected.type, 
           {
             detail: {
               intersects: intersects,

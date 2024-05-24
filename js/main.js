@@ -1,4 +1,5 @@
 import { Editor } from "./editor/editor.js";
+import { SceneTree } from "./editor/scene-tree.js";
 import { VerticalResizer } from "./editor/vertical-resizer.js";
 import { Viewport } from "./editor/viewport.js";
 
@@ -8,18 +9,22 @@ import { Sphere } from "./threejs/objects/sphere.js";
 
 const editor = new Editor();
 
-const sceneTree = document.getElementById( "SceneTree" );
+// const sceneTree = document.getElementById( "SceneTree" );
+const leftSideBar = document.getElementById( "LeftSideBar" );
 const levelViewport = document.getElementById( "LevelViewport" );
 const propertiesPanel = document.getElementById( "PropertiesPanel" );
 
-const leftVerticalResizer = new VerticalResizer( editor, sceneTree, levelViewport);
+const viewport = new Viewport( editor );
+levelViewport.appendChild( viewport.container );
+
+const sceneTree = new SceneTree( viewport );
+leftSideBar.appendChild( sceneTree.container );
+
+const leftVerticalResizer = new VerticalResizer( editor, leftSideBar, levelViewport);
 leftVerticalResizer.addToDOM();
 
 const rightVerticalResizer = new VerticalResizer( editor, levelViewport, propertiesPanel);
 rightVerticalResizer.addToDOM();
-
-const viewport = new Viewport( editor );
-levelViewport.appendChild( viewport.container );
 
 // Temporary solution
 // TODO: create the renderer in editor.js and pass the renderer through a 
@@ -48,8 +53,6 @@ document.getElementById( "AddObject" ).addEventListener( "click", function() {
 
   if (activeItems.length > 0) {
     const selectedObject = activeItems[0].getAttribute( "object-name" );
-
-    console.log( "Adding object: " + selectedObject );
 
     switch ( selectedObject ) {
       case "Cube":
