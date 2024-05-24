@@ -55,8 +55,8 @@
     </div>
 
     <div id="MainContent" class="flex-grow-1 d-flex flex-row border m-0">
-      <div id="SceneTree" class="flex-grow-1 flex-shrink-1 border m-1" style="flex-basis: 20%;">
-        <!-- Button trigger modal -->
+      <div id="LeftSideBar" class="flex-grow-1 flex-shrink-1 border m-1" style="flex-basis: 20%;">
+        <!-- Button trigger modal
         <!-- Add ButtonContainer div to prevent the buttons from growing their width into 100% -->
         <div id="ButtonContainer">
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddObjectModal">
@@ -87,6 +87,60 @@
             </div>
           </div>
         </div>
+
+        <!-- Testing if using list-group is good for creating the scene tree -->
+        <style>
+          #sceneSubList .list-group-item {
+            padding-left: 2rem; /* Adjust this value to move the sublist to the right */
+          }
+          #object3SubList .list-group-item {
+            padding-left: 3rem; /* Adjust this value to move the sublist to the right */
+          }
+        </style>
+
+        <!-- <div class="row"> -->
+        <!--   <div class="col"> -->
+        <!--     <ul id="TopLevel" class="list-group"> -->
+        <!--       <li> -->
+        <!--         <div class="list-group-item"> -->
+        <!--           <button class="btn btn-secondary btn-sm btn-dark" data-bs-toggle="collapse" data-bs-target="#Scene1Level">+/-</button> -->
+        <!--           <span>Scene1</span> -->
+        <!--         </div> -->
+        <!--         <ul id="Scene1Level" class="list-group"> -->
+        <!--           <li> -->
+        <!--             <div class="list-group-item" data-bs-toggle="collapse" data-bs-target="#Scene1-Object1Level">Object1</div> -->
+        <!--             <ul id="Scene1-Object1Level" class="list-group"> -->
+        <!--             </ul> -->
+        <!--           </li> -->
+        <!--           <li> -->
+        <!--             <div class="list-group-item" data-bs-toggle="collapse" data-bs-target="#Scene1-Object2Level">Object2</div> -->
+        <!--             <ul id="Scene1-Object2Level" class="list-group"> -->
+        <!--             </ul> -->
+        <!--           </li> -->
+        <!--         </ul> -->
+        <!--       </li> -->
+        <!--       <li> -->
+        <!--         <div class="list-group-item"> -->
+        <!--           <button class="btn btn-secondary btn-sm btn-dark" data-bs-toggle="collapse" data-bs-target="#Scene2Level">+/-</button> -->
+        <!--           Scene2 -->
+        <!--         </div> -->
+        <!--         <ul id="Scene2Level" class="list-group"> -->
+        <!--           <li> -->
+        <!--             <div class="list-group-item" data-bs-toggle="collapse" data-bs-target="#Scene2-Object1Level">Object1</div> -->
+        <!--             <ul id="Scene2-Object1Level" class="list-group"> -->
+        <!--             </ul> -->
+        <!--           </li> -->
+        <!--           <li> -->
+        <!--             <div class="list-group-item" data-bs-toggle="collapse" data-bs-target="#Scene2-Object2Level">Object2</div> -->
+        <!--             <ul id="Scene2-Object2Level" class="list-group"> -->
+        <!--             </ul> -->
+        <!--           </li> -->
+        <!--         </ul> -->
+        <!--       </li> -->
+        <!--     </ul> -->
+        <!--   </div> -->
+        <!-- </div> -->
+
       </div>
 
       <!-- <div class="vertical-resizer border" style="width: 4px; cursor: col-resize;"></div> -->
