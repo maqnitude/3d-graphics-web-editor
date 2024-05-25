@@ -3,6 +3,13 @@ class VerticalResizer {
     this.eventDispatcher = editor.eventDispatcher;
     this.events = editor.events;
 
+    this.leftSibling = leftSibling;
+    this.rightSibling = rightSibling;
+
+    this.isResizing = false;
+
+    //
+
     this.container = document.createElement( "div" );
     this.container.setAttribute( "id", "vertical-resizer" );
     this.container.setAttribute(
@@ -14,10 +21,9 @@ class VerticalResizer {
       "width: 4px; cursor: col-resize;"
     );
 
-    this.leftSibling = leftSibling;
-    this.rightSibling = rightSibling;
+    this.rightSibling.parentNode.insertBefore( this.container, this.rightSibling );
 
-    this.isResizing = false;
+    //
 
     this.addEventListeners();
   }
@@ -83,10 +89,6 @@ class VerticalResizer {
         child.style.width = "100%";
       }
     });
-  }
-
-  addToDOM() {
-    this.rightSibling.parentNode.insertBefore( this.container, this.rightSibling );
   }
 }
 
