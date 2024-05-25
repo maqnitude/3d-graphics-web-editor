@@ -9,22 +9,19 @@ class Selector {
     this.viewport = viewport;
     this.events = editor.events;
 
+    this.ignore = false;
+
+    //
+
+    this.setupEventListeners();
+  }
+
+  // Methods
+  
+  setupEventListeners() {
     this.editor.eventDispatcher.addEventListener(
       this.editor.events.intersectionsDetected.type,
-      ( event ) => {
-        if (event.detail.ignore) {
-          return;
-        }
-
-        const intersects = event.detail.intersects;
-
-        if (intersects.length > 0) {
-          const object = intersects[ 0 ].object;
-          this.select( object );
-        } else {
-          this.select( null );
-        }
-      }
+      this.onIntersectionsDetected.bind( this )
     )
   }
 
@@ -57,6 +54,21 @@ class Selector {
         }
       )
     )    
+  }
+
+  // Event handlers
+  
+  onIntersectionsDetected( event ) {
+    if (this.ignore) { return; }
+
+    const intersects = event.detail.intersects;
+
+    if (intersects.length > 0) {
+      const object = intersects[ 0 ].object;
+      this.select( object );
+    } else {
+      this.select( null );
+    }
   }
 }
 

@@ -1,10 +1,13 @@
 import * as THREE from "three";
 
-class Plane {
+class Plane extends THREE.Mesh {
   constructor() {
-    this.geometry = new THREE.PlaneGeometry(2, 2);
-    this.material = new THREE.MeshBasicMaterial({ color: 0x808080 });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
+    const geometry = new THREE.PlaneGeometry(2, 2);
+    const material = new THREE.MeshBasicMaterial({ color: 0x808080 });
+
+    super( geometry, material );
+
+    this.name = "Plane";
   }
 }
 

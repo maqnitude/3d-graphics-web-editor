@@ -1,12 +1,15 @@
 import * as THREE from "three";
 
-class Cube {
+class Cube extends THREE.Mesh {
   constructor() {
-    this.geometry = new THREE.BoxGeometry(1, 1, 1);
-    this.material = new THREE.MeshBasicMaterial({
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshBasicMaterial({
       color: 0x808080
     });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
+
+    super( geometry, material );
+
+    this.name = "Cube";
   }
 }
 

@@ -7,6 +7,7 @@ import { Selector } from "./selector.js";
 
 class Viewport {
   ignoreSelector = false;
+
   constructor( editor ) {
     this.editor = editor;
     this.eventDispatcher = editor.eventDispatcher;
@@ -21,10 +22,13 @@ class Viewport {
 
     // Default camera: perspective
     this.currentCamera = this.perspectiveCamera;
+    this.currentCamera.name = "Viewport Camera";
 
     this.orbitControls = new OrbitControls( this.currentCamera, this.renderer.domElement );
 
     this.scene = new THREE.Scene();
+    this.scene.name = "Scene";
+
     this.sceneHelper = new THREE.Scene();
     this.grid = this.createGrid();
 
@@ -80,15 +84,18 @@ class Viewport {
     const translateButton = document.getElementById("Translate");
     translateButton.classList.remove('btn-secondary');
     translateButton.classList.add('btn-primary');
+
     const rotateButton = document.getElementById("Rotate");
     const scaleButton = document.getElementById("Scale");
+
     const transformButtons = [translateButton, rotateButton, scaleButton];
+
     for (let button of transformButtons) {
       button.addEventListener('mouseenter', () => {
-        this.ignoreSelector = true;
+        this.selector.ignore = true;
       })
       button.addEventListener('mouseleave', () => {
-        this.ignoreSelector = false;
+        this.selector.ignore = false;
       })
       button.onclick = () => {
         for (let button of transformButtons) {
@@ -107,6 +114,7 @@ class Viewport {
         )
       }
     }
+
     this.eventDispatcher.addEventListener(
       this.events.transformModeChanged.type,
       this.onTransformModeChanged.bind(this)
@@ -177,7 +185,8 @@ class Viewport {
   // Methods
   
   addObject( object ) {
-    this.scene.add( object.mesh );
+    // this.scene.add( object.mesh );
+    this.scene.add( object );
     this.eventDispatcher.dispatchEvent( this.events.objectAdded );
   }
 
@@ -243,8 +252,6 @@ class Viewport {
           {
             detail: {
               intersects: intersects,
-              // this prop prevents the selector from selecting a new object via the passed intersects
-              ignore: this.ignoreSelector,
             }
           }
         )
