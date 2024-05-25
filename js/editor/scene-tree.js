@@ -9,12 +9,14 @@ class Node {
     this.children = []; // This is used to update the nodes after refreshing
     this.isActive = false;
 
+    //
+
     this.container = document.createElement( "li" );
-    this.container.setAttribute( "id", `Node-${ object.id }` );
+    this.container.setAttribute( "id", `Node-${ object.uuid }` );
     this.container.setAttribute( "style", "list-style-type: none;" );
     this.container.draggable = draggable;
 
-    const listGroupId = `ListGroup-${ object.id }`;
+    const listGroupId = `ListGroup-${ object.uuid }`;
 
     this.listGroupItem = document.createElement( "div" );
     this.listGroupItem.setAttribute( "class", "list-group-item list-group-item-action" );
@@ -28,7 +30,7 @@ class Node {
 
     // This span holds the name of the object
     this.span = document.createElement( "span" );
-    this.span.innerText = ` ${ object.type }`;
+    this.span.innerText = ` ${ object.name }`;
 
     // Each node will have their own "sub-list"
     this.listGroup = document.createElement( "ul" );
