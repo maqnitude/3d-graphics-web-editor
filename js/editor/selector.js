@@ -4,10 +4,10 @@ const mouse = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
 
 class Selector {
-  constructor( editor, viewport ) {
-    this.editor = editor;
+  constructor( viewport ) {
     this.viewport = viewport;
-    this.events = editor.events;
+    this.eventDispatcher = this.viewport.eventDispatcher;
+    this.events = this.viewport.events;
 
     this.ignore = false;
 
@@ -19,8 +19,8 @@ class Selector {
   // Methods
   
   setupEventListeners() {
-    this.editor.eventDispatcher.addEventListener(
-      this.editor.events.intersectionsDetected.type,
+    this.eventDispatcher.addEventListener(
+      this.events.intersectionsDetected.type,
       this.onIntersectionsDetected.bind( this )
     )
   }
@@ -44,9 +44,9 @@ class Selector {
   }
 
   select ( object ) {
-    this.editor.eventDispatcher.dispatchEvent(
+    this.eventDispatcher.dispatchEvent(
       new CustomEvent(
-        this.editor.events.objectSelected.type,
+        this.events.objectSelected.type,
         {
           detail: {
             object: object,

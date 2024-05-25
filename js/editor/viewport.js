@@ -13,7 +13,7 @@ class Viewport {
     this.eventDispatcher = editor.eventDispatcher;
     this.events = editor.events;
 
-    this.selector = new Selector( this.editor, this );
+    this.selector = new Selector( this );
     this.container = this.createContainer();
     this.renderer = this.createRenderer();
 
