@@ -10,8 +10,8 @@
     <link href="lib/bootstrap-icons-1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
   </head>
-  <body class="vw-100 vh-100 d-flex flex-column">
-    <div id="MenuBar" class="container-fluid border p-0 m-0">
+  <body class="vw-100 vh-100 overflow-hidden d-flex flex-column">
+    <div id="MenuBar" class="w-100 position-relative border-bottom p-0 m-0">
       <ul class="d-flex flex-row p-0 m-0" style="list-style-type: none;">
         <li class="dropdown">
           <button id="File" class="btn btn-sm btn-menu dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -38,7 +38,7 @@
       </ul>
     </div>
 
-    <div id="MainToolBar" class="container-fluid border p-0 m-0">
+    <div id="MainToolBar" class="w-100 position-relative border-bottom p-0 m-0">
       <ul id="PlayModeControls" class="d-flex flex-row justify-content-center px-0 py-1 m-0">
         <li class="d-flex align-items-center">
           <a id="Play" class="btn btn-primary btn-control" role="button" aria-disabled="true">
@@ -54,11 +54,11 @@
       </ul>
     </div>
 
-    <div id="MainContent" class="flex-grow-1 d-flex flex-row border m-0">
-      <div id="LeftSideBar" class="flex-grow-1 flex-shrink-1 border m-1" style="flex-basis: 20%;">
+    <div id="MainContent" class="w-100 position-relative d-flex flex-row m-0">
+      <div id="LeftSideBar" class="flex-grow-1 flex-shrink-1 position-relative m-1" style="flex-basis: 20%;">
         <!-- Button trigger modal
-        <!-- Add ButtonContainer div to prevent the buttons from growing their width into 100% -->
-        <div id="ButtonContainer">
+        <!-- Add a button container div to prevent the buttons from growing their width into 100% -->
+        <div id="AddObjectButtonContainer">
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddObjectModal">
             <i class="bi bi-plus"></i>
           </button>
@@ -82,71 +82,17 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button id="AddObject" type="button" class="btn btn-primary" data-bs-dismiss="modal">Add</button>
+                <button id="AddObjectButton" type="button" class="btn btn-primary" data-bs-dismiss="modal">Add</button>
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Testing if using list-group is good for creating the scene tree -->
-        <style>
-          #sceneSubList .list-group-item {
-            padding-left: 2rem; /* Adjust this value to move the sublist to the right */
-          }
-          #object3SubList .list-group-item {
-            padding-left: 3rem; /* Adjust this value to move the sublist to the right */
-          }
-        </style>
-
-        <!-- <div class="row"> -->
-        <!--   <div class="col"> -->
-        <!--     <ul id="TopLevel" class="list-group"> -->
-        <!--       <li> -->
-        <!--         <div class="list-group-item"> -->
-        <!--           <button class="btn btn-secondary btn-sm btn-dark" data-bs-toggle="collapse" data-bs-target="#Scene1Level">+/-</button> -->
-        <!--           <span>Scene1</span> -->
-        <!--         </div> -->
-        <!--         <ul id="Scene1Level" class="list-group"> -->
-        <!--           <li> -->
-        <!--             <div class="list-group-item" data-bs-toggle="collapse" data-bs-target="#Scene1-Object1Level">Object1</div> -->
-        <!--             <ul id="Scene1-Object1Level" class="list-group"> -->
-        <!--             </ul> -->
-        <!--           </li> -->
-        <!--           <li> -->
-        <!--             <div class="list-group-item" data-bs-toggle="collapse" data-bs-target="#Scene1-Object2Level">Object2</div> -->
-        <!--             <ul id="Scene1-Object2Level" class="list-group"> -->
-        <!--             </ul> -->
-        <!--           </li> -->
-        <!--         </ul> -->
-        <!--       </li> -->
-        <!--       <li> -->
-        <!--         <div class="list-group-item"> -->
-        <!--           <button class="btn btn-secondary btn-sm btn-dark" data-bs-toggle="collapse" data-bs-target="#Scene2Level">+/-</button> -->
-        <!--           Scene2 -->
-        <!--         </div> -->
-        <!--         <ul id="Scene2Level" class="list-group"> -->
-        <!--           <li> -->
-        <!--             <div class="list-group-item" data-bs-toggle="collapse" data-bs-target="#Scene2-Object1Level">Object1</div> -->
-        <!--             <ul id="Scene2-Object1Level" class="list-group"> -->
-        <!--             </ul> -->
-        <!--           </li> -->
-        <!--           <li> -->
-        <!--             <div class="list-group-item" data-bs-toggle="collapse" data-bs-target="#Scene2-Object2Level">Object2</div> -->
-        <!--             <ul id="Scene2-Object2Level" class="list-group"> -->
-        <!--             </ul> -->
-        <!--           </li> -->
-        <!--         </ul> -->
-        <!--       </li> -->
-        <!--     </ul> -->
-        <!--   </div> -->
-        <!-- </div> -->
-
       </div>
 
       <!-- <div class="vertical-resizer border" style="width: 4px; cursor: col-resize;"></div> -->
 
-      <div id="LevelViewport" class="flex-grow-1 flex-shrink-1 d-flex flex-column border m-1" style="flex-basis: 60%;">
-        <div id="ViewportControls" class="container-fluid border p-0 m-0">
+      <div id="LevelViewport" class="flex-grow-1 flex-shrink-1 position-relative d-flex flex-column m-1" style="flex-basis: 60%;">
+        <div id="ViewportControls" class="container-fluid border-bottom p-0 m-0">
           <ul class="d-flex flex-row p-1 m-0">
             <li class="d-flex align-items-center">
               <a id="Select" class="btn btn-secondary btn-control" role="button" aria-disabled="true">
@@ -169,7 +115,8 @@
 
       <!-- <div class="vertical-resizer border" style="width: 4px; cursor: col-resize;"></div> -->
 
-      <div id="PropertiesPanel" class="flex-grow-1 flex-shrink-1 border m-1" style="flex-basis: 20%;">
+      <!-- TODO: setting explicit height seem to be the solution, need a class for this too -->
+      <div id="RightSideBar" class="flex-grow-1 flex-shrink-1 position-relative d-flex flex-column m-1" style="flex-basis: 20%;">
       </div>
     </div>
 

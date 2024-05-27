@@ -6,8 +6,6 @@ import { TransformControls } from "three/addons/controls/TransformControls.js";
 import { Selector } from "./selector.js";
 
 class Viewport {
-  ignoreSelector = false;
-
   constructor( editor ) {
     this.editor = editor;
     this.eventDispatcher = editor.eventDispatcher;
@@ -34,6 +32,8 @@ class Viewport {
 
     this.transformControls = new TransformControls( this.currentCamera, this.renderer.domElement );
     this.sceneHelper.add( this.transformControls );
+
+    //
 
     this.setupEventListeners();
   }
