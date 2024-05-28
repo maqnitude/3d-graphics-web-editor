@@ -63,6 +63,10 @@ class Viewport {
       this.events.objectSelected.type,
       this.onObjectSelected.bind( this )
     );
+    this.eventDispatcher.addEventListener(
+      this.events.objectChanged.type,
+      this.render.bind(this)
+    );
 
     this.orbitControls.addEventListener(
       "change",
@@ -78,6 +82,21 @@ class Viewport {
       "dragging-changed",
       ( event ) => {
         this.orbitControls.enabled = !event.value;
+      }
+    );
+
+    this.transformControls.addEventListener(
+      "objectChange",
+      ( event ) => {
+        console.log(this.transformControls.object);
+        this.eventDispatcher.dispatchEvent(new CustomEvent(
+          this.events.objectChanged.type,
+          {
+            detail: {
+              object: this.transformControls.object,
+            }
+          }
+        ));
       }
     );
 
