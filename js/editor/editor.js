@@ -9,10 +9,11 @@ class Editor {
 
       windowResized: new Event( "windowResized" ),
 
-      objectAdded: new Event( "objectAdded" ),
-
       intersectionsDetected: new Event( "intersectionsDetected" ),
+      
+      objectAdded: new Event( "objectAdded" ),
       objectSelected: new Event( "objectSelected" ),
+      objectChanged: new Event( "objectChanged "),
 
       transformModeChanged: new Event( "transformModeChanged" ),
     };
