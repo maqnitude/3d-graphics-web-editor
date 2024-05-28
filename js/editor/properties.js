@@ -30,6 +30,7 @@ class ReadOnlyProperty {
     this.listItem.appendChild( this.formFloating );
     this.parent.appendChild( this.listItem );
   }
+
   setValue( value ) {
     this.input.setAttribute( "value", `${ value }` );
   }
@@ -207,7 +208,8 @@ class Vector3Property {
     this.inputNumberX.addEventListener(
       "input",
       (event) => {
-        const value = event.target.value;
+        const value = Number( event.target.value );
+
         switch(this.type) {
           case 'position':
             this.object.position.setComponent(0, value);
@@ -227,10 +229,12 @@ class Vector3Property {
         ));
       }
     )
+
     this.inputNumberY.addEventListener(
       "input",
       (event) => {
-        const value = event.target.value;
+        const value = Number( event.target.value );
+
         switch(this.type) {
           case 'position':
             this.object.position.setComponent(1, value);
@@ -250,10 +254,12 @@ class Vector3Property {
         ));
       }
     )
+
     this.inputNumberZ.addEventListener(
       "input",
       (event) => {
-        const value = event.target.value;
+        const value = Number( event.target.value );
+
         switch(this.type) {
           case 'position':
             this.object.position.setComponent(2, value);
@@ -359,6 +365,8 @@ class EulerProperty {
 
     this.parent.appendChild(this.container);
 
+    //
+
     this.setupEventListeners();
   }
 
@@ -372,7 +380,8 @@ class EulerProperty {
     this.inputNumberX.addEventListener(
       "input",
       (event) => {
-        const value = event.target.value;
+        const value = Number( event.target.value );
+
         this.object.rotation.x = (value * (Math.PI / 180));
 
         this.eventDispatcher.dispatchEvent(new CustomEvent(
@@ -388,7 +397,8 @@ class EulerProperty {
     this.inputNumberY.addEventListener(
       "input",
       (event) => {
-        const value = event.target.value;
+        const value = Number( event.target.value );
+
         this.object.rotation.y = (value * (Math.PI / 180));
 
         this.eventDispatcher.dispatchEvent(new CustomEvent(
@@ -404,7 +414,8 @@ class EulerProperty {
     this.inputNumberZ.addEventListener(
       "input",
       (event) => {
-        const value = event.target.value;
+        const value = Number( event.target.value );
+
         this.object.rotation.z = (value * (Math.PI / 180));
 
         this.eventDispatcher.dispatchEvent(new CustomEvent(
@@ -419,7 +430,6 @@ class EulerProperty {
     )
   }
 }
-
 
 class Properties {
   constructor( editor ) {
