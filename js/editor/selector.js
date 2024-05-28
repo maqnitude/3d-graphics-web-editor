@@ -4,27 +4,24 @@ const mouse = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
 
 class Selector {
-  constructor( editor, viewport ) {
-    this.editor = editor;
+  constructor( viewport ) {
     this.viewport = viewport;
-    this.events = editor.events;
+    this.eventDispatcher = this.viewport.eventDispatcher;
+    this.events = this.viewport.events;
 
-    this.editor.eventDispatcher.addEventListener(
-      this.editor.events.intersectionsDetected.type,
-      ( event ) => {
-        if (event.detail.ignore) {
-          return;
-        }
+    this.ignore = false;
 
-        const intersects = event.detail.intersects;
+    //
 
-        if (intersects.length > 0) {
-          const object = intersects[ 0 ].object;
-          this.select( object );
-        } else {
-          this.select( null );
-        }
-      }
+    this.setupEventListeners();
+  }
+
+  // Methods
+  
+  setupEventListeners() {
+    this.eventDispatcher.addEventListener(
+      this.events.intersectionsDetected.type,
+      this.onIntersectionsDetected.bind( this )
     )
   }
 
@@ -47,9 +44,9 @@ class Selector {
   }
 
   select ( object ) {
-    this.editor.eventDispatcher.dispatchEvent(
+    this.eventDispatcher.dispatchEvent(
       new CustomEvent(
-        this.editor.events.objectSelected.type,
+        this.events.objectSelected.type,
         {
           detail: {
             object: object,
@@ -57,6 +54,21 @@ class Selector {
         }
       )
     )    
+  }
+
+  // Event handlers
+  
+  onIntersectionsDetected( event ) {
+    if (this.ignore) { return; }
+
+    const intersects = event.detail.intersects;
+
+    if (intersects.length > 0) {
+      const object = intersects[ 0 ].object;
+      this.select( object );
+    } else {
+      this.select( null );
+    }
   }
 }
 
