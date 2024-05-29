@@ -1,3 +1,5 @@
+import * as THREE from "three";
+
 class Editor {
   constructor() {
     // This enables all the events in here to be "global"
@@ -14,9 +16,14 @@ class Editor {
       objectAdded: new Event( "objectAdded" ),
       objectSelected: new Event( "objectSelected" ),
       objectChanged: new Event( "objectChanged "),
+      objectRemoved: new Event( "objectRemoved" ),
 
       transformModeChanged: new Event( "transformModeChanged" ),
     };
+
+    this.history = null;
+
+    this.scene = new THREE.Scene();
   }
 }
 

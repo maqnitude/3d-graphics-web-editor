@@ -11,7 +11,9 @@ class Viewport {
     this.eventDispatcher = editor.eventDispatcher;
     this.events = editor.events;
 
+    this.history = editor.history;
     this.selector = new Selector( this );
+
     this.container = this.createContainer();
     this.renderer = this.createRenderer();
 
@@ -24,7 +26,9 @@ class Viewport {
 
     this.orbitControls = new OrbitControls( this.currentCamera, this.renderer.domElement );
 
-    this.scene = new THREE.Scene();
+    // this.scene = new THREE.Scene();
+    // this.scene.name = "Scene";
+    this.scene = editor.scene;
     this.scene.name = "Scene";
 
     this.sceneHelper = new THREE.Scene();
@@ -65,7 +69,11 @@ class Viewport {
     );
     this.eventDispatcher.addEventListener(
       this.events.objectChanged.type,
-      this.render.bind(this)
+      this.render.bind( this )
+    );
+    this.eventDispatcher.addEventListener(
+      this.events.objectRemoved.type,
+      this.render.bind( this )
     );
 
     this.orbitControls.addEventListener(
@@ -85,10 +93,10 @@ class Viewport {
       }
     );
 
+    // Change in viewport, update in properties
     this.transformControls.addEventListener(
       "objectChange",
       ( event ) => {
-        console.log(this.transformControls.object);
         this.eventDispatcher.dispatchEvent(new CustomEvent(
           this.events.objectChanged.type,
           {
@@ -97,6 +105,19 @@ class Viewport {
             }
           }
         ));
+      }
+    );
+
+    this.transformControls.addEventListener(
+      "mouseDown",
+      ( event ) => {
+        this.history.recordChange = true;
+      }
+    );
+    this.transformControls.addEventListener(
+      "mouseUp",
+      ( event ) => {
+        this.history.recordChange = true;
       }
     );
 
@@ -204,9 +225,29 @@ class Viewport {
   // Methods
   
   addObject( object ) {
-    // this.scene.add( object.mesh );
     this.scene.add( object );
-    this.eventDispatcher.dispatchEvent( this.events.objectAdded );
+    // this.eventDispatcher.dispatchEvent( this.events.objectAdded );
+    this.eventDispatcher.dispatchEvent( new CustomEvent(
+      this.events.objectAdded.type,
+      {
+        detail: {
+          object: object
+        }
+      }
+    ));
+  }
+
+  removeObject( object ) {
+    this.scene.remove( object );
+    // this.eventDispatcher.dispatchEvent( this.events.objectRemoved );
+    this.eventDispatcher.dispatchEvent( new CustomEvent(
+      this.events.objectRemoved.type,
+      {
+        detail: {
+          object: object
+        }
+      }
+    ));
   }
 
   getMousePosition( dom, x, y ) {
@@ -235,7 +276,11 @@ class Viewport {
 
   // Events handlers
   
-  onObjectAdded() {
+  onObjectAdded( event ) {
+    this.render();
+  }
+
+  onObjectRemoved( event ) {
     this.render();
   }
 

@@ -1,4 +1,5 @@
 import { Editor } from "./editor/editor.js";
+import { History } from "./editor/history.js";
 import { MeshProperties } from "./editor/properties.js";
 import { SceneTree } from "./editor/scene-tree.js";
 import { VerticalResizer } from "./editor/vertical-resizer.js";
@@ -20,13 +21,18 @@ const mainContent = document.getElementById( "MainContent" );
 let availableHeight = window.innerHeight - (menuBar.clientHeight + mainToolBar.clientHeight);
 mainContent.style.height = `${ 100 * availableHeight / window.innerHeight }%`;
 
+// Holy shit, did i just accidentally use dependency injection?
 const editor = new Editor();
+const history = new History( editor );
+editor.history = history;
+
+const viewport = new Viewport( editor );
+history.viewport = viewport;
 
 const leftSideBar = document.getElementById( "LeftSideBar" );
 const levelViewport = document.getElementById( "LevelViewport" );
 const rightSideBar = document.getElementById( "RightSideBar" );
 
-const viewport = new Viewport( editor );
 levelViewport.appendChild( viewport.container );
 
 const leftVerticalResizer = new VerticalResizer( editor, leftSideBar, levelViewport );
@@ -34,6 +40,7 @@ const rightVerticalResizer = new VerticalResizer( editor, levelViewport, rightSi
 
 const sceneTree = new SceneTree( viewport );
 leftSideBar.appendChild( sceneTree.container );
+
 
 /*
  * Need to do these after setting up the editor
@@ -54,7 +61,28 @@ window.addEventListener("resize", function() {
   mainContent.style.height = `${ 100 * availableHeight / window.innerHeight }%`;
 });
 
+// Handle shit on the menubar
+const editUndo = document.getElementById( "EditUndo" );
+const editRedo = document.getElementById( "EditRedo" );
+editUndo.addEventListener(
+  "click",
+  function( event ) {
+    history.undo();
+    console.log("(undo) undos:", history.undos);
+    console.log("(undo) redos:", history.redos)
+  }
+);
+editRedo.addEventListener(
+  "click",
+  function( event ) {
+    history.redo();
+    console.log("(redo) undos:", history.undos);
+    console.log("(redo) redos:", history.redos);
+  }
+)
+
 // Handle shit in the right sidebar
+// TODO: hide the properties container instead of removing it
 editor.eventDispatcher.addEventListener(
   editor.events.objectSelected.type,
   function( event ) {
