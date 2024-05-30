@@ -1,6 +1,7 @@
 class ReadOnlyProperty {
   constructor( parent, propertyLabel, value, type ) {
     this.parent = parent;
+
     this.listItem = document.createElement( "div" );
     this.listItem.classList.add(
       "list-group-item",
@@ -14,9 +15,9 @@ class ReadOnlyProperty {
 
     this.input = document.createElement( "input" );
     this.input.readOnly = true;
-    this.input.setAttribute( "id", `input-${ propertyLabel }` );
-    this.input.setAttribute( "type", type );
-    this.input.setAttribute( "value", `${ value }` );
+    this.input.id = `input-${ propertyLabel }`;
+    this.input.type = type;
+    this.input.value = `${ value }`;
     this.input.classList.add(
       "form-control-plaintext"
     );
@@ -30,6 +31,7 @@ class ReadOnlyProperty {
     this.listItem.appendChild( this.formFloating );
     this.parent.appendChild( this.listItem );
   }
+
   setValue( value ) {
     this.input.setAttribute( "value", `${ value }` );
   }
@@ -38,6 +40,7 @@ class ReadOnlyProperty {
 class ValueSliderProperty {
   constructor( parent, propertyLabel, value, min, max, step ) {
     this.parent = parent;
+
     this.listItem = document.createElement( "div" );
     this.listItem.classList.add(
       "list-group-item",
@@ -57,12 +60,12 @@ class ValueSliderProperty {
 
     this.inputNumber = document.createElement( "input" );
     this.inputNumber.readOnly = false;
-    this.inputNumber.setAttribute( "id", `input-${ propertyLabel }` );
-    this.inputNumber.setAttribute( "type", "number" );
-    this.inputNumber.setAttribute( "value", `${ value }` );
-    this.inputNumber.setAttribute( "min", `${ min }` );
-    this.inputNumber.setAttribute( "max", `${ max }` );
-    this.inputNumber.setAttribute( "step", `${ step }` );
+    this.inputNumber.id = `input-${ propertyLabel }`;
+    this.inputNumber.type = "number";
+    this.inputNumber.value = `${ value }`;
+    this.inputNumber.min = `${ min }`;
+    this.inputNumber.max = `${ max }`;
+    this.inputNumber.step = `${ step }`;
     this.inputNumber.classList.add(
       "form-control",
     );
@@ -75,12 +78,12 @@ class ValueSliderProperty {
 
     this.inputSlider = document.createElement( "input" );
     this.inputSlider.readOnly = false;
-    this.inputSlider.setAttribute( "id", `input-${ propertyLabel }` );
-    this.inputSlider.setAttribute( "type", "range" );
-    this.inputSlider.setAttribute( "value", `${ value }` );
-    this.inputSlider.setAttribute( "min", `${ min }` );
-    this.inputSlider.setAttribute( "max", `${ max }` );
-    this.inputSlider.setAttribute( "step", `${ step }` );
+    this.inputSlider.id = `input-${ propertyLabel }`;
+    this.inputSlider.type = "range";
+    this.inputSlider.value = `${ value }`;
+    this.inputSlider.min = `${ min }`;
+    this.inputSlider.max = `${ max }`;
+    this.inputSlider.step = `${ step }`;
     this.inputSlider.classList.add(
       "form-range",
     );
@@ -99,8 +102,8 @@ class ValueSliderProperty {
   }
 
   setValue( value ) {
-    this.inputNumber.setAttribute( "value", `${ value }` );
-    this.inputSlider.setAttribute( "value", `${ value }` );
+    this.inputNumber.value = `${ value }`;
+    this.inputSlider.value = `${ value }`;
   }
 
   setupEventListeners() {
@@ -155,25 +158,25 @@ class Vector3Property {
 
     this.inputNumberX = document.createElement( "input" );
     this.inputNumberX.readOnly = false;
-    this.inputNumberX.setAttribute( "id", "input-x" );
-    this.inputNumberX.setAttribute( "type", "number" );
-    this.inputNumberX.setAttribute( "value", `${ vector3.getComponent(0) }` );
+    this.inputNumberX.id = "input-x";
+    this.inputNumberX.type = "number";
+    this.inputNumberX.value = `${ vector3.getComponent(0) }`;
     this.inputNumberX.classList.add(
       "form-control",
     );
     this.inputNumberY = document.createElement( "input" );
     this.inputNumberY.readOnly = false;
-    this.inputNumberY.setAttribute( "id", "input-y" );
-    this.inputNumberY.setAttribute( "type", "number" );
-    this.inputNumberY.setAttribute( "value", `${ vector3.getComponent(1) }` );
+    this.inputNumberY.id = "input-y";
+    this.inputNumberY.type = "number";
+    this.inputNumberY.value = `${ vector3.getComponent(1) }`;
     this.inputNumberY.classList.add(
       "form-control",
     );
     this.inputNumberZ = document.createElement( "input" );
     this.inputNumberZ.readOnly = false;
-    this.inputNumberZ.setAttribute( "id", "input-z" );
-    this.inputNumberZ.setAttribute( "type", "number" );
-    this.inputNumberZ.setAttribute( "value", `${ vector3.getComponent(2) }` );
+    this.inputNumberZ.id = "input-z";
+    this.inputNumberZ.type = "number";
+    this.inputNumberZ.value = `${ vector3.getComponent(2) }`;
     this.inputNumberZ.classList.add(
       "form-control",
     );
@@ -198,16 +201,18 @@ class Vector3Property {
   }
 
   setValue( vector3 ) {
-    this.inputNumberX.setAttribute( "value", `${ vector3.getComponent(0) }` );
-    this.inputNumberY.setAttribute( "value", `${ vector3.getComponent(1) }` );
-    this.inputNumberZ.setAttribute( "value", `${ vector3.getComponent(2) }` );
+    this.inputNumberX.value = `${ vector3.getComponent(0) }`;
+    this.inputNumberY.value = `${ vector3.getComponent(1) }`;
+    this.inputNumberZ.value = `${ vector3.getComponent(2) }`;
   } 
 
+  // Change in properties, update in viewport
   setupEventListeners() {
     this.inputNumberX.addEventListener(
       "input",
       (event) => {
-        const value = event.target.value;
+        const value = Number( event.target.value );
+
         switch(this.type) {
           case 'position':
             this.object.position.setComponent(0, value);
@@ -217,20 +222,15 @@ class Vector3Property {
             break;
         }
         
-        this.eventDispatcher.dispatchEvent(new CustomEvent(
-          this.events.objectChanged.type,
-          {
-            detail: {
-              object: this.object,
-            }
-          }
-        ));
+        this.dispatchObjectChangedEvent( this.object );
       }
     )
+
     this.inputNumberY.addEventListener(
       "input",
       (event) => {
-        const value = event.target.value;
+        const value = Number( event.target.value );
+
         switch(this.type) {
           case 'position':
             this.object.position.setComponent(1, value);
@@ -240,20 +240,15 @@ class Vector3Property {
             break;
         }
 
-        this.eventDispatcher.dispatchEvent(new CustomEvent(
-          this.events.objectChanged.type,
-          {
-            detail: {
-              object: this.object,
-            }
-          }
-        ));
+        this.dispatchObjectChangedEvent( this.object );
       }
     )
+
     this.inputNumberZ.addEventListener(
       "input",
       (event) => {
-        const value = event.target.value;
+        const value = Number( event.target.value );
+
         switch(this.type) {
           case 'position':
             this.object.position.setComponent(2, value);
@@ -263,16 +258,21 @@ class Vector3Property {
             break;
         }
 
-        this.eventDispatcher.dispatchEvent(new CustomEvent(
-          this.events.objectChanged.type,
-          {
-            detail: {
-              object: this.object,
-            }
-          }
-        ));
+        this.dispatchObjectChangedEvent( this.object );
+
       }
     )
+  }
+
+  dispatchObjectChangedEvent( object ) {
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.objectChanged.type,
+      {
+        detail: {
+          object: object,
+        }
+      }
+    ));
   }
 }
 
@@ -320,25 +320,25 @@ class EulerProperty {
 
     this.inputNumberX = document.createElement( "input" );
     this.inputNumberX.readOnly = false;
-    this.inputNumberX.setAttribute( "id", "input-x" );
-    this.inputNumberX.setAttribute( "type", "number" );
-    this.inputNumberX.setAttribute( "value", `${ Number((euler.x * (180 / Math.PI)).toFixed(2))}` );
+    this.inputNumberX.id = "input-x";
+    this.inputNumberX.type = "number";
+    this.inputNumberX.value = `${ Number((euler.x * (180 / Math.PI)).toFixed(2))}`;
     this.inputNumberX.classList.add(
       "form-control",
     );
     this.inputNumberY = document.createElement( "input" );
     this.inputNumberY.readOnly = false;
-    this.inputNumberY.setAttribute( "id", "input-y" );
-    this.inputNumberY.setAttribute( "type", "number" );
-    this.inputNumberY.setAttribute( "value", `${ Number((euler.y * (180 / Math.PI)).toFixed(2))}` );
+    this.inputNumberY.id = "input-y";
+    this.inputNumberY.type = "number";
+    this.inputNumberY.value = `${ Number((euler.y * (180 / Math.PI)).toFixed(2))}`;
     this.inputNumberY.classList.add(
       "form-control",
     );
     this.inputNumberZ = document.createElement( "input" );
     this.inputNumberZ.readOnly = false;
-    this.inputNumberZ.setAttribute( "id", "input-z" );
-    this.inputNumberZ.setAttribute( "type", "number" );
-    this.inputNumberZ.setAttribute( "value", `${ Number((euler.z * (180 / Math.PI)).toFixed(2))}` );
+    this.inputNumberZ.id = "input-z";
+    this.inputNumberZ.type = "number";
+    this.inputNumberZ.value = `${ Number((euler.z * (180 / Math.PI)).toFixed(2))}`;
     this.inputNumberZ.classList.add(
       "form-control",
     );
@@ -359,67 +359,62 @@ class EulerProperty {
 
     this.parent.appendChild(this.container);
 
+    //
+
     this.setupEventListeners();
   }
 
   setValue( euler ) {
-    this.inputNumberX.setAttribute( "value", `${ Number((euler.x * (180 / Math.PI)).toFixed(2)) }` );
-    this.inputNumberY.setAttribute( "value", `${ Number((euler.y * (180 / Math.PI)).toFixed(2)) }` );
-    this.inputNumberZ.setAttribute( "value", `${ Number((euler.z * (180 / Math.PI)).toFixed(2)) }` );
+    this.inputNumberX.value = `${ Number((euler.x * (180 / Math.PI)).toFixed(2)) }`;
+    this.inputNumberY.value = `${ Number((euler.y * (180 / Math.PI)).toFixed(2)) }`;
+    this.inputNumberZ.value = `${ Number((euler.z * (180 / Math.PI)).toFixed(2)) }`;
   }
 
+  // Change in properties, update in viewport
   setupEventListeners() {
     this.inputNumberX.addEventListener(
       "input",
       (event) => {
-        const value = event.target.value;
+        const value = Number( event.target.value );
+
         this.object.rotation.x = (value * (Math.PI / 180));
 
-        this.eventDispatcher.dispatchEvent(new CustomEvent(
-          this.events.objectChanged.type,
-          {
-            detail: {
-              object: this.object,
-            }
-          }
-        ));
+        this.dispatchObjectChangedEvent( this.object );
       }
     )
     this.inputNumberY.addEventListener(
       "input",
       (event) => {
-        const value = event.target.value;
+        const value = Number( event.target.value );
+
         this.object.rotation.y = (value * (Math.PI / 180));
 
-        this.eventDispatcher.dispatchEvent(new CustomEvent(
-          this.events.objectChanged.type,
-          {
-            detail: {
-              object: this.object,
-            }
-          }
-        ));
+        this.dispatchObjectChangedEvent( this.object );
       }
     )
     this.inputNumberZ.addEventListener(
       "input",
       (event) => {
-        const value = event.target.value;
+        const value = Number( event.target.value );
+
         this.object.rotation.z = (value * (Math.PI / 180));
 
-        this.eventDispatcher.dispatchEvent(new CustomEvent(
-          this.events.objectChanged.type,
-          {
-            detail: {
-              object: this.object,
-            }
-          }
-        ));
+        this.dispatchObjectChangedEvent( this.object );
       }
     )
   }
-}
 
+  dispatchObjectChangedEvent( object ) {
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.objectChanged.type,
+      {
+        detail: {
+          object: object,
+        }
+      }
+    ));
+  }
+}
 
 class Properties {
   constructor( editor ) {
@@ -427,10 +422,12 @@ class Properties {
     this.eventDispatcher = editor.eventDispatcher;
     this.events = editor.events;
 
+    this.history = editor.history;
+
     //
     
     this.container = document.createElement( "div" );
-    this.container.setAttribute( "id", "Properties" );
+    this.container.id = "Properties";
     this.container.classList.add(
       // "h-100",
       "overflow-scroll",
@@ -590,8 +587,9 @@ class MeshProperties extends Properties {
     }
   }
 
-  onObjectChanged(event) {
+  onObjectChanged( event ) {
     this.mesh = event.detail.object;
+
     this.updateUI();
   }
 }
