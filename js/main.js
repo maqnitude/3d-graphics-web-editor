@@ -68,16 +68,12 @@ editUndo.addEventListener(
   "click",
   function( event ) {
     history.undo();
-    console.log("(undo) undos:", history.undos);
-    console.log("(undo) redos:", history.redos)
   }
 );
 editRedo.addEventListener(
   "click",
   function( event ) {
     history.redo();
-    console.log("(redo) undos:", history.undos);
-    console.log("(redo) redos:", history.redos);
   }
 )
 

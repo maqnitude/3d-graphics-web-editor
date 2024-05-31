@@ -12,6 +12,7 @@ class History {
     this.redos = [];
 
     this.recordChange = false; // if true, change will be recorded then goes back to false
+    this.newUndoBranch = true;
 
     //
 
@@ -46,15 +47,29 @@ class History {
 
         this.viewport.render();
 
+        this.redos.push( entry );
+
         break;
       case "remove":
         this.scene.add( entry.object );
 
-        this.eventDispatcher.dispatchEvent( this.events.objectAdded );
+        this.viewport.render();
+
+        this.redos.push( entry );
 
         break;
       case "change":
         let object = this.scene.getObjectById( entry.id );
+
+        // The top entry in undos only contains the last action, therefore we need
+        // to push the current object state to redos before undoing
+        this.redos.push({
+          type: "change",
+          id: object.id,
+          position: object.position.clone(),
+          rotation: object.rotation.clone(),
+          scale: object.scale.clone()
+        });
 
         if (object) {
           if (entry.position) { object.position.copy( entry.position ) }
@@ -62,12 +77,10 @@ class History {
           if (entry.scale) { object.scale.copy( entry.scale ) }
         }
 
-        this.viewport.render();
+        this.dispatchObjectChangedEvent( object );
 
         break;
     }
-
-    this.redos.push( entry );
   }
 
   redo() {
@@ -81,15 +94,29 @@ class History {
 
         this.viewport.render();
 
+        this.undos.push( entry );
+
         break;
       case "remove":
         this.scene.remove( entry.object );
 
         this.viewport.render();
 
+        this.undos.push( entry );
+
         break;
       case "change":
         let object = this.scene.getObjectById( entry.id );
+
+        // Same logic as in unfo(), we need to push current object state t
+        // undos before redoing
+        this.undos.push({
+          type: "change",
+          id: object.id,
+          position: object.position.clone(),
+          rotation: object.rotation.clone(),
+          scale: object.scale.clone()
+        });
 
         if (object) {
           if (entry.position) { object.position.copy( entry.position ) }
@@ -101,21 +128,19 @@ class History {
 
         break;
     }
-
-    this.undos.push( entry );
   }
 
   // Event handlers
 
   onObjectAdded( event ) {
-    // New undo branch, need to clear redos
-    if (this.redos.length > 0) {
-      this.redos.splice( 0, this.redos.length );
-    }
-
     const object = event.detail.object;
 
     if (!object) { return; }
+
+    if (this.newUndoBranch) {
+      this.redos.splice( 0, this.redos.length );
+      this.newUndoBranch = false;
+    }
 
     if (this.undos.length > this.maxEntries) {
       this.undos.shift();
@@ -130,14 +155,14 @@ class History {
   }
 
   onObjectRemoved( event ) {
-    // New undo branch, need to clear redos
-    if (this.redos.length > 0) {
-      this.redos.splice( 0, this.redos.length );
-    }
-
     const object = event.detail.object;
 
     if (!object) { return; }
+
+    if (this.newUndoBranch) {
+      this.redos.splice( 0, this.redos.length );
+      this.newUndoBranch = false;
+    }
 
     if (this.undos.length > this.maxEntries) {
       this.undos.shift();
@@ -152,16 +177,16 @@ class History {
   }
 
   onObjectChanged( event ) {
-    // New undo branch, need to clear redos
-    if (this.redos.length > 0) {
-      this.redos.splice( 0, this.redos.length );
-    }
-
     if (!this.recordChange) { return; }
 
     const object = event.detail.object;
 
     if (!object) { return; }
+
+    if (this.newUndoBranch) {
+      this.redos.splice( 0, this.redos.length );
+      this.newUndoBranch = false;
+    }
 
     if (this.undos.length > this.maxEntries) {
       this.undos.shift();
