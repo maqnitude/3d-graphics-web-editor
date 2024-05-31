@@ -125,12 +125,6 @@ class Viewport {
     const transformButtons = [translateButton, rotateButton, scaleButton];
 
     for (let button of transformButtons) {
-      button.addEventListener('mouseenter', () => {
-        this.selector.ignore = true;
-      })
-      button.addEventListener('mouseleave', () => {
-        this.selector.ignore = false;
-      })
       button.onclick = () => {
         for (let button of transformButtons) {
           button.classList.add('btn-secondary');
@@ -301,6 +295,7 @@ class Viewport {
 
   onObjectRemoved( event ) {
     this.transformControls.detach();
+    this.selector.deselect();
 
     this.render();
   }

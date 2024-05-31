@@ -56,6 +56,10 @@ class Selector {
     )    
   }
 
+  deselect() {
+    this.select( null );
+  }
+
   // Event handlers
   
   onIntersectionsDetected( event ) {
@@ -67,7 +71,7 @@ class Selector {
       const object = intersects[ 0 ].object;
       this.select( object );
     } else {
-      this.select( null );
+      this.deselect();
     }
   }
 }
