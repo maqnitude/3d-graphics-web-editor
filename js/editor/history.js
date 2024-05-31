@@ -200,7 +200,13 @@ class History {
       scale: object.scale.clone()
     }
 
-    this.undos.push( entry );
+    const lastEntry = this.undos[ this.undos.length - 1 ];
+    console.log(lastEntry);
+    if (!lastEntry) {
+      this.undos.push( entry );
+    } else if (JSON.stringify( entry ) !== JSON.stringify( lastEntry )) {
+      this.undos.push( entry );
+    }
 
     this.recordChange = false;
   }

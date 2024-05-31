@@ -39,6 +39,8 @@ class ReadOnlyProperty {
 
 class ValueSliderProperty {
   constructor( parent, propertyLabel, value, min, max, step ) {
+    this.history = null;
+
     this.parent = parent;
 
     this.listItem = document.createElement( "div" );
@@ -114,9 +116,9 @@ class ValueSliderProperty {
 }
 
 class Vector3Property {
-  constructor(editor, object, parent, propertyLabel, vector3, type) {
-    this.eventDispatcher = editor.eventDispatcher;
-    this.events = editor.events;
+  constructor(object, parent, propertyLabel, vector3, type) {
+    this.editor = null;
+    this.history = null;
 
     this.object = object;
     this.parent = parent;
@@ -161,6 +163,7 @@ class Vector3Property {
     this.inputNumberX.id = "input-x";
     this.inputNumberX.type = "number";
     this.inputNumberX.value = `${ vector3.getComponent(0) }`;
+    this.inputNumberX.step = "0.001";
     this.inputNumberX.classList.add(
       "form-control",
     );
@@ -169,6 +172,7 @@ class Vector3Property {
     this.inputNumberY.id = "input-y";
     this.inputNumberY.type = "number";
     this.inputNumberY.value = `${ vector3.getComponent(1) }`;
+    this.inputNumberY.step = "0.001";
     this.inputNumberY.classList.add(
       "form-control",
     );
@@ -177,6 +181,7 @@ class Vector3Property {
     this.inputNumberZ.id = "input-z";
     this.inputNumberZ.type = "number";
     this.inputNumberZ.value = `${ vector3.getComponent(2) }`;
+    this.inputNumberZ.step = "0.001";
     this.inputNumberZ.classList.add(
       "form-control",
     );
@@ -210,7 +215,7 @@ class Vector3Property {
   setupEventListeners() {
     this.inputNumberX.addEventListener(
       "input",
-      (event) => {
+      ( event ) => {
         const value = Number( event.target.value );
 
         switch(this.type) {
@@ -221,14 +226,25 @@ class Vector3Property {
             this.object.scale.setComponent(0, value);
             break;
         }
-        
+
         this.dispatchObjectChangedEvent( this.object );
+      }
+    )
+    this.inputNumberX.addEventListener(
+      "focus",
+      ( event ) => {
+        this.history.recordChange = true;
+        this.history.newUndoBranch = true;
+
+        this.dispatchObjectChangedEvent( this.object );
+
+        this.history.recordChange = true;
       }
     )
 
     this.inputNumberY.addEventListener(
       "input",
-      (event) => {
+      ( event ) => {
         const value = Number( event.target.value );
 
         switch(this.type) {
@@ -265,8 +281,8 @@ class Vector3Property {
   }
 
   dispatchObjectChangedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectChanged.type,
+    this.editor.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.editor.events.objectChanged.type,
       {
         detail: {
           object: object,
@@ -277,9 +293,9 @@ class Vector3Property {
 }
 
 class EulerProperty {
-  constructor(editor, object, parent, propertyLabel, euler) {
-    this.eventDispatcher = editor.eventDispatcher;
-    this.events = editor.events;
+  constructor(object, parent, propertyLabel, euler) {
+    this.editor = null;
+    this.history = null;
 
     this.object = object;
     this.parent = parent;
@@ -405,8 +421,8 @@ class EulerProperty {
   }
 
   dispatchObjectChangedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectChanged.type,
+    this.editor.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.editor.events.objectChanged.type,
       {
         detail: {
           object: object,
@@ -505,26 +521,34 @@ class MeshProperties extends Properties {
     this.objectUuid = new ReadOnlyProperty( this.objectProperties, "UUID", this.mesh.uuid, "text" );
     this.objectType = new ReadOnlyProperty( this.objectProperties, "Type", this.mesh.type, "text" );
 
-    this.objectPosition = new Vector3Property( this.editor, this.mesh, this.objectProperties, "Position", this.mesh.position, "position" );
-    this.objectRotation = new EulerProperty( this.editor, this.mesh, this.objectProperties, "Rotation", this.mesh.rotation );
-    this.objectScale = new Vector3Property( this.editor, this.mesh, this.objectProperties, "Scale", this.mesh.scale, "scale" );
+    this.objectPosition = new Vector3Property( this.mesh, this.objectProperties, "Position", this.mesh.position, "position" );
+    this.objectPosition.editor = this.editor;
+    this.objectPosition.history = this.editor.history;
+
+    this.objectRotation = new EulerProperty( this.mesh, this.objectProperties, "Rotation", this.mesh.rotation );
+    this.objectRotation.editor = this.editor;
+    this.objectRotation.history = this.editor.history;
+
+    this.objectScale = new Vector3Property( this.mesh, this.objectProperties, "Scale", this.mesh.scale, "scale" );
+    this.objectPosition.editor = this.editor;
+    this.objectPosition.history = this.editor.history;
 
     this.geometryProperties = this.createListGroup( "Geometry" );
     this.geometryType = new ReadOnlyProperty( this.geometryProperties, "Type", this.mesh.geometry.type, "text");
     switch ( this.mesh.geometry.type ) {
       case "BoxGeometry":
-        const params = this.mesh.geometry.parameters;
+        var params = this.mesh.geometry.parameters;
 
-        this.geometryWidth = new ValueSliderProperty( this.geometryProperties, "Width", params.width, 1, 30, 0.001 );
-        this.geometryHeight = new ValueSliderProperty( this.geometryProperties, "Height", params.height, 1, 30, 0.001 );
-        this.geometryDepth = new ValueSliderProperty( this.geometryProperties, "Depth", params.depth, 1, 30, 0.001 );
-        this.geometryWidthSegments = new ValueSliderProperty( this.geometryProperties, "Width Segments", params.widthSegments, 1, 10, 1 );
-        this.geometryHeightSegments = new ValueSliderProperty( this.geometryProperties, "Height Segments", params.heightSegments, 1, 10, 1 );
-        this.geometryDepthSegments = new ValueSliderProperty( this.geometryProperties, "Depth Segments", params.depthSegments, 1, 10, 1 );
+        this.boxGeometryWidth = new ValueSliderProperty( this.geometryProperties, "Width", params.width, 1, 30, 0.001 );
+        this.boxGeometryHeight = new ValueSliderProperty( this.geometryProperties, "Height", params.height, 1, 30, 0.001 );
+        this.boxGeometryDepth = new ValueSliderProperty( this.geometryProperties, "Depth", params.depth, 1, 30, 0.001 );
+        this.boxGeometryWidthSegments = new ValueSliderProperty( this.geometryProperties, "Width Segments", params.widthSegments, 1, 10, 1 );
+        this.boxGeometryHeightSegments = new ValueSliderProperty( this.geometryProperties, "Height Segments", params.heightSegments, 1, 10, 1 );
+        this.boxGeometryDepthSegments = new ValueSliderProperty( this.geometryProperties, "Depth Segments", params.depthSegments, 1, 10, 1 );
 
         break;
       case "PlaneGeometry":
-        // TODO
+        var params = this.mesh.geometry.parameters;
 
         break;
       case "SphereGeometry":
@@ -569,12 +593,13 @@ class MeshProperties extends Properties {
       case "BoxGeometry":
         const params = this.mesh.geometry.parameters;
 
-        this.geometryWidth.setValue( params.width );
-        this.geometryHeight.setValue( params.height);
-        this.geometryDepth.setValue( params.depth);
-        this.geometryWidthSegments.setValue( params.widthSegments);
-        this.geometryHeightSegments.setValue( params.heightSegments);
-        this.geometryDepthSegments.setValue( params.depthSegments);
+        this.boxGeometryWidth.setValue( params.width );
+        this.boxGeometryHeight.setValue( params.height);
+        this.boxGeometryDepth.setValue( params.depth);
+        this.boxGeometryWidthSegments.setValue( params.widthSegments);
+        this.boxGeometryHeightSegments.setValue( params.heightSegments);
+        this.boxGeometryDepthSegments.setValue( params.depthSegments);
+
         break;
       case "PlaneGeometry":
         // TODO
