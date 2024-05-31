@@ -38,8 +38,9 @@ class ReadOnlyProperty {
 }
 
 class ValueSliderProperty {
-  constructor( parent, propertyLabel, value, min, max, step ) {
-    this.history = null;
+  constructor( editor, parent, propertyLabel, value, min, max, step ) {
+    this.editor = editor;
+    this.history = editor.history;
 
     this.parent = parent;
 
@@ -116,7 +117,10 @@ class ValueSliderProperty {
 }
 
 class BooleanProperty {
-  constructor(parent, propertyLabel, value) {
+  constructor( editor, parent, propertyLabel, value ) {
+    this.editor = editor;
+    this.history = editor.history;
+
     this.parent = parent;
 
     this.listItem = document.createElement("div");
@@ -159,7 +163,10 @@ class BooleanProperty {
 }
 
 class DropdownProperty {
-  constructor(parent, propertyLabel, options, selectedOption) {
+  constructor( editor, parent, propertyLabel, options, selectedOption ) {
+    this.editor = editor;
+    this.history = editor.history;
+
     this.parent = parent;
 
     this.listItem = document.createElement("div");
@@ -206,9 +213,11 @@ class DropdownProperty {
 
 
 class Vector3Property {
-  constructor(object, parent, propertyLabel, vector3, type) {
-    this.editor = null;
-    this.history = null;
+  constructor( editor, object, parent, propertyLabel, vector3, type ) {
+    this.editor = editor;
+    this.history = editor.history;
+    this.eventDispatcher = editor.eventDispatcher;
+    this.events = editor.events;
 
     this.object = object;
     this.parent = parent;
@@ -322,21 +331,11 @@ class Vector3Property {
     )
     this.inputNumberX.addEventListener(
       "focus",
-      ( event ) => {
-        this.history.recordChange = true;
-        this.history.newUndoBranch = true;
-
-        this.dispatchObjectChangedEvent( this.object );
-
-        this.history.recordChange = true;
-      }
+      this.onFocus.bind( this )
     )
-
     this.inputNumberX.addEventListener(
       "blur",
-      ( event ) => {
-        this.history.recordChange = false;
-      }
+      this.onBlur.bind( this )
     )
 
     this.inputNumberY.addEventListener(
@@ -356,24 +355,13 @@ class Vector3Property {
         this.dispatchObjectChangedEvent( this.object );
       }
     )
-
     this.inputNumberY.addEventListener(
       "focus",
-      ( event ) => {
-        this.history.recordChange = true;
-        this.history.newUndoBranch = true;
-
-        this.dispatchObjectChangedEvent( this.object );
-
-        this.history.recordChange = true;
-      }
+      this.onFocus.bind( this )
     )
-
     this.inputNumberY.addEventListener(
       "blur",
-      ( event ) => {
-        this.history.recordChange = false;
-      }
+      this.onBlur.bind( this )
     )
 
     this.inputNumberZ.addEventListener(
@@ -394,30 +382,34 @@ class Vector3Property {
 
       }
     )
-
     this.inputNumberZ.addEventListener(
       "focus",
-      ( event ) => {
-        this.history.recordChange = true;
-        this.history.newUndoBranch = true;
-
-        this.dispatchObjectChangedEvent( this.object );
-
-        this.history.recordChange = true;
-      }
+      this.onFocus.bind( this )
     )
-
     this.inputNumberZ.addEventListener(
       "blur",
-      ( event ) => {
-        this.history.recordChange = false;
-      }
+      this.onBlur.bind( this )
     )
   }
 
+  // Event handlers
+  
+  onFocus() {
+    this.history.recordChange = true;
+    this.history.newUndoBranch = true;
+
+    this.dispatchObjectChangedEvent( this.object );
+  }
+
+  onBlur() {
+    this.history.recordChange = false;
+  }
+
+  // Dispatch custome events
+
   dispatchObjectChangedEvent( object ) {
-    this.editor.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.editor.events.objectChanged.type,
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.objectChanged.type,
       {
         detail: {
           object: object,
@@ -428,9 +420,11 @@ class Vector3Property {
 }
 
 class EulerProperty {
-  constructor(object, parent, propertyLabel, euler) {
-    this.editor = null;
-    this.history = null;
+  constructor( editor, object, parent, propertyLabel, euler ) {
+    this.editor = editor;
+    this.history = editor.history;
+    this.eventDispatcher = editor.eventDispatcher;
+    this.events = editor.events;
 
     this.object = object;
     this.parent = parent;
@@ -535,19 +529,11 @@ class EulerProperty {
     )
     this.inputNumberX.addEventListener(
       "focus",
-      (event) => {
-        this.history.recordChange = true;
-        this.history.newUndoBranch = true;
-
-        this.dispatchObjectChangedEvent( this.object );
-        this.history.recordChange = true;
-      }
+      this.onFocus.bind( this )
     )
     this.inputNumberX.addEventListener(
       "blur",
-      (event) => {
-        this.history.recordChange = false;
-      }
+      this.onBlur.bind( this )
     )
 
     this.inputNumberY.addEventListener(
@@ -562,19 +548,11 @@ class EulerProperty {
     )
     this.inputNumberY.addEventListener(
       "focus",
-      (event) => {
-        this.history.recordChange = true;
-        this.history.newUndoBranch = true;
-
-        this.dispatchObjectChangedEvent( this.object );
-        this.history.recordChange = true;
-      }
+      this.onFocus.bind( this )
     )
     this.inputNumberY.addEventListener(
       "blur",
-      (event) => {
-        this.history.recordChange = false;
-      }
+      this.onBlur.bind( this )
     )
 
     this.inputNumberZ.addEventListener(
@@ -589,25 +567,32 @@ class EulerProperty {
     )
     this.inputNumberZ.addEventListener(
       "focus",
-      (event) => {
-        this.history.recordChange = true;
-        this.history.newUndoBranch = true;
-
-        this.dispatchObjectChangedEvent( this.object );
-        this.history.recordChange = true;
-      }
+      this.onFocus.bind( this )
     )
     this.inputNumberZ.addEventListener(
       "blur",
-      (event) => {
-        this.history.recordChange = false;
-      }
+      this.onBlur.bind( this )
     )
   }
 
+  // Event handlers
+
+  onFocus() {
+    this.history.recordChange = true;
+    this.history.newUndoBranch = true;
+
+    this.dispatchObjectChangedEvent( this.object );
+  }
+
+  onBlur() {
+    this.history.recordChange = false;
+  }
+
+  // Dispatch custom events
+
   dispatchObjectChangedEvent( object ) {
-    this.editor.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.editor.events.objectChanged.type,
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.objectChanged.type,
       {
         detail: {
           object: object,
@@ -706,17 +691,9 @@ class MeshProperties extends Properties {
     this.objectUuid = new ReadOnlyProperty( this.objectProperties, "UUID", this.mesh.uuid, "text" );
     this.objectType = new ReadOnlyProperty( this.objectProperties, "Type", this.mesh.type, "text" );
 
-    this.objectPosition = new Vector3Property( this.mesh, this.objectProperties, "Position", this.mesh.position, "position" );
-    this.objectPosition.editor = this.editor;
-    this.objectPosition.history = this.editor.history;
-
-    this.objectRotation = new EulerProperty( this.mesh, this.objectProperties, "Rotation", this.mesh.rotation );
-    this.objectRotation.editor = this.editor;
-    this.objectRotation.history = this.editor.history;
-
-    this.objectScale = new Vector3Property( this.mesh, this.objectProperties, "Scale", this.mesh.scale, "scale" );
-    this.objectScale.editor = this.editor;
-    this.objectScale.history = this.editor.history;
+    this.objectPosition = new Vector3Property( this.editor, this.mesh, this.objectProperties, "Position", this.mesh.position, "position" );
+    this.objectRotation = new EulerProperty( this.editor, this.mesh, this.objectProperties, "Rotation", this.mesh.rotation );
+    this.objectScale = new Vector3Property( this.editor, this.mesh, this.objectProperties, "Scale", this.mesh.scale, "scale" );
 
     this.geometryProperties = this.createListGroup( "Geometry" );
     this.geometryType = new ReadOnlyProperty( this.geometryProperties, "Type", this.mesh.geometry.type, "text");
@@ -724,31 +701,31 @@ class MeshProperties extends Properties {
       case "BoxGeometry":
         var params = this.mesh.geometry.parameters;
 
-        this.boxGeometryWidth = new ValueSliderProperty( this.geometryProperties, "Width", params.width, 1, 30, 0.001 );
-        this.boxGeometryHeight = new ValueSliderProperty( this.geometryProperties, "Height", params.height, 1, 30, 0.001 );
-        this.boxGeometryDepth = new ValueSliderProperty( this.geometryProperties, "Depth", params.depth, 1, 30, 0.001 );
-        this.boxGeometryWidthSegments = new ValueSliderProperty( this.geometryProperties, "Width Segments", params.widthSegments, 1, 10, 1 );
-        this.boxGeometryHeightSegments = new ValueSliderProperty( this.geometryProperties, "Height Segments", params.heightSegments, 1, 10, 1 );
-        this.boxGeometryDepthSegments = new ValueSliderProperty( this.geometryProperties, "Depth Segments", params.depthSegments, 1, 10, 1 );
+        this.boxGeometryWidth = new ValueSliderProperty( this.editor, this.geometryProperties, "Width", params.width, 1, 30, 0.001 );
+        this.boxGeometryHeight = new ValueSliderProperty( this.editor, this.geometryProperties, "Height", params.height, 1, 30, 0.001 );
+        this.boxGeometryDepth = new ValueSliderProperty( this.editor, this.geometryProperties, "Depth", params.depth, 1, 30, 0.001 );
+        this.boxGeometryWidthSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Width Segments", params.widthSegments, 1, 10, 1 );
+        this.boxGeometryHeightSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Height Segments", params.heightSegments, 1, 10, 1 );
+        this.boxGeometryDepthSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Depth Segments", params.depthSegments, 1, 10, 1 );
         // test boolean property
-        this.boxGeometryVisible = new BooleanProperty(this.geometryProperties, "Visible", true);
+        this.boxGeometryVisible = new BooleanProperty( this.editor, this.geometryProperties, "Visible", true );
 
         break;
       case "PlaneGeometry":
         var params = this.mesh.geometry.parameters;
 
-        this.planeGeometryWidth = new ValueSliderProperty( this.geometryProperties, "Width", params.width, 1, 30, 0.001 );
-        this.planeGeometryHeight = new ValueSliderProperty( this.geometryProperties, "Height", params.height, 1, 30, 0.001 );
-        this.planeGeometryWidthSegments = new ValueSliderProperty( this.geometryProperties, "Width Segments", params.widthSegments, 1, 30, 1 );
-        this.planeGeometryHeightSegments = new ValueSliderProperty( this.geometryProperties, "Height Segments", params.heightSegments, 1, 30, 1 );
+        this.planeGeometryWidth = new ValueSliderProperty( this.editor, this.geometryProperties, "Width", params.width, 1, 30, 0.001 );
+        this.planeGeometryHeight = new ValueSliderProperty( this.editor, this.geometryProperties, "Height", params.height, 1, 30, 0.001 );
+        this.planeGeometryWidthSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Width Segments", params.widthSegments, 1, 30, 1 );
+        this.planeGeometryHeightSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Height Segments", params.heightSegments, 1, 30, 1 );
 
         break;
       case "SphereGeometry":
         var params = this.mesh.geometry.parameters;
         
-        this.sphereRadius = new ValueSliderProperty( this.geometryProperties, "Radius", params.radius, 1, 30, 0.001 );
-        this.sphereWidthSegments = new ValueSliderProperty( this.geometryProperties, "Width Segments", params.widthSegments, 1, 64, 1 );
-        this.sphereHeightSegments = new ValueSliderProperty( this.geometryProperties, "Height Segments", params.heightSegments, 1, 32, 1 );
+        this.sphereRadius = new ValueSliderProperty( this.editor, this.geometryProperties, "Radius", params.radius, 1, 30, 0.001 );
+        this.sphereWidthSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Width Segments", params.widthSegments, 1, 64, 1 );
+        this.sphereHeightSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Height Segments", params.heightSegments, 1, 32, 1 );
 
         break;
     }
@@ -756,7 +733,9 @@ class MeshProperties extends Properties {
     this.materialProperties = this.createListGroup( "Material" );
     // test dropdown property
     console.log(this.mesh.material.type);
-    this.materialType = new DropdownProperty(this.materialProperties, "Type", ["MeshPhongMaterial", "MeshStandardMaterial", "MeshBasicMaterial", "MeshNormalMaterial"], this.mesh.material.type);
+    this.materialType = new DropdownProperty( this.editor, this.materialProperties, "Type",
+      ["MeshPhongMaterial", "MeshStandardMaterial", "MeshBasicMaterial", "MeshNormalMaterial"],
+      this.mesh.material.type);
 
     this.textureProperties = this.createListGroup( "Texture" );
 

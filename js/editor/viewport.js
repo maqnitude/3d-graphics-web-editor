@@ -12,7 +12,7 @@ class Viewport {
     this.events = editor.events;
 
     this.history = editor.history;
-    this.selector = new Selector( this );
+    this.selector = editor.selector;
 
     this.container = this.createContainer();
     this.renderer = this.createRenderer();
@@ -26,12 +26,9 @@ class Viewport {
 
     this.orbitControls = new OrbitControls( this.currentCamera, this.renderer.domElement );
 
-    // this.scene = new THREE.Scene();
-    // this.scene.name = "Scene";
     this.scene = editor.scene;
-    this.scene.name = "Scene";
 
-    this.sceneHelper = new THREE.Scene();
+    this.sceneHelper = editor.sceneHelper;
     this.grid = this.createGrid();
 
     this.transformControls = new TransformControls( this.currentCamera, this.renderer.domElement );
@@ -100,12 +97,13 @@ class Viewport {
         this.dispatchObjectChangedEvent( this.transformControls.object );
       }
     );
-
     this.transformControls.addEventListener(
       "mouseDown",
       ( event ) => {
         this.history.recordChange = true;
         this.history.newUndoBranch = true;
+
+        this.dispatchObjectChangedEvent( this.transformControls.object );
       }
     );
     this.transformControls.addEventListener(

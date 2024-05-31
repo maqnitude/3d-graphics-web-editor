@@ -1,5 +1,4 @@
 import { Editor } from "./editor/editor.js";
-import { History } from "./editor/history.js";
 import { MeshProperties } from "./editor/properties.js";
 import { SceneTree } from "./editor/scene-tree.js";
 import { VerticalResizer } from "./editor/vertical-resizer.js";
@@ -21,13 +20,8 @@ const mainContent = document.getElementById( "MainContent" );
 let availableHeight = window.innerHeight - (menuBar.clientHeight + mainToolBar.clientHeight);
 mainContent.style.height = `${ 100 * availableHeight / window.innerHeight }%`;
 
-// Holy shit, did i just accidentally use dependency injection?
 const editor = new Editor();
-const history = new History( editor );
-editor.history = history;
-
 const viewport = new Viewport( editor );
-history.viewport = viewport;
 
 const leftSideBar = document.getElementById( "LeftSideBar" );
 const levelViewport = document.getElementById( "LevelViewport" );
@@ -67,13 +61,13 @@ const editRedo = document.getElementById( "EditRedo" );
 editUndo.addEventListener(
   "click",
   function( event ) {
-    history.undo();
+    editor.history.undo();
   }
 );
 editRedo.addEventListener(
   "click",
   function( event ) {
-    history.redo();
+    editor.history.redo();
   }
 )
 

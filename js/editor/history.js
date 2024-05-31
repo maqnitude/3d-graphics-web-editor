@@ -4,9 +4,6 @@ class History {
     this.eventDispatcher = editor.eventDispatcher;
     this.events = editor.events;
 
-    this.viewport = null;
-    this.scene = editor.scene;
-
     this.maxEntries = 100;
     this.undos = [];
     this.redos = [];
@@ -43,7 +40,7 @@ class History {
 
     switch ( entry.type ) {
       case "add":
-        this.scene.remove( entry.object );
+        this.editor.scene.remove( entry.object );
 
         this.dispatchObjectRemovedEvent( null );
 
@@ -51,7 +48,7 @@ class History {
 
         break;
       case "remove":
-        this.scene.add( entry.object );
+        this.editor.scene.add( entry.object );
 
         this.dispatchObjectAddedEvent( null );
 
@@ -59,7 +56,7 @@ class History {
 
         break;
       case "change":
-        let object = this.scene.getObjectById( entry.id );
+        let object = this.editor.scene.getObjectById( entry.id );
 
         // The top entry in undos only contains the last action, therefore we need
         // to push the current object state to redos before undoing
@@ -90,7 +87,7 @@ class History {
 
     switch ( entry.type ) {
       case "add":
-        this.scene.add( entry.object );
+        this.editor.scene.add( entry.object );
 
         this.dispatchObjectAddedEvent( null );
 
@@ -98,7 +95,7 @@ class History {
 
         break;
       case "remove":
-        this.scene.remove( entry.object );
+        this.editor.scene.remove( entry.object );
 
         this.dispatchObjectRemovedEvent( null );
 
@@ -106,7 +103,7 @@ class History {
 
         break;
       case "change":
-        let object = this.scene.getObjectById( entry.id );
+        let object = this.editor.scene.getObjectById( entry.id );
 
         // Same logic as in unfo(), we need to push current object state t
         // undos before redoing
@@ -200,7 +197,6 @@ class History {
     }
 
     const lastEntry = this.undos[ this.undos.length - 1 ];
-    console.log(lastEntry);
     if (!lastEntry) {
       this.undos.push( entry );
     } else if (JSON.stringify( entry ) !== JSON.stringify( lastEntry )) {

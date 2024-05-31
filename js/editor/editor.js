@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { History } from "./history.js";
+import { Selector } from "./selector.js";
 
 class Editor {
   constructor() {
@@ -21,9 +23,14 @@ class Editor {
       transformModeChanged: new Event( "transformModeChanged" ),
     };
 
-    this.history = null;
+    this.history = new History( this );
+    this.selector = new Selector( this );
 
     this.scene = new THREE.Scene();
+    this.scene.name = "Scene";
+
+    this.sceneHelper = new THREE.Scene();
+    this.sceneHelper.add( new THREE.HemisphereLight( 0xffffff, 0x888888, 2 ) );
   }
 }
 
