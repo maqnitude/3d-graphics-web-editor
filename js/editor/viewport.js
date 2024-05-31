@@ -12,7 +12,7 @@ class Viewport {
     this.events = editor.events;
 
     this.history = editor.history;
-    this.selector = new Selector( this );
+    this.selector = editor.selector;
 
     this.container = this.createContainer();
     this.renderer = this.createRenderer();
@@ -26,12 +26,9 @@ class Viewport {
 
     this.orbitControls = new OrbitControls( this.currentCamera, this.renderer.domElement );
 
-    // this.scene = new THREE.Scene();
-    // this.scene.name = "Scene";
     this.scene = editor.scene;
-    this.scene.name = "Scene";
 
-    this.sceneHelper = new THREE.Scene();
+    this.sceneHelper = editor.sceneHelper;
     this.grid = this.createGrid();
 
     this.transformControls = new TransformControls( this.currentCamera, this.renderer.domElement );
@@ -73,7 +70,7 @@ class Viewport {
     );
     this.eventDispatcher.addEventListener(
       this.events.objectRemoved.type,
-      this.render.bind( this )
+      this.onObjectRemoved.bind( this )
     );
 
     this.orbitControls.addEventListener(
@@ -100,12 +97,13 @@ class Viewport {
         this.dispatchObjectChangedEvent( this.transformControls.object );
       }
     );
-
     this.transformControls.addEventListener(
       "mouseDown",
       ( event ) => {
         this.history.recordChange = true;
         this.history.newUndoBranch = true;
+
+        this.dispatchObjectChangedEvent( this.transformControls.object );
       }
     );
     this.transformControls.addEventListener(
@@ -125,12 +123,6 @@ class Viewport {
     const transformButtons = [translateButton, rotateButton, scaleButton];
 
     for (let button of transformButtons) {
-      button.addEventListener('mouseenter', () => {
-        this.selector.ignore = true;
-      })
-      button.addEventListener('mouseleave', () => {
-        this.selector.ignore = false;
-      })
       button.onclick = () => {
         for (let button of transformButtons) {
           button.classList.add('btn-secondary');
@@ -152,6 +144,20 @@ class Viewport {
     this.eventDispatcher.addEventListener(
       this.events.transformModeChanged.type,
       this.onTransformModeChanged.bind(this)
+    )
+
+    // Make selector only work in viewport
+    this.container.addEventListener(
+      "mouseenter",
+      ( event ) => {
+        this.selector.ignore = false;
+      }
+    )
+    this.container.addEventListener(
+      "mouseleave",
+      ( event ) => {
+        this.selector.ignore = true;
+      }
     )
   }
 
@@ -286,6 +292,9 @@ class Viewport {
   }
 
   onObjectRemoved( event ) {
+    this.transformControls.detach();
+    this.selector.deselect();
+
     this.render();
   }
 

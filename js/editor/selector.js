@@ -4,10 +4,10 @@ const mouse = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
 
 class Selector {
-  constructor( viewport ) {
-    this.viewport = viewport;
-    this.eventDispatcher = this.viewport.eventDispatcher;
-    this.events = this.viewport.events;
+  constructor( editor ) {
+    this.editor = editor;
+    this.eventDispatcher = editor.eventDispatcher;
+    this.events = editor.events;
 
     this.ignore = false;
 
@@ -28,7 +28,7 @@ class Selector {
   getIntersects( raycaster ) {
     const objects = [];
 
-    this.viewport.scene.traverseVisible( function( child ) {
+    this.editor.scene.traverseVisible( function( child ) {
       objects.push( child );
     });
 
@@ -56,6 +56,10 @@ class Selector {
     )    
   }
 
+  deselect() {
+    this.select( null );
+  }
+
   // Event handlers
   
   onIntersectionsDetected( event ) {
@@ -67,7 +71,7 @@ class Selector {
       const object = intersects[ 0 ].object;
       this.select( object );
     } else {
-      this.select( null );
+      this.deselect();
     }
   }
 }
