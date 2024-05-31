@@ -97,14 +97,7 @@ class Viewport {
     this.transformControls.addEventListener(
       "objectChange",
       ( event ) => {
-        this.eventDispatcher.dispatchEvent(new CustomEvent(
-          this.events.objectChanged.type,
-          {
-            detail: {
-              object: this.transformControls.object,
-            }
-          }
-        ));
+        this.dispatchObjectChangedEvent( this.transformControls.object );
       }
     );
 
@@ -112,12 +105,13 @@ class Viewport {
       "mouseDown",
       ( event ) => {
         this.history.recordChange = true;
+        this.history.newUndoBranch = true;
       }
     );
     this.transformControls.addEventListener(
       "mouseUp",
       ( event ) => {
-        this.history.recordChange = true;
+        this.history.recordChange = false;
       }
     );
 
@@ -224,6 +218,17 @@ class Viewport {
 
   // Methods
   
+  dispatchObjectChangedEvent( object ) {
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.objectChanged.type,
+      {
+        detail: {
+          object: object,
+        }
+      }
+    ));
+  }
+
   addObject( object ) {
     this.scene.add( object );
     // this.eventDispatcher.dispatchEvent( this.events.objectAdded );
