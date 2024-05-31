@@ -101,18 +101,6 @@ editor.eventDispatcher.addEventListener(
     viewport.render();
   }
 );
-rightSideBar.addEventListener(
-  "mouseenter",
-  function( event ) {
-    viewport.selector.ignore = true;
-  }
-);
-rightSideBar.addEventListener(
-  "mouseleave",
-  function( event ) {
-    viewport.selector.ignore = false;
-  }
-);
 
 // add click event listener to each group item
 const addObjectModal = document.getElementById( "AddObjectModal" );

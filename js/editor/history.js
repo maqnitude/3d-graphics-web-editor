@@ -45,7 +45,7 @@ class History {
       case "add":
         this.scene.remove( entry.object );
 
-        this.viewport.render();
+        this.dispatchObjectRemovedEvent( null );
 
         this.redos.push( entry );
 
@@ -53,7 +53,7 @@ class History {
       case "remove":
         this.scene.add( entry.object );
 
-        this.viewport.render();
+        this.dispatchObjectAddedEvent( null );
 
         this.redos.push( entry );
 
@@ -92,7 +92,7 @@ class History {
       case "add":
         this.scene.add( entry.object );
 
-        this.viewport.render();
+        this.dispatchObjectAddedEvent( null );
 
         this.undos.push( entry );
 
@@ -100,7 +100,7 @@ class History {
       case "remove":
         this.scene.remove( entry.object );
 
-        this.viewport.render();
+        this.dispatchObjectRemovedEvent( null );
 
         this.undos.push( entry );
 
@@ -133,9 +133,9 @@ class History {
   // Event handlers
 
   onObjectAdded( event ) {
-    const object = event.detail.object;
+    if (!event.detail.object) { return; }
 
-    if (!object) { return; }
+    const object = event.detail.object;
 
     if (this.newUndoBranch) {
       this.redos.splice( 0, this.redos.length );
@@ -155,9 +155,9 @@ class History {
   }
 
   onObjectRemoved( event ) {
-    const object = event.detail.object;
+    if (!event.detail.object) { return; }
 
-    if (!object) { return; }
+    const object = event.detail.object;
 
     if (this.newUndoBranch) {
       this.redos.splice( 0, this.redos.length );
@@ -178,10 +178,9 @@ class History {
 
   onObjectChanged( event ) {
     if (!this.recordChange) { return; }
+    if (!event.detail.object) { return; }
 
     const object = event.detail.object;
-
-    if (!object) { return; }
 
     if (this.newUndoBranch) {
       this.redos.splice( 0, this.redos.length );
@@ -212,6 +211,28 @@ class History {
   }
 
   // Dispatch custom events
+
+  dispatchObjectAddedEvent( object ) {
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.objectAdded.type,
+      {
+        detail: {
+          object: object
+        }
+      }
+    ));
+  }
+
+  dispatchObjectRemovedEvent( object ) {
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.objectRemoved.type,
+      {
+        detail: {
+          object: object
+        }
+      }
+    ));
+  }
 
   dispatchObjectChangedEvent( object ) {
     this.eventDispatcher.dispatchEvent(new CustomEvent(

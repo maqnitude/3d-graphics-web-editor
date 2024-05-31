@@ -73,7 +73,7 @@ class Viewport {
     );
     this.eventDispatcher.addEventListener(
       this.events.objectRemoved.type,
-      this.render.bind( this )
+      this.onObjectRemoved.bind( this )
     );
 
     this.orbitControls.addEventListener(
@@ -152,6 +152,20 @@ class Viewport {
     this.eventDispatcher.addEventListener(
       this.events.transformModeChanged.type,
       this.onTransformModeChanged.bind(this)
+    )
+
+    // Make selector only work in viewport
+    this.container.addEventListener(
+      "mouseenter",
+      ( event ) => {
+        this.selector.ignore = false;
+      }
+    )
+    this.container.addEventListener(
+      "mouseleave",
+      ( event ) => {
+        this.selector.ignore = true;
+      }
     )
   }
 
@@ -286,6 +300,8 @@ class Viewport {
   }
 
   onObjectRemoved( event ) {
+    this.transformControls.detach();
+
     this.render();
   }
 
