@@ -130,11 +130,11 @@ class Node {
 }
 
 class SceneTree {
-  constructor( viewport ) {
+  constructor( editor ) {
     // Make use of a data structure for these fucking nodes?
-    this.viewport = viewport;
-    this.eventDispatcher = viewport.eventDispatcher;
-    this.events = viewport.events;
+    this.editor = editor;
+    this.eventDispatcher = editor.eventDispatcher;
+    this.events = editor.events;
 
     this.selectedNode = null; // Don't know what to do with this yet
 
@@ -161,7 +161,7 @@ class SceneTree {
 
     //
 
-    this.refreshNodes();
+    this.refresh();
 
     this.setupEventListeners();
   }
@@ -172,6 +172,11 @@ class SceneTree {
     this.eventDispatcher.addEventListener(
       this.events.objectAdded.type,
       this.onObjectAdded.bind( this )
+    )
+
+    this.eventDispatcher.addEventListener(
+      this.events.objectRemoved.type,
+      this.onObjectRemoved.bind( this )
     )
   }
 
@@ -200,11 +205,11 @@ class SceneTree {
     }
   }
 
-  refreshNodes() {
+  refresh() {
     this.nodes.splice( 0, this.nodes.length );
 
-    const camera = this.viewport.currentCamera;
-    const scene = this.viewport.scene;
+    const camera = this.editor.viewportCamera;
+    const scene = this.editor.scene;
 
     const nodes = [];
 
@@ -241,7 +246,11 @@ class SceneTree {
   // Event handlers
 
   onObjectAdded() {
-    this.refreshNodes();
+    this.refresh();
+  }
+
+  onObjectRemoved() {
+    this.refresh();
   }
 
   onDrag() {
