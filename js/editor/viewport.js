@@ -17,21 +17,16 @@ class Viewport {
     this.container = this.createContainer();
     this.renderer = this.createRenderer();
 
-    this.perspectiveCamera = this.createPerspectiveCamera();
-    this.orthographicCamera = this.createOrthographicCamera();
+    this.camera = this.editor.camera;
 
-    // Default camera: perspective
-    this.currentCamera = this.perspectiveCamera;
-    this.currentCamera.name = "Viewport Camera";
-
-    this.orbitControls = new OrbitControls( this.currentCamera, this.renderer.domElement );
+    this.orbitControls = new OrbitControls( this.camera, this.renderer.domElement );
 
     this.scene = editor.scene;
 
     this.sceneHelper = editor.sceneHelper;
     this.grid = this.createGrid();
 
-    this.transformControls = new TransformControls( this.currentCamera, this.renderer.domElement );
+    this.transformControls = new TransformControls( this.camera, this.renderer.domElement );
     this.sceneHelper.add( this.transformControls );
 
     //
@@ -188,19 +183,6 @@ class Viewport {
     return renderer;
   }
 
-  createPerspectiveCamera() {
-    const camera = new THREE.PerspectiveCamera( 50, 1, 0.1, 1000 );
-
-    camera.position.set( 0, 5, 10 );
-    camera.lookAt( new THREE.Vector3( 0, 0, 0 ) );
-
-    return camera;
-  }
-
-  createOrthographicCamera() {
-
-  }
-
   createGrid() {
     const GRID_COLORS = [
       0x555555,
@@ -267,8 +249,8 @@ class Viewport {
   }
 
   updateAspectRatio() {
-    this.currentCamera.aspect = this.container.clientWidth / this.container.clientHeight;
-    this.currentCamera.updateProjectionMatrix();
+    this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+    this.camera.updateProjectionMatrix();
   }
 
   render() {
@@ -277,12 +259,16 @@ class Viewport {
     this.updateAspectRatio();
 
     this.renderer.setViewport( 0, 0, this.container.clientWidth, this.container.clientHeight );
-    this.renderer.render( this.scene, this.currentCamera );
+    this.renderer.render( this.scene, this.editor.viewportCamera );
 
-    this.renderer.autoClear = false;
-    this.renderer.render( this.grid, this.currentCamera );
-    this.renderer.render( this.sceneHelper, this.currentCamera );
-    this.renderer.autoClear = true;
+    if ( this.camera === this.editor.viewportCamera ) {
+      this.renderer.autoClear = false;
+
+      if ( this.grid.visible ) { this.renderer.render( this.grid, this.camera ) };
+      if ( this.sceneHelper.visible ) { this.renderer.render( this.sceneHelper, this.camera ) };
+
+      this.renderer.autoClear = true;
+    }
   }
 
   // Events handlers
@@ -303,7 +289,7 @@ class Viewport {
 
     this.transformControls.detach();
 
-    if (object !== null && object !== this.scene && object !== this.currentCamera) {
+    if (object !== null && object !== this.scene && object !== this.camera) {
       this.transformControls.attach( object );
     }
 
@@ -323,7 +309,7 @@ class Viewport {
     this.onUpPosition.fromArray( array );
 
     if (this.onDownPosition.distanceTo( this.onUpPosition ) === 0) {
-      const intersects = this.selector.getPointerIntersects( this.onUpPosition, this.currentCamera );
+      const intersects = this.selector.getPointerIntersects( this.onUpPosition, this.camera );
       this.eventDispatcher.dispatchEvent(
         new CustomEvent(
           this.events.intersectionsDetected.type, 

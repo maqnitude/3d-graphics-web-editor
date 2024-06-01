@@ -139,7 +139,7 @@ class BooleanProperty {
     this.input.readOnly = false;
     this.input.id = `input-${ propertyLabel }`;
     this.input.type = "checkbox";
-    this.input.value = `${ value }`;
+    this.input.checked = value;
     this.input.classList.add(
       "form-check-input"
     );
@@ -157,7 +157,7 @@ class BooleanProperty {
     this.parent.appendChild(this.listItem);
   }
 
-  setValue(value) {
+  setValue( value ) {
     this.input.checked = value;
   }
 }
@@ -213,7 +213,7 @@ class DropdownProperty {
 
 
 class Vector3Property {
-  constructor( editor, object, parent, propertyLabel, vector3, type ) {
+  constructor( editor, parent, object, propertyLabel, vector3, type ) {
     this.editor = editor;
     this.history = editor.history;
     this.eventDispatcher = editor.eventDispatcher;
@@ -420,7 +420,7 @@ class Vector3Property {
 }
 
 class EulerProperty {
-  constructor( editor, object, parent, propertyLabel, euler ) {
+  constructor( editor, parent, object, propertyLabel, euler ) {
     this.editor = editor;
     this.history = editor.history;
     this.eventDispatcher = editor.eventDispatcher;
@@ -602,6 +602,28 @@ class EulerProperty {
   }
 }
 
+class PropertyGroup {
+  constructor( parent, title ) {
+    this.parent = parent;
+
+    this.container = document.createElement( "div" )
+    this.container.classList.add(
+      "list-group"
+    );
+
+    this.header = document.createElement( "h5" );
+    this.header.classList.add(
+      "list-group-item",
+      "list-group-item-primary",
+    );
+    this.header.textContent = title;
+
+    this.container.appendChild( this.header );
+
+    this.parent.appendChild( this.container );
+  }
+}
+
 class Properties {
   constructor( editor ) {
     this.editor = editor;
@@ -620,24 +642,6 @@ class Properties {
       "d-flex",
       "flex-column"
     );
-  }
-
-  createListGroup( title ) {
-    const listGroup = document.createElement( "div" )
-    listGroup.classList.add(
-      "list-group"
-    );
-
-    const header = document.createElement( "h5" );
-    header.classList.add(
-      "list-group-item",
-      "list-group-item-primary",
-    );
-    header.textContent = title;
-
-    listGroup.appendChild( header );
-
-    return listGroup;
   }
 
   addVector2Property( parent, propertyLabel, vector2 ) {
@@ -686,66 +690,35 @@ class MeshProperties extends Properties {
     super( editor );
     this.mesh = mesh;
 
-    this.objectProperties = this.createListGroup( "Object" );
-    this.objectName = new ReadOnlyProperty( this.objectProperties, "Name", this.mesh.name, "text" );
-    this.objectUuid = new ReadOnlyProperty( this.objectProperties, "UUID", this.mesh.uuid, "text" );
-    this.objectType = new ReadOnlyProperty( this.objectProperties, "Type", this.mesh.type, "text" );
+    this.objectProperties = new PropertyGroup( this.container, "Object" );
+    this.objectName = new ReadOnlyProperty( this.objectProperties.container, "Name", this.mesh.name, "text" );
+    this.objectUuid = new ReadOnlyProperty( this.objectProperties.container, "UUID", this.mesh.uuid, "text" );
+    this.objectType = new ReadOnlyProperty( this.objectProperties.container, "Type", this.mesh.type, "text" );
 
-    this.objectPosition = new Vector3Property( this.editor, this.mesh, this.objectProperties, "Position", this.mesh.position, "position" );
-    this.objectRotation = new EulerProperty( this.editor, this.mesh, this.objectProperties, "Rotation", this.mesh.rotation );
-    this.objectScale = new Vector3Property( this.editor, this.mesh, this.objectProperties, "Scale", this.mesh.scale, "scale" );
+    this.objectPosition = new Vector3Property( this.editor, this.objectProperties.container, this.mesh, "Position", this.mesh.position, "position" );
+    this.objectRotation = new EulerProperty( this.editor, this.objectProperties.container, this.mesh, "Rotation", this.mesh.rotation );
+    this.objectScale = new Vector3Property( this.editor, this.objectProperties.container, this.mesh, "Scale", this.mesh.scale, "scale" );
 
-    this.geometryProperties = this.createListGroup( "Geometry" );
-    this.geometryType = new ReadOnlyProperty( this.geometryProperties, "Type", this.mesh.geometry.type, "text");
-    switch ( this.mesh.geometry.type ) {
-      case "BoxGeometry":
-        var params = this.mesh.geometry.parameters;
+    this.objectVisible = new BooleanProperty( this.editor, this.objectProperties.container, "Visible", true );
 
-        this.boxGeometryWidth = new ValueSliderProperty( this.editor, this.geometryProperties, "Width", params.width, 1, 30, 0.001 );
-        this.boxGeometryHeight = new ValueSliderProperty( this.editor, this.geometryProperties, "Height", params.height, 1, 30, 0.001 );
-        this.boxGeometryDepth = new ValueSliderProperty( this.editor, this.geometryProperties, "Depth", params.depth, 1, 30, 0.001 );
-        this.boxGeometryWidthSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Width Segments", params.widthSegments, 1, 10, 1 );
-        this.boxGeometryHeightSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Height Segments", params.heightSegments, 1, 10, 1 );
-        this.boxGeometryDepthSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Depth Segments", params.depthSegments, 1, 10, 1 );
-        // test boolean property
-        this.boxGeometryVisible = new BooleanProperty( this.editor, this.geometryProperties, "Visible", true );
+    this.geometryProperties = new PropertyGroup( this.container, "Geometry" );
+    this.geometryType = new ReadOnlyProperty( this.geometryProperties.container, "Type", this.mesh.geometry.type, "text");
+    this.geometryParameters = this.mesh.geometry.parameters;
+    this.setupGeometryProperties( this.geometryProperties.container, this.geometryType, this.geometryParameters );
 
-        break;
-      case "PlaneGeometry":
-        var params = this.mesh.geometry.parameters;
+    this.materialProperties = new PropertyGroup( this.container, "Material" );
 
-        this.planeGeometryWidth = new ValueSliderProperty( this.editor, this.geometryProperties, "Width", params.width, 1, 30, 0.001 );
-        this.planeGeometryHeight = new ValueSliderProperty( this.editor, this.geometryProperties, "Height", params.height, 1, 30, 0.001 );
-        this.planeGeometryWidthSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Width Segments", params.widthSegments, 1, 30, 1 );
-        this.planeGeometryHeightSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Height Segments", params.heightSegments, 1, 30, 1 );
-
-        break;
-      case "SphereGeometry":
-        var params = this.mesh.geometry.parameters;
-        
-        this.sphereRadius = new ValueSliderProperty( this.editor, this.geometryProperties, "Radius", params.radius, 1, 30, 0.001 );
-        this.sphereWidthSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Width Segments", params.widthSegments, 1, 64, 1 );
-        this.sphereHeightSegments = new ValueSliderProperty( this.editor, this.geometryProperties, "Height Segments", params.heightSegments, 1, 32, 1 );
-
-        break;
-    }
-
-    this.materialProperties = this.createListGroup( "Material" );
     // test dropdown property
     console.log(this.mesh.material.type);
-    this.materialType = new DropdownProperty( this.editor, this.materialProperties, "Type",
+    this.materialType = new DropdownProperty( this.editor, this.materialProperties.container, "Type",
       ["MeshPhongMaterial", "MeshStandardMaterial", "MeshBasicMaterial", "MeshNormalMaterial"],
       this.mesh.material.type);
 
-    this.textureProperties = this.createListGroup( "Texture" );
+    this.textureProperties = new PropertyGroup( this.container, "Texture" );
 
-    this.physicsProperties = this.createListGroup( "Physics" );
+    this.physicsProperties = new PropertyGroup( this.container, "Physics" );
 
-    this.container.appendChild( this.objectProperties );
-    this.container.appendChild( this.geometryProperties );
-    this.container.appendChild( this.materialProperties );
-    this.container.appendChild( this.textureProperties );
-    this.container.appendChild( this.physicsProperties );
+    //
 
     this.setupEventListeners();
   }
@@ -757,47 +730,87 @@ class MeshProperties extends Properties {
     )
   }
 
-  updateUI() {
-    this.objectName.setValue( this.mesh.name );
-    this.objectUuid.setValue( this.mesh.uuid );
-    this.objectType.setValue( this.mesh.type );
-
-    this.objectPosition.setValue( this.mesh.position );
-    this.objectRotation.setValue( this.mesh.rotation );
-    this.objectScale.setValue( this.mesh.scale );
-    
-    this.geometryType.setValue( this.mesh.geometry.type );
-    switch ( this.mesh.geometry.type ) {
+  setupGeometryProperties( parent, type, params ) {
+    switch ( type ) {
       case "BoxGeometry":
-        var params = this.mesh.geometry.parameters;
-
-        this.boxGeometryWidth.setValue( params.width );
-        this.boxGeometryHeight.setValue( params.height);
-        this.boxGeometryDepth.setValue( params.depth);
-        this.boxGeometryWidthSegments.setValue( params.widthSegments);
-        this.boxGeometryHeightSegments.setValue( params.heightSegments);
-        this.boxGeometryDepthSegments.setValue( params.depthSegments);
+        this.boxGeometryWidth = new ValueSliderProperty( this.editor, parent, "Width", params.width, 1, 30, 0.001 );
+        this.boxGeometryHeight = new ValueSliderProperty( this.editor, parent, "Height", params.height, 1, 30, 0.001 );
+        this.boxGeometryDepth = new ValueSliderProperty( this.editor, parent, "Depth", params.depth, 1, 30, 0.001 );
+        this.boxGeometryWidthSegments = new ValueSliderProperty( this.editor, parent, "Width Segments", params.widthSegments, 1, 10, 1 );
+        this.boxGeometryHeightSegments = new ValueSliderProperty( this.editor, parent, "Height Segments", params.heightSegments, 1, 10, 1 );
+        this.boxGeometryDepthSegments = new ValueSliderProperty( this.editor, parent, "Depth Segments", params.depthSegments, 1, 10, 1 );
 
         break;
       case "PlaneGeometry":
-        var params = this.mesh.geometry.parameters;
-        
-        this.planeGeometryWidth.setValue( params.width );
-        this.planeGeometryHeight.setValue( params.height);
-        this.planeGeometryWidthSegments.setValue( params.widthSegments);
-        this.planeGeometryHeightSegments.setValue( params.heightSegments);
+        this.planeGeometryWidth = new ValueSliderProperty( this.editor, parent, "Width", params.width, 1, 30, 0.001 );
+        this.planeGeometryHeight = new ValueSliderProperty( this.editor, parent, "Height", params.height, 1, 30, 0.001 );
+        this.planeGeometryWidthSegments = new ValueSliderProperty( this.editor, parent, "Width Segments", params.widthSegments, 1, 30, 1 );
+        this.planeGeometryHeightSegments = new ValueSliderProperty( this.editor, parent, "Height Segments", params.heightSegments, 1, 30, 1 );
 
         break;
       case "SphereGeometry":
-        var params = this.mesh.geometry.parameters;
-        
-        this.sphereGeometryRadius.setValue( params.radius );
-        this.sphereGeometryWidthSegments.setValue( params.widthSegments);
-        this.sphereGeometryHeightSegments.setValue( params.heightSegments);
+        this.sphereGeometryRadius = new ValueSliderProperty( this.editor, parent, "Radius", params.radius, 1, 30, 0.001 );
+        this.sphereGeometryWidthSegments = new ValueSliderProperty( this.editor, parent, "Width Segments", params.widthSegments, 1, 64, 1 );
+        this.sphereGeometryHeightSegments = new ValueSliderProperty( this.editor, parent, "Height Segments", params.heightSegments, 1, 32, 1 );
 
         break;
     }
   }
+
+  updateUI() {
+    this.setPropertyValue( this.objectName, this.mesh.name );
+    this.setPropertyValue( this.objectUuid, this.mesh.uuid );
+    this.setPropertyValue( this.objectType, this.mesh.type );
+    this.setPropertyValue( this.objectPosition, this.mesh.position );
+    this.setPropertyValue( this.objectRotation, this.mesh.rotation );
+    this.setPropertyValue( this.objectScale, this.mesh.scale );
+
+    this.setPropertyValue( this.geometryType, this.mesh.geometry.type );
+    
+    const geometryProps = this.getGeometryProperties( this.geometryType );
+    if ( geometryProps ) {
+      for ( const prop in geometryProps ) {
+        if ( this.geometryParameters.hasOwnProperty( prop ) ) {
+          this.setPropertyValue( geometryProps[ prop ], this.geometryParameters[ prop ] );
+        }
+      }
+    }
+  }
+
+  // Helpers
+
+  setPropertyValue( property, value ) {
+    property.setValue( value );
+  }
+
+  getGeometryProperties(geometryType) {
+    const geometryPropertiesMap = {
+      BoxGeometry: {
+        width: this.boxGeometryWidth,
+        height: this.boxGeometryHeight,
+        depth: this.boxGeometryDepth,
+        widthSegments: this.boxGeometryWidthSegments,
+        heightSegments: this.boxGeometryHeightSegments,
+        depthSegments: this.boxGeometryDepthSegments,
+      },
+      PlaneGeometry: {
+        width: this.planeGeometryWidth,
+        height: this.planeGeometryHeight,
+        widthSegments: this.planeGeometryWidthSegments,
+        heightSegments: this.planeGeometryHeightSegments,
+      },
+      SphereGeometry: {
+        radius: this.sphereGeometryRadius,
+        widthSegments: this.sphereGeometryWidthSegments,
+        heightSegments: this.sphereGeometryHeightSegments,
+      },
+      // Add other geometry types as needed
+    };
+
+    return geometryPropertiesMap[geometryType];
+  }
+
+  // Event handlers
 
   onObjectChanged( event ) {
     this.mesh = event.detail.object;
