@@ -32,7 +32,7 @@ levelViewport.appendChild( viewport.container );
 const leftVerticalResizer = new VerticalResizer( editor, leftSideBar, levelViewport );
 const rightVerticalResizer = new VerticalResizer( editor, levelViewport, rightSideBar );
 
-const sceneTree = new SceneTree( viewport );
+const sceneTree = new SceneTree( editor );
 leftSideBar.appendChild( sceneTree.container );
 
 
