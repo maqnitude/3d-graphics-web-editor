@@ -14,11 +14,13 @@ class Editor {
       windowResized: new Event( "windowResized" ),
 
       intersectionsDetected: new Event( "intersectionsDetected" ),
-      
+
       objectAdded: new Event( "objectAdded" ),
       objectSelected: new Event( "objectSelected" ),
       objectChanged: new Event( "objectChanged "),
       objectRemoved: new Event( "objectRemoved" ),
+
+      materialChanged: new Event( "materialChanged" ),
 
       transformModeChanged: new Event( "transformModeChanged" ),
     };
