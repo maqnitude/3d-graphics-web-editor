@@ -117,11 +117,14 @@ class ValueSliderProperty {
 }
 
 class BooleanProperty {
-  constructor( editor, parent, propertyLabel, value ) {
+  constructor( editor, parent, object, propertyLabel, value ) {
     this.editor = editor;
     this.history = editor.history;
+    this.eventDispatcher = editor.eventDispatcher;
+    this.events = editor.events;
 
     this.parent = parent;
+    this.object = object;
 
     this.listItem = document.createElement("div");
     this.listItem.classList.add(
@@ -155,10 +158,46 @@ class BooleanProperty {
     this.formCheck.appendChild(this.label);
     this.listItem.appendChild(this.formCheck);
     this.parent.appendChild(this.listItem);
+
+    //
+
+    this.setupEventListeners();
   }
 
   setValue( value ) {
     this.input.checked = value;
+  }
+
+  setupEventListeners() {
+    this.input.addEventListener(
+      "input",
+      ( event ) => {
+        const checked = Boolean( event.target.checked );
+
+        // Save before updating the object
+        this.history.recordChange = true;
+        this.history.newUndoBranch = true;
+
+        this.dispatchObjectChangedEvent( this.object );
+
+        this.object.visible = checked;
+
+        this.dispatchObjectChangedEvent( this.object );
+      }
+    )
+  }
+
+  // Dispatch custom events
+
+  dispatchObjectChangedEvent( object ) {
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.objectChanged.type,
+      {
+        detail: {
+          object: object,
+        }
+      }
+    ));
   }
 }
 
@@ -308,7 +347,7 @@ class Vector3Property {
     this.inputNumberX.value = `${ vector3.getComponent(0) }`;
     this.inputNumberY.value = `${ vector3.getComponent(1) }`;
     this.inputNumberZ.value = `${ vector3.getComponent(2) }`;
-  } 
+  }
 
   // Change in properties, update in viewport
   setupEventListeners() {
@@ -393,7 +432,7 @@ class Vector3Property {
   }
 
   // Event handlers
-  
+
   onFocus() {
     this.history.recordChange = true;
     this.history.newUndoBranch = true;
@@ -633,7 +672,7 @@ class Properties {
     this.history = editor.history;
 
     //
-    
+
     this.container = document.createElement( "div" );
     this.container.id = "Properties";
     this.container.classList.add(
@@ -650,7 +689,7 @@ class Properties {
       "list-group-item",
       "p-0"
     );
-    
+
     // TODO
 
     parent.appendChild( listItem );
@@ -699,7 +738,7 @@ class MeshProperties extends Properties {
     this.objectRotation = new EulerProperty( this.editor, this.objectProperties.container, this.mesh, "Rotation", this.mesh.rotation );
     this.objectScale = new Vector3Property( this.editor, this.objectProperties.container, this.mesh, "Scale", this.mesh.scale, "scale" );
 
-    this.objectVisible = new BooleanProperty( this.editor, this.objectProperties.container, "Visible", true );
+    this.objectVisible = new BooleanProperty( this.editor, this.objectProperties.container, this.mesh, "Visible", this.mesh.visible );
 
     this.geometryProperties = new PropertyGroup( this.container, "Geometry" );
     this.geometryType = new ReadOnlyProperty( this.geometryProperties.container, "Type", this.mesh.geometry.type, "text");
@@ -764,9 +803,9 @@ class MeshProperties extends Properties {
     this.setPropertyValue( this.objectPosition, this.mesh.position );
     this.setPropertyValue( this.objectRotation, this.mesh.rotation );
     this.setPropertyValue( this.objectScale, this.mesh.scale );
+    this.setPropertyValue( this.objectVisible, this.mesh.visible );
 
     this.setPropertyValue( this.geometryType, this.mesh.geometry.type );
-    
     const geometryProps = this.getGeometryProperties( this.geometryType );
     if ( geometryProps ) {
       for ( const prop in geometryProps ) {
