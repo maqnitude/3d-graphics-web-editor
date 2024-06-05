@@ -177,22 +177,22 @@ class BooleanProperty {
     this.input.addEventListener(
       "input",
       ( event ) => {
-        const checked = Boolean( event.object.checked );
+        const checked = Boolean( event.target.checked );
 
         // Save before updating the object
-        if (this.object.isObject3D) {
+        if ( this.object.isObject3D ) {
           this.history.recordChange = true;
           this.history.newUndoBranch = true;
 
           this.dispatchObjectChangedEvent( this.object );
 
-          switch ( this.property ) {
-            case "visible":
-              this.object.visible = checked;
-              break;
-          }
+          this.object[ this.property ] = checked;
 
           this.dispatchObjectChangedEvent( this.object );
+        } else if ( this.object.isMaterial ) {
+          this.object[ this.property ] = checked;
+
+          this.eventDispatcher.dispatchEvent( this.events.materialChanged );
         }
       }
     )
@@ -430,14 +430,7 @@ class Vector3Property {
       ( event ) => {
         const value = Number( event.target.value );
 
-        switch(this.property) {
-          case 'position':
-            this.object.position.setComponent(0, value);
-            break;
-          case 'scale':
-            this.object.scale.setComponent(0, value);
-            break;
-        }
+        this.object[ this.property ].setComponent(0, value);
 
         this.dispatchObjectChangedEvent( this.object );
       }
@@ -456,14 +449,7 @@ class Vector3Property {
       ( event ) => {
         const value = Number( event.target.value );
 
-        switch(this.property) {
-          case 'position':
-            this.object.position.setComponent(1, value);
-            break;
-          case 'scale':
-            this.object.scale.setComponent(1, value);
-            break;
-        }
+        this.object[ this.property ].setComponent(0, value);
 
         this.dispatchObjectChangedEvent( this.object );
       }
@@ -482,14 +468,7 @@ class Vector3Property {
       (event) => {
         const value = Number( event.target.value );
 
-        switch(this.property) {
-          case 'position':
-            this.object.position.setComponent(2, value);
-            break;
-          case 'scale':
-            this.object.scale.setComponent(2, value);
-            break;
-        }
+        this.object[ this.property ].setComponent(0, value);
 
         this.dispatchObjectChangedEvent( this.object );
 
@@ -812,13 +791,39 @@ class TextureProperty {
       "change",
       ( event ) => {
         const file = event.target.files[ 0 ];
-        if ( file ) {
-          console.log("Uploaded file:", file.name);
+
+        if ( file && this.object.isMaterial ) {
+          const material = this.object;
+
+          this.loadTexture( material, this.property, file );
         }
       }
     )
   }
 
+  loadTexture( material, property, image ) {
+    if ( material[ property ] ) {
+      material[ property ].dispose();
+    }
+
+    const reader = new FileReader();
+    reader.onload = ( event ) => {
+      const dataURL = event.target.result;
+
+      const texture = new THREE.TextureLoader().load( dataURL, () => {
+        material[ property ] = texture;
+
+        material.needsUpdate = true;
+        this.eventDispatcher.dispatchEvent( this.events.materialChanged );
+      });
+      texture.colorSpace = THREE.SRGBColorSpace;
+    }
+
+    reader.readAsDataURL( image );
+  }
+
+  // TODO: find a better way to deal with setting shit up in the properties
+  // Keep this to prevent errors
   setValue( value ) {
     return;
   }
