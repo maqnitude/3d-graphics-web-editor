@@ -35,7 +35,7 @@ class Viewport {
   }
 
   // Initializers
-  
+
   setupEventListeners() {
     document.addEventListener("mousedown", (event) => this.onMouseDown(event));
 
@@ -61,11 +61,21 @@ class Viewport {
     );
     this.eventDispatcher.addEventListener(
       this.events.objectChanged.type,
-      this.render.bind( this )
+      this.onObjectChanged.bind( this )
     );
     this.eventDispatcher.addEventListener(
       this.events.objectRemoved.type,
       this.onObjectRemoved.bind( this )
+    );
+
+    this.eventDispatcher.addEventListener(
+      this.events.geometryChanged.type,
+      this.onGeometryChanged.bind( this )
+    );
+
+    this.eventDispatcher.addEventListener(
+      this.events.materialChanged.type,
+      this.onMaterialChanged.bind( this )
     );
 
     this.orbitControls.addEventListener(
@@ -205,7 +215,7 @@ class Viewport {
   }
 
   // Methods
-  
+
   dispatchObjectChangedEvent( object ) {
     this.eventDispatcher.dispatchEvent(new CustomEvent(
       this.events.objectChanged.type,
@@ -272,7 +282,7 @@ class Viewport {
   }
 
   // Events handlers
-  
+
   onObjectAdded( event ) {
     this.render();
   }
@@ -296,6 +306,18 @@ class Viewport {
     this.render();
   }
 
+  onObjectChanged( event ) {
+    this.render();
+  }
+
+  onGeometryChanged( event ) {
+    this.render();
+  }
+
+  onMaterialChanged( event ) {
+    this.render();
+  }
+
   onDownPosition = new THREE.Vector2();
   onUpPosition = new THREE.Vector2();
 
@@ -312,7 +334,7 @@ class Viewport {
       const intersects = this.selector.getPointerIntersects( this.onUpPosition, this.camera );
       this.eventDispatcher.dispatchEvent(
         new CustomEvent(
-          this.events.intersectionsDetected.type, 
+          this.events.intersectionsDetected.type,
           {
             detail: {
               intersects: intersects,

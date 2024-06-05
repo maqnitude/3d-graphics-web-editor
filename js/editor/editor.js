@@ -20,6 +20,7 @@ class Editor {
       objectChanged: new Event( "objectChanged "),
       objectRemoved: new Event( "objectRemoved" ),
 
+      geometryChanged: new Event( "geometryChanged" ),
       materialChanged: new Event( "materialChanged" ),
 
       transformModeChanged: new Event( "transformModeChanged" ),
