@@ -40,13 +40,15 @@ class ReadOnlyProperty {
 }
 
 class ValueSliderProperty {
-  constructor( editor, parent, object, property, propertyLabel, value, min, max, step ) {
+  constructor( editor, parent, object, propertyString, propertyLabel, value, min, max, step ) {
     this.editor = editor;
     this.history = editor.history;
+    this.eventDispatcher = editor.eventDispatcher;
+    this.events = editor.events;
 
     this.parent = parent;
     this.object = object;
-    this.property = property;
+    this.properties = propertyString.split( "." );
 
     this.listItem = document.createElement( "div" );
     this.listItem.classList.add(
@@ -106,6 +108,10 @@ class ValueSliderProperty {
     this.inputGroup.appendChild( this.inputNumber );
     this.listItem.appendChild( this.inputGroup );
     this.parent.appendChild( this.listItem );
+
+    //
+
+    this.setupEventListeners();
   }
 
   setValue( value ) {
@@ -114,14 +120,85 @@ class ValueSliderProperty {
   }
 
   setupEventListeners() {
-    this.input.addEventListener(
-      
-    )
+    this.inputNumber.addEventListener(
+      "input",
+      this.onInput.bind( this )
+    );
+
+    this.inputSlider.addEventListener(
+      "input",
+      this.onInput.bind( this )
+    );
+  }
+
+  onInput( event ) {
+    const value = Number( event.target.value );
+
+    if ( this.properties.length === 1 ) {
+      // Do nothing
+    } else {
+      if ( this.object.isMesh ) {
+        switch ( this.properties[ 0 ] ) {
+          case "geometry":
+            switch ( this.properties[ 1 ] ) {
+              case "parameters":
+                // Change geometry parameters
+                const params = this.object.geometry.parameters;
+                params[ this.properties[ 2 ] ] = value;
+
+                var newGeometry = null;
+                switch ( this.object.geometry.type ) {
+                  case "BoxGeometry":
+                    newGeometry = new THREE.BoxGeometry(
+                      params.width,
+                      params.height,
+                      params.depth,
+                      params.widthSegments,
+                      params.heightSegments,
+                      params.depthSegments
+                    );
+                    break;
+                  case "PlaneGeometry":
+                    newGeometry = new THREE.PlaneGeometry(
+                      params.width,
+                      params.height,
+                      params.widthSegments,
+                      params.heightSegments
+                    )
+                    break;
+                  case "SphereGeometry":
+                    newGeometry = new THREE.SphereGeometry(
+                      params.radius,
+                      params.widthSegments,
+                      params.heightSegments
+                    )
+                    break;
+                }
+
+                this.object.geometry.dispose();
+                this.object.geometry = newGeometry;
+                this.object.geometry.computeBoundingSphere();
+
+                this.eventDispatcher.dispatchEvent( this.events.geometryChanged );
+
+                break;
+              default:
+                break;
+            }
+
+            break;
+          case "material":
+            break;
+          default:
+            break;
+        }
+      }
+    }
   }
 }
 
 class BooleanProperty {
-  constructor( editor, parent, object, property, propertyLabel, value ) {
+  constructor( editor, parent, object, propertyString, propertyLabel, value ) {
     this.editor = editor;
     this.history = editor.history;
     this.eventDispatcher = editor.eventDispatcher;
@@ -129,7 +206,7 @@ class BooleanProperty {
 
     this.parent = parent;
     this.object = object;
-    this.property = property;
+    this.properties = propertyString.split( "." );
 
     this.listItem = document.createElement("div");
     this.listItem.classList.add(
@@ -179,20 +256,27 @@ class BooleanProperty {
       ( event ) => {
         const checked = Boolean( event.target.checked );
 
-        // Save before updating the object
-        if ( this.object.isObject3D ) {
+        if ( this.properties.length === 1 ) {
+          // Save before updating the object
           this.history.recordChange = true;
           this.history.newUndoBranch = true;
 
           this.dispatchObjectChangedEvent( this.object );
 
-          this.object[ this.property ] = checked;
+          this.object[ this.properties[ 0 ] ] = checked;
 
           this.dispatchObjectChangedEvent( this.object );
-        } else if ( this.object.isMaterial ) {
-          this.object[ this.property ] = checked;
+        } else {
+          if ( this.object.isMesh ) {
+            switch ( this.properties[ 0 ] ) {
+              case "material":
+                this.object.material[ this.properties[ 1 ] ] = checked;
 
-          this.eventDispatcher.dispatchEvent( this.events.materialChanged );
+                this.eventDispatcher.dispatchEvent( this.events.materialChanged );
+
+                break;
+            }
+          }
         }
       }
     )
@@ -449,7 +533,7 @@ class Vector3Property {
       ( event ) => {
         const value = Number( event.target.value );
 
-        this.object[ this.property ].setComponent(0, value);
+        this.object[ this.property ].setComponent(1, value);
 
         this.dispatchObjectChangedEvent( this.object );
       }
@@ -468,7 +552,7 @@ class Vector3Property {
       (event) => {
         const value = Number( event.target.value );
 
-        this.object[ this.property ].setComponent(0, value);
+        this.object[ this.property ].setComponent(2, value);
 
         this.dispatchObjectChangedEvent( this.object );
 
@@ -757,7 +841,7 @@ class ColorProperty {
 }
 
 class TextureProperty {
-  constructor( editor, parent, object, property, propertyLabel ) {
+  constructor( editor, parent, object, propertyString, propertyLabel ) {
     this.editor = editor,
     this.history = editor.history,
     this.eventDispatcher = editor.eventDispatcher,
@@ -765,7 +849,7 @@ class TextureProperty {
 
     this.parent = parent,
     this.object = object,
-    this.property = property;
+    this.properties = propertyString.split( "." );
 
     this.container = document.createElement( "div" );
 
@@ -790,12 +874,22 @@ class TextureProperty {
     this.inputFile.addEventListener(
       "change",
       ( event ) => {
-        const file = event.target.files[ 0 ];
+        if ( this.properties.length === 1 ) {
+          // Do nothing
+        } else {
+          switch ( this.properties[ 0 ] ) {
+            case "material":
+              const material = this.object.material;
+              const file = event.target.files[ 0 ];
 
-        if ( file && this.object.isMaterial ) {
-          const material = this.object;
+              if ( file ) {
+                this.loadTexture( material, this.properties[ 1 ], file );
+              }
 
-          this.loadTexture( material, this.property, file );
+              break;
+            default:
+              break;
+          }
         }
       }
     )
@@ -927,7 +1021,6 @@ class MeshProperties extends Properties {
     this.setupObjectProperties( this.objectProperties.container );
 
     this.geometryProperties = new PropertyGroup( this.container, "Geometry" );
-    this.geometryParameters = this.mesh.geometry.parameters;
     this.setupGeometryProperties( this.geometryProperties.container );
 
     this.materialProperties = new PropertyGroup( this.container, "Material" );
@@ -967,32 +1060,33 @@ class MeshProperties extends Properties {
 
   setupGeometryProperties( parent ) {
     const editor = this.editor;
-    const geometry = this.mesh.geometry;
-    const params = this.geometryParameters;
+    const object = this.mesh;
+    const geometry = object.geometry;
+    const params = geometry.parameters;
 
     this.geometryType = new ReadOnlyProperty( parent, "Type", geometry.type, "text");
 
     switch ( geometry.type ) {
       case "BoxGeometry":
-        this.boxGeometryWidth = new ValueSliderProperty( editor, parent, geometry, "width", "Width", params.width, 1, 30, 0.001 );
-        this.boxGeometryHeight = new ValueSliderProperty( editor, parent, geometry, "height", "Height", params.height, 1, 30, 0.001 );
-        this.boxGeometryDepth = new ValueSliderProperty( editor, parent, geometry, "depth", "Depth", params.depth, 1, 30, 0.001 );
-        this.boxGeometryWidthSegments = new ValueSliderProperty( editor, parent, geometry, "widthSegments", "Width Segments", params.widthSegments, 1, 10, 1 );
-        this.boxGeometryHeightSegments = new ValueSliderProperty( editor, parent, geometry, "heightSegments", "Height Segments", params.heightSegments, 1, 10, 1 );
-        this.boxGeometryDepthSegments = new ValueSliderProperty( editor, parent, geometry, "depthSegments", "Depth Segments", params.depthSegments, 1, 10, 1 );
+        this.boxGeometryWidth = new ValueSliderProperty( editor, parent, object, "geometry.parameters.width", "Width", params.width, 1, 30, 0.001 );
+        this.boxGeometryHeight = new ValueSliderProperty( editor, parent, object, "geometry.parameters.height", "Height", params.height, 1, 30, 0.001 );
+        this.boxGeometryDepth = new ValueSliderProperty( editor, parent, object, "geometry.parameters.depth", "Depth", params.depth, 1, 30, 0.001 );
+        this.boxGeometryWidthSegments = new ValueSliderProperty( editor, parent, object, "geometry.parameters.widthSegments", "Width Segments", params.widthSegments, 1, 10, 1 );
+        this.boxGeometryHeightSegments = new ValueSliderProperty( editor, parent, object, "geometry.parameters.heightSegments", "Height Segments", params.heightSegments, 1, 10, 1 );
+        this.boxGeometryDepthSegments = new ValueSliderProperty( editor, parent, object, "geometry.parameters.depthSegments", "Depth Segments", params.depthSegments, 1, 10, 1 );
 
         break;
       case "PlaneGeometry":
-        this.planeGeometryWidth = new ValueSliderProperty( editor, parent, geometry, "width", "Width", params.width, 1, 30, 0.001 );
-        this.planeGeometryHeight = new ValueSliderProperty( editor, parent, geometry, "height", "Height", params.height, 1, 30, 0.001 );
-        this.planeGeometryWidthSegments = new ValueSliderProperty( editor, parent, geometry, "widthSegments", "Width Segments", params.widthSegments, 1, 30, 1 );
-        this.planeGeometryHeightSegments = new ValueSliderProperty( editor, parent, geometry, "heightSegments", "Height Segments", params.heightSegments, 1, 30, 1 );
+        this.planeGeometryWidth = new ValueSliderProperty( editor, parent, object, "geometry.parameters.width", "Width", params.width, 1, 30, 0.001 );
+        this.planeGeometryHeight = new ValueSliderProperty( editor, parent, object, "geometry.parameters.height", "Height", params.height, 1, 30, 0.001 );
+        this.planeGeometryWidthSegments = new ValueSliderProperty( editor, parent, object, "geometry.parameters.widthSegments", "Width Segments", params.widthSegments, 1, 30, 1 );
+        this.planeGeometryHeightSegments = new ValueSliderProperty( editor, parent, object, "geometry.parameters.heightSegments", "Height Segments", params.heightSegments, 1, 30, 1 );
 
         break;
       case "SphereGeometry":
-        this.sphereGeometryRadius = new ValueSliderProperty( editor, parent, geometry, "radius", "Radius", params.radius, 1, 30, 0.001 );
-        this.sphereGeometryWidthSegments = new ValueSliderProperty( editor, parent, geometry, "widthSegments", "Width Segments", params.widthSegments, 1, 64, 1 );
-        this.sphereGeometryHeightSegments = new ValueSliderProperty( editor, parent, geometry, "heightSegments", "Height Segments", params.heightSegments, 1, 32, 1 );
+        this.sphereGeometryRadius = new ValueSliderProperty( editor, parent, object, "geometry.parameters.radius", "Radius", params.radius, 1, 30, 0.001 );
+        this.sphereGeometryWidthSegments = new ValueSliderProperty( editor, parent, object, "geometry.parameters.widthSegments", "Width Segments", params.widthSegments, 1, 64, 1 );
+        this.sphereGeometryHeightSegments = new ValueSliderProperty( editor, parent, object, "geometry.parameters.heightSegments", "Height Segments", params.heightSegments, 1, 32, 1 );
 
         break;
     }
@@ -1012,71 +1106,71 @@ class MeshProperties extends Properties {
       ],
       material.type);
 
-    this.materialTransparent = new BooleanProperty( editor, parent, material, "transparent", "Transparent", material.transparent );
-    this.materialOpacity = new ValueSliderProperty( editor, parent, material, "opacity", "Opacity", material.opacity, 0, 1, 0.01 );
-    this.materialDepthTest = new BooleanProperty( editor, parent, material, "depthTest", "Depth Test", material.depthTest );
-    this.materialDepthWrite = new BooleanProperty( editor, parent, material, "depthWrite", "Depth Write", material.depthWrite );
-    this.materialAlphaTest = new ValueSliderProperty( editor, parent, material, "alphaTest", "Alpha Test", material.alphaTest, 0, 1, 0.01 );
-    this.materialAlphaHash = new BooleanProperty( editor, parent, material, "alphaHash", "Alpha Hash", material.alphaHash );
-    this.materialVisible = new BooleanProperty( editor, parent, material, "visible", "Visible", material.visible );
+    this.materialTransparent = new BooleanProperty( editor, parent, object, "material.transparent", "Transparent", material.transparent );
+    this.materialOpacity = new ValueSliderProperty( editor, parent, object, "material.opacity", "Opacity", material.opacity, 0, 1, 0.01 );
+    this.materialDepthTest = new BooleanProperty( editor, parent, object, "material.depthTest", "Depth Test", material.depthTest );
+    this.materialDepthWrite = new BooleanProperty( editor, parent, object, "material.depthWrite", "Depth Write", material.depthWrite );
+    this.materialAlphaTest = new ValueSliderProperty( editor, parent, object, "material.alphaTest", "Alpha Test", material.alphaTest, 0, 1, 0.01 );
+    this.materialAlphaHash = new BooleanProperty( editor, parent, object, "material.alphaHash", "Alpha Hash", material.alphaHash );
+    this.materialVisible = new BooleanProperty( editor, parent, object, "material.visible", "Visible", material.visible );
 
     switch ( material.type ) {
       case "MeshBasicMaterial":
-        this.basicMaterialColor = new ColorProperty( editor, parent, material, "color", "Color", material.color );
-        this.basicMaterialWireframe = new BooleanProperty( editor, parent, material, "wireframe", "Wireframe", material.wireframe );
-        this.basicMaterialVertexColors = new BooleanProperty( editor, parent, material, "vertexColors", "Vertex Colors", material.vertexColors );
-        this.basicMaterialEnvMap = new TextureProperty( editor, parent, material, "envMap", "Environment Map", material.envMap );
-        this.basicMaterialMap = new TextureProperty( editor, parent, material, "map", "Color Map", material.map );
-        this.basicMaterialAlphaMap = new TextureProperty( editor, parent, material, "alphaMap", "Alpha Map", material.alphaMap );
-        this.basicMaterialCombine = new DropdownProperty( editor, parent, material, "combine", "Combine",
+        this.basicMaterialColor = new ColorProperty( editor, parent, object, "material.color", "Color", material.color );
+        this.basicMaterialWireframe = new BooleanProperty( editor, parent, object, "material.wireframe", "Wireframe", material.wireframe );
+        this.basicMaterialVertexColors = new BooleanProperty( editor, parent, object, "material.vertexColors", "Vertex Colors", material.vertexColors );
+        this.basicMaterialEnvMap = new TextureProperty( editor, parent, object, "material.envMap", "Environment Map", material.envMap );
+        this.basicMaterialMap = new TextureProperty( editor, parent, object, "material.map", "Color Map", material.map );
+        this.basicMaterialAlphaMap = new TextureProperty( editor, parent, object, "material.alphaMap", "Alpha Map", material.alphaMap );
+        this.basicMaterialCombine = new DropdownProperty( editor, parent, object, "material.combine", "Combine",
           [
             THREE.MultiplyOperation,
             THREE.MixOperation,
             THREE.AddOperation
           ], material.combine);
-        this.basicMaterialReflectivity = new ValueSliderProperty( editor, parent, material, "reflectivity", "Reflectivity", material.reflectivity, 0, 1, 0.001 );
-        this.basicMaterialRefactionRatio = new ValueSliderProperty( editor, parent, material, "refractionRatio", "Refraction Ratio", material.refractionRatio, 0, 1, 0.001 );
+        this.basicMaterialReflectivity = new ValueSliderProperty( editor, parent, object, "material.reflectivity", "Reflectivity", material.reflectivity, 0, 1, 0.001 );
+        this.basicMaterialRefactionRatio = new ValueSliderProperty( editor, parent, object, "material.refractionRatio", "Refraction Ratio", material.refractionRatio, 0, 1, 0.001 );
 
         break;
       case "MeshNormalMaterial":
-        this.standardMaterialFlatShading = new BooleanProperty( editor, parent, material, "flatShading", "Flat Shading", material.flatShading );
-        this.standardMaterialWireframe = new BooleanProperty( editor, parent, material, "wireframe", "Wireframe", material.wireframe );
+        this.standardMaterialFlatShading = new BooleanProperty( editor, parent, object, "material.flatShading", "Flat Shading", material.flatShading );
+        this.standardMaterialWireframe = new BooleanProperty( editor, parent, object, "material.wireframe", "Wireframe", material.wireframe );
 
         break;
       case "MeshPhongMaterial":
-        this.phongMaterialColor = new ColorProperty( editor, parent, material, "color", "Color", material.color );
-        this.phongMaterialEmissive = new ColorProperty( editor, parent, material, "emissive", "Emissive", material.emissive );
-        this.phongMaterialSpecular = new ColorProperty( editor, parent, material, "specular", "Specular", material.specular );
-        this.phongMaterialShininess = new ValueSliderProperty( editor, parent, material, "shininess", "Shininess", material.shininess, 0, 100, 0.1 );
-        this.phongMaterialFlatShading = new BooleanProperty( editor, parent, material, "flatShading", "Flat Shading", material.flatShading );
-        this.phongMaterialWireframe = new BooleanProperty ( editor, parent, material, "wireframe", "Wireframe", material.wireframe );
-        this.phongMaterialVertexColors = new BooleanProperty( editor, parent, material, "vertexColors", "Vertex Colors", material.vertexColors );
-        this.phongMaterialEnvMap = new TextureProperty( editor, parent, material, "envMap", "Environment Map", material.envMap );
-        this.phongMaterialMap = new TextureProperty( editor, parent, material, "map", "Color Map", material.map );
-        this.phongMaterialAlphaMap = new TextureProperty( editor, parent, material, "alphaMap", "Alpha Map", material.alphaMap );
-        this.phongMaterialCombine = new DropdownProperty( editor, parent, material, "combine", "Combine",
+        this.phongMaterialColor = new ColorProperty( editor, parent, object, "material.color", "Color", material.color );
+        this.phongMaterialEmissive = new ColorProperty( editor, parent, object, "material.emissive", "Emissive", material.emissive );
+        this.phongMaterialSpecular = new ColorProperty( editor, parent, object, "material.specular", "Specular", material.specular );
+        this.phongMaterialShininess = new ValueSliderProperty( editor, parent, object, "material.shininess", "Shininess", material.shininess, 0, 100, 0.1 );
+        this.phongMaterialFlatShading = new BooleanProperty( editor, parent, object, "material.flatShading", "Flat Shading", material.flatShading );
+        this.phongMaterialWireframe = new BooleanProperty ( editor, parent, object, "material.wireframe", "Wireframe", material.wireframe );
+        this.phongMaterialVertexColors = new BooleanProperty( editor, parent, object, "material.vertexColors", "Vertex Colors", material.vertexColors );
+        this.phongMaterialEnvMap = new TextureProperty( editor, parent, object, "material.envMap", "Environment Map", material.envMap );
+        this.phongMaterialMap = new TextureProperty( editor, parent, object, "material.map", "Color Map", material.map );
+        this.phongMaterialAlphaMap = new TextureProperty( editor, parent, object, "material.alphaMap", "Alpha Map", material.alphaMap );
+        this.phongMaterialCombine = new DropdownProperty( editor, parent, object, "material.combine", "Combine",
           [
             THREE.MultiplyOperation,
             THREE.MixOperation,
             THREE.AddOperation
           ], material.combine);
-        this.phongMaterialReflectivity = new ValueSliderProperty( editor, parent, material, "reflectivity", "Reflectivity", material.reflectivity, 0, 1, 0.001 );
-        this.phongMaterialRefractionRatio = new ValueSliderProperty( editor, parent, material, "refractionRatio", "Refraction Ratio", material.refractionRatio, 0, 1, 0.001 );
+        this.phongMaterialReflectivity = new ValueSliderProperty( editor, parent, object, "material.reflectivity", "Reflectivity", material.reflectivity, 0, 1, 0.001 );
+        this.phongMaterialRefractionRatio = new ValueSliderProperty( editor, parent, object, "material.refractionRatio", "Refraction Ratio", material.refractionRatio, 0, 1, 0.001 );
 
         break;
       case "MeshStandardMaterial":
-        this.standardMaterialColor = new ColorProperty( editor, parent, material, "color", "Color", material.color );
-        this.standardMaterialEmissive = new ColorProperty( editor, parent, material, "emissive", "Emissive", material.emissive );
-        this.standardMaterialRoughness = new ValueSliderProperty( editor, parent, material, "roughness", "Roughness", material.roughness, 0, 1, 0.001 );
-        this.standardMaterialMetalness = new ValueSliderProperty( editor, parent, material, "metalness", "Metalness", material.metalness, 0, 1, 0.001 );
-        this.standardMaterialFlatShading = new BooleanProperty( editor, parent, material, "flatShading", "Flat Shading", material.flatShading );
-        this.standardMaterialWireframe = new BooleanProperty ( editor, parent, material, "wireframe", "Wireframe", material.wireframe );
-        this.standardMaterialVertexColors = new BooleanProperty( editor, parent, material, "vertexColors", "Vertex Colors", material.vertexColors );
-        this.standardMaterialEnvMap = new TextureProperty( editor, parent, material, "envMap", "Environment Map", material.envMap );
-        this.standardMaterialMap = new TextureProperty( editor, parent, material, "map", "Color Map", material.map );
-        this.standardMaterialRoughnessMap = new TextureProperty( editor, parent, material, "roughnessMap", "Roughness Map", material.roughnessMap );
-        this.standardMaterialAlphaMap = new TextureProperty( editor, parent, material, "alphaMap", "Alpha Map", material.alphaMap );
-        this.standardMaterialMetalnessMap = new TextureProperty( editor, parent, material, "metalnessMap", "Metalness Map", material.metalnessMap );
+        this.standardMaterialColor = new ColorProperty( editor, parent, object, "material.color", "Color", material.color );
+        this.standardMaterialEmissive = new ColorProperty( editor, parent, object, "material.emissive", "Emissive", material.emissive );
+        this.standardMaterialRoughness = new ValueSliderProperty( editor, parent, object, "material.roughness", "Roughness", material.roughness, 0, 1, 0.001 );
+        this.standardMaterialMetalness = new ValueSliderProperty( editor, parent, object, "material.metalness", "Metalness", material.metalness, 0, 1, 0.001 );
+        this.standardMaterialFlatShading = new BooleanProperty( editor, parent, object, "material.flatShading", "Flat Shading", material.flatShading );
+        this.standardMaterialWireframe = new BooleanProperty ( editor, parent, object, "material.wireframe", "Wireframe", material.wireframe );
+        this.standardMaterialVertexColors = new BooleanProperty( editor, parent, object, "material.vertexColors", "Vertex Colors", material.vertexColors );
+        this.standardMaterialEnvMap = new TextureProperty( editor, parent, object, "material.envMap", "Environment Map", material.envMap );
+        this.standardMaterialMap = new TextureProperty( editor, parent, object, "material.map", "Color Map", material.map );
+        this.standardMaterialRoughnessMap = new TextureProperty( editor, parent, object, "material.roughnessMap", "Roughness Map", material.roughnessMap );
+        this.standardMaterialAlphaMap = new TextureProperty( editor, parent, object, "material.alphaMap", "Alpha Map", material.alphaMap );
+        this.standardMaterialMetalnessMap = new TextureProperty( editor, parent, object, "material.metalnessMap", "Metalness Map", material.metalnessMap );
 
         break;
     }
@@ -1091,13 +1185,14 @@ class MeshProperties extends Properties {
     }
 
     const geometry = this.mesh.geometry;
+    const params = geometry.parameters;
     this.setPropertyValue( this.geometryType, geometry.type );
 
     const geometryProps = this.getGeometryProperties( geometry.type );
     if ( geometryProps ) {
       for ( const prop in geometryProps ) {
-        if ( this.geometryParameters.hasOwnProperty( prop ) ) {
-          this.setPropertyValue( geometryProps[ prop ], this.geometryParameters[ prop ] );
+        if ( params.hasOwnProperty( prop ) ) {
+          this.setPropertyValue( geometryProps[ prop ], params[ prop ] );
         }
       }
     }

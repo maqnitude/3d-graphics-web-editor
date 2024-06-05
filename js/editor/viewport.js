@@ -69,6 +69,11 @@ class Viewport {
     );
 
     this.eventDispatcher.addEventListener(
+      this.events.geometryChanged.type,
+      this.onGeometryChanged.bind( this )
+    );
+
+    this.eventDispatcher.addEventListener(
       this.events.materialChanged.type,
       this.onMaterialChanged.bind( this )
     );
@@ -302,6 +307,10 @@ class Viewport {
   }
 
   onObjectChanged( event ) {
+    this.render();
+  }
+
+  onGeometryChanged( event ) {
     this.render();
   }
 
