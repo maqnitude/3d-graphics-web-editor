@@ -988,28 +988,85 @@ class Properties {
     );
   }
 
-  addVector2Property( parent, propertyLabel, vector2 ) {
-    const listItem = document.createElement( "div" );
-    listItem.classList.add(
-      "list-group-item",
-      "p-0"
-    );
+  // Common methods
 
-    // TODO
+  setPropertyValue( property, value ) {
+    property?.setValue( value );
+  }
+}
 
-    parent.appendChild( listItem );
+class ObjectProperties extends Properties {
+  constructor( editor, object ) {
+    super( editor );
+
+    this.object = object;
+
+    this.objectProperties = new PropertyGroup( this.container, "Object" );
+    this.setupObjectProperties( this.objectProperties.container );
+
+    //
+
+    this.setupEventListeners();
   }
 
-  addVector3Property( parent, propertyLabel, vector3 ) {
-    const listItem = document.createElement( "div" );
-    listItem.classList.add(
-      "list-group-item",
-      "p-0"
+  setupEventListeners() {
+    this.eventDispatcher.addEventListener(
+      this.events.objectChanged.type,
+      this.onObjectChanged.bind( this )
     );
+  }
 
-    // TODO
+  setupObjectProperties( parent ) {
+    const editor = this.editor;
+    const object = this.object;
 
-    parent.appendChild( listItem );
+    this.objectName = new ReadOnlyProperty( parent, "Name", object.name, "text" );
+    this.objectUuid = new ReadOnlyProperty( parent, "UUID", object.uuid, "text" );
+    this.objectType = new ReadOnlyProperty( parent, "Type", object.type, "text" );
+    this.objectPosition = new Vector3Property( editor, parent, object, "position", "Position", object.position );
+    this.objectRotation = new EulerProperty( editor, parent, object, "rotation", "Rotation", object.rotation );
+    this.objectScale = new Vector3Property( editor, parent, object, "scale", "Scale", object.scale );
+    this.objectVisible = new BooleanProperty( editor, parent, object, "visible", "Visible", object.visible );
+    this.objectCastShadow = new BooleanProperty( editor, parent, object, "castShadow", "Cast Shadow", object.castShadow );
+    this.objectReceiveShadow = new BooleanProperty( editor, parent, object, "receiveShadow", "Receive Shadow", object.receiveShadow );
+  }
+
+  updateUI() {
+    const object = this.object;
+    const objectProps = this.getObjectProperties();
+    for ( const prop in objectProps ) {
+      if ( object.hasOwnProperty( prop ) ) {
+        this.setPropertyValue( objectProps[ prop ], object[ prop ] );
+      }
+    }
+  }
+
+  // Helpers
+
+  getObjectProperties() {
+    const objectPropertiesMap = {
+      name: this.objectName,
+      uuid: this.objectUuid,
+      type: this.objectType,
+      position: this.objectPosition,
+      rotation: this.objectRotation,
+      scale: this.objectScale,
+      visible: this.objectVisible,
+      castShadow: this.objectCastShadow,
+      receiveShadow: this.objectReceiveShadow,
+    }
+    return objectPropertiesMap;
+  }
+
+  // Event handlers
+
+  onObjectChanged( event ) {
+    const object = event.detail.object;
+
+    if ( object.isObject3D ) {
+      this.object = object;
+      this.updateUI();
+    }
   }
 }
 
@@ -1029,13 +1086,10 @@ class SceneProperties extends Properties {
   }
 }
 
-class MeshProperties extends Properties {
+class MeshProperties extends ObjectProperties {
   constructor( editor, mesh ) {
-    super( editor );
+    super( editor, mesh );
     this.mesh = mesh;
-
-    this.objectProperties = new PropertyGroup( this.container, "Object" );
-    this.setupObjectProperties( this.objectProperties.container );
 
     this.geometryProperties = new PropertyGroup( this.container, "Geometry" );
     this.setupGeometryProperties( this.geometryProperties.container );
@@ -1060,21 +1114,6 @@ class MeshProperties extends Properties {
       this.events.materialChanged.type,
       this.onMaterialChanged.bind( this )
     );
-  }
-
-  setupObjectProperties( parent ) {
-    const editor = this.editor;
-    const object = this.mesh;
-
-    this.objectName = new ReadOnlyProperty( parent, "Name", object.name, "text" );
-    this.objectUuid = new ReadOnlyProperty( parent, "UUID", object.uuid, "text" );
-    this.objectType = new ReadOnlyProperty( parent, "Type", object.type, "text" );
-    this.objectPosition = new Vector3Property( editor, parent, object, "position", "Position", object.position );
-    this.objectRotation = new EulerProperty( editor, parent, object, "rotation", "Rotation", object.rotation );
-    this.objectScale = new Vector3Property( editor, parent, object, "scale", "Scale", object.scale );
-    this.objectVisible = new BooleanProperty( editor, parent, object, "visible", "Visible", object.visible );
-    this.objectCastShadow = new BooleanProperty( editor, parent, object, "castShadow", "Cast Shadow", object.castShadow );
-    this.objectReceiveShadow = new BooleanProperty( editor, parent, object, "receiveShadow", "Receive Shadow", object.receiveShadow );
   }
 
   setupGeometryProperties( parent ) {
@@ -1196,12 +1235,7 @@ class MeshProperties extends Properties {
   }
 
   updateUI() {
-    const objectProps = this.getObjectProperties();
-    for ( const prop in objectProps ) {
-      if ( this.mesh.hasOwnProperty( prop ) ) {
-        this.setPropertyValue( objectProps[ prop ], this.mesh[ prop ] );
-      }
-    }
+    super.updateUI();
 
     const geometry = this.mesh.geometry;
     const params = geometry.parameters;
@@ -1237,21 +1271,6 @@ class MeshProperties extends Properties {
   }
 
   // Helpers
-
-  getObjectProperties() {
-    const objectPropertiesMap = {
-      name: this.objectName,
-      uuid: this.objectUuid,
-      type: this.objectType,
-      position: this.objectPosition,
-      rotation: this.objectRotation,
-      scale: this.objectScale,
-      visible: this.objectVisible,
-      castShadow: this.objectCastShadow,
-      receiveShadow: this.objectReceiveShadow,
-    }
-    return objectPropertiesMap;
-  }
 
   getGeometryProperties( geometryType = null ) {
     const geometryPropertiesMap = {
@@ -1339,10 +1358,6 @@ class MeshProperties extends Properties {
     return materialPropertiesMap[ materialType ];
   }
 
-  setPropertyValue( property, value ) {
-    property?.setValue( value );
-  }
-
   // Event handlers
 
   onObjectChanged( event ) {
@@ -1360,13 +1375,15 @@ class MeshProperties extends Properties {
   }
 }
 
-class LightProperties extends Properties {
+class LightProperties extends ObjectProperties {
   constructor( editor, light ) {
-    super( editor );
+    super( editor, light );
     this.light = light;
 
-    this.objectProperties = new PropertyGroup( this.container, "Object" );
-    this.setupObjectProperties( this.objectProperties.container );
+    this.objectRotation.container.classList.add( "d-none" );
+    this.objectScale.container.classList.add( "d-none" );
+    this.objectCastShadow.container.classList.add( "d-none" );
+    this.objectReceiveShadow.container.classList.add( "d-none" );
 
     this.lightProperties = new PropertyGroup( this.container, "Light" );
     this.setupLightProperties( this.lightProperties.container );
@@ -1377,17 +1394,6 @@ class LightProperties extends Properties {
       this.events.objectChanged.type,
       this.onObjectChanged.bind( this )
     )
-  }
-
-  setupObjectProperties( parent ) {
-    const editor = this.editor;
-    const object = this.light;
-
-    this.objectName = new ReadOnlyProperty( parent, "Name", object.name, "text" );
-    this.objectUuid = new ReadOnlyProperty( parent, "UUID", object.uuid, "text" );
-    this.objectType = new ReadOnlyProperty( parent, "Type", object.type, "text" );
-    this.objectPosition = new Vector3Property( editor, parent, object, "position", "Position", object.position );
-    this.objectVisible = new BooleanProperty( editor, parent, object, "visible", "Visible", object.visible );
   }
 
   setupLightProperties( parent ) {
@@ -1406,12 +1412,7 @@ class LightProperties extends Properties {
   }
 
   updateUI() {
-    const objectProps = this.getObjectProperties();
-    for ( const prop in objectProps ) {
-      if ( this.light.hasOwnProperty( prop ) ) {
-        this.setPropertyValue( objectProps[ prop ], this.light[ prop ] );
-      }
-    }
+    super.updateUI();
 
     this.setPropertyValue( this.lightColor, this.light.color );
     this.setPropertyValue( this.lightIntesity, this.light.intensity );
@@ -1424,17 +1425,6 @@ class LightProperties extends Properties {
     }
   }
 
-  getObjectProperties() {
-    const objectPropertiesMap = {
-      name: this.objectName,
-      uuid: this.objectUuid,
-      type: this.objectType,
-      position: this.objectPosition,
-      visible: this.objectVisible,
-    }
-    return objectPropertiesMap;
-  }
-
   getLightProperties( type ) {
     const lightProperties = {
       DirectionalLight: {
@@ -1442,10 +1432,6 @@ class LightProperties extends Properties {
       }
     }
     return lightProperties[ type ];
-  }
-
-  setPropertyValue( property, value ) {
-    property.setValue( value );
   }
 
   // Event handlers
