@@ -229,7 +229,7 @@ class SceneTree {
         this.nodes.push( node );
 
         addNodes( object.children, node, level + 1 );
-      } 
+      }
     };
     addNodes( scene.children, sceneNode, 0 );
 
@@ -264,7 +264,6 @@ class SceneTree {
   onDrop() {
 
   }
-  
 }
 
 export { SceneTree };

@@ -3,8 +3,6 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TransformControls } from "three/addons/controls/TransformControls.js";
 
-import { Selector } from "./selector.js";
-
 class Viewport {
   constructor( editor ) {
     this.editor = editor;
@@ -179,6 +177,7 @@ class Viewport {
     const renderer = new THREE.WebGLRenderer({
       antialias: true
     });
+    renderer.shadowMap.enabled = true;
 
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setClearColor( 0x333333 );
