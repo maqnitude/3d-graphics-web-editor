@@ -4,6 +4,8 @@ class ReadOnlyProperty {
   constructor( parent, propertyLabel, value, type ) {
     this.parent = parent;
 
+    this.container = document.createElement( "div" );
+
     this.listItem = document.createElement( "div" );
     this.listItem.classList.add(
       "list-group-item",
@@ -31,7 +33,8 @@ class ReadOnlyProperty {
     this.formFloating.appendChild( this.input );
     this.formFloating.appendChild( this.label );
     this.listItem.appendChild( this.formFloating );
-    this.parent.appendChild( this.listItem );
+    this.container.appendChild( this.listItem );
+    this.parent.appendChild( this.container );
   }
 
   setValue( value ) {
@@ -49,6 +52,8 @@ class ValueSliderProperty {
     this.parent = parent;
     this.object = object;
     this.properties = propertyString.split( "." );
+
+    this.container = document.createElement( "div" );
 
     this.listItem = document.createElement( "div" );
     this.listItem.classList.add(
@@ -107,7 +112,8 @@ class ValueSliderProperty {
     this.inputGroup.appendChild( this.inputSlider );
     this.inputGroup.appendChild( this.inputNumber );
     this.listItem.appendChild( this.inputGroup );
-    this.parent.appendChild( this.listItem );
+    this.container.appendChild( this.listItem );
+    this.parent.appendChild( this.container );
 
     //
 
@@ -135,7 +141,11 @@ class ValueSliderProperty {
     const value = Number( event.target.value );
 
     if ( this.properties.length === 1 ) {
-      // Do nothing
+      if ( this.object.isMesh ) {
+        // Do nothing
+      } else if ( this.object.isLight ) {
+        // Do nothing
+      }
     } else {
       if ( this.object.isMesh ) {
         switch ( this.properties[ 0 ] ) {
@@ -208,6 +218,8 @@ class BooleanProperty {
     this.object = object;
     this.properties = propertyString.split( "." );
 
+    this.container = document.createElement( "div" );
+
     this.listItem = document.createElement("div");
     this.listItem.classList.add(
       "list-group-item",
@@ -236,10 +248,11 @@ class BooleanProperty {
       "form-check-label"
     );
 
-    this.formCheck.appendChild(this.input);
-    this.formCheck.appendChild(this.label);
-    this.listItem.appendChild(this.formCheck);
-    this.parent.appendChild(this.listItem);
+    this.formCheck.appendChild( this.input );
+    this.formCheck.appendChild( this.label );
+    this.listItem.appendChild( this.formCheck );
+    this.container.appendChild( this.listItem );
+    this.parent.appendChild( this.container );
 
     //
 
@@ -307,6 +320,8 @@ class DropdownProperty {
     this.object = object;
     this.property = property;
 
+    this.container = document.createElement( "div" );
+
     this.listItem = document.createElement("div");
     this.listItem.classList.add(
       "list-group-item",
@@ -340,10 +355,11 @@ class DropdownProperty {
     this.label.setAttribute("for", this.select.getAttribute("id"));
     this.label.textContent = propertyLabel;
 
-    this.formFloating.appendChild(this.select);
-    this.formFloating.appendChild(this.label);
-    this.listItem.appendChild(this.formFloating);
-    this.parent.appendChild(this.listItem);
+    this.formFloating.appendChild( this.select );
+    this.formFloating.appendChild( this.label );
+    this.listItem.appendChild( this.formFloating );
+    this.container.appendChild( this.listItem );
+    this.parent.appendChild( this.container );
 
     //
 
@@ -574,7 +590,8 @@ class Vector3Property {
     this.history.recordChange = true;
     this.history.newUndoBranch = true;
 
-    this.dispatchObjectChangedEvent( this.object );
+    // BUG: SOMETHING WRONG HERE?
+    // this.dispatchObjectChangedEvent( this.object );
   }
 
   onBlur() {
@@ -1056,6 +1073,8 @@ class MeshProperties extends Properties {
     this.objectRotation = new EulerProperty( editor, parent, object, "rotation", "Rotation", object.rotation );
     this.objectScale = new Vector3Property( editor, parent, object, "scale", "Scale", object.scale );
     this.objectVisible = new BooleanProperty( editor, parent, object, "visible", "Visible", object.visible );
+    this.objectCastShadow = new BooleanProperty( editor, parent, object, "castShadow", "Cast Shadow", object.castShadow );
+    this.objectReceiveShadow = new BooleanProperty( editor, parent, object, "receiveShadow", "Receive Shadow", object.receiveShadow );
   }
 
   setupGeometryProperties( parent ) {
@@ -1133,8 +1152,8 @@ class MeshProperties extends Properties {
 
         break;
       case "MeshNormalMaterial":
-        this.standardMaterialFlatShading = new BooleanProperty( editor, parent, object, "material.flatShading", "Flat Shading", material.flatShading );
-        this.standardMaterialWireframe = new BooleanProperty( editor, parent, object, "material.wireframe", "Wireframe", material.wireframe );
+        this.normalMaterialFlatShading = new BooleanProperty( editor, parent, object, "material.flatShading", "Flat Shading", material.flatShading );
+        this.normalMaterialWireframe = new BooleanProperty( editor, parent, object, "material.wireframe", "Wireframe", material.wireframe );
 
         break;
       case "MeshPhongMaterial":
@@ -1199,6 +1218,13 @@ class MeshProperties extends Properties {
 
     const material = this.mesh.material;
     this.setPropertyValue( this.materialTypes, material.type );
+    this.setPropertyValue( this.materialTransparent, material.transparent );
+    this.setPropertyValue( this.materialOpacity, material.opacity );
+    this.setPropertyValue( this.materialDepthTest, material.depthTest );
+    this.setPropertyValue( this.materialDepthWrite, material.depthWrite );
+    this.setPropertyValue( this.materialAlphaTest, material.alphaTest );
+    this.setPropertyValue( this.materialAlphaHash, material.alphaHas );
+    this.setPropertyValue( this.materialVisible, material.visible );
 
     const materialProps = this.getMaterialProperties( material.type );
     if ( materialProps ) {
@@ -1220,12 +1246,14 @@ class MeshProperties extends Properties {
       position: this.objectPosition,
       rotation: this.objectRotation,
       scale: this.objectScale,
-      visible: this.objectVisible
+      visible: this.objectVisible,
+      castShadow: this.objectCastShadow,
+      receiveShadow: this.objectReceiveShadow,
     }
     return objectPropertiesMap;
   }
 
-  getGeometryProperties( geometryType ) {
+  getGeometryProperties( geometryType = null ) {
     const geometryPropertiesMap = {
       BoxGeometry: {
         width: this.boxGeometryWidth,
@@ -1248,10 +1276,15 @@ class MeshProperties extends Properties {
       },
       // Add other geometry types as needed
     };
+
+    if ( !geometryType ) {
+      return geometryPropertiesMap;
+    }
+
     return geometryPropertiesMap[ geometryType ];
   }
 
-  getMaterialProperties( materialType ) {
+  getMaterialProperties( materialType = null ) {
     const materialPropertiesMap = {
       MeshBasicMaterial: {
         color: this.basicMaterialColor,
@@ -1265,8 +1298,8 @@ class MeshProperties extends Properties {
         refractionRatio: this.basicMaterialRefactionRatio,
       },
       MeshNormalMaterial: {
-        flatShading: this.standardMaterialFlatShading,
-        wireframe: this.standardMaterialWireframe,
+        flatShading: this.normalMaterialFlatShading,
+        wireframe: this.normalMaterialWireframe,
       },
       MeshPhongMaterial: {
         color: this.phongMaterialColor,
@@ -1298,19 +1331,27 @@ class MeshProperties extends Properties {
         metalnessMap: this.standardMaterialMetalnessMap,
       },
     };
+
+    if ( !materialType ) {
+      return materialPropertiesMap;
+    }
+
     return materialPropertiesMap[ materialType ];
   }
 
   setPropertyValue( property, value ) {
-    property.setValue( value );
+    property?.setValue( value );
   }
 
   // Event handlers
 
   onObjectChanged( event ) {
-    this.mesh = event.detail.object;
+    const object = event.detail.object;
 
-    this.updateUI();
+    if ( object.isMesh ) {
+      this.mesh = object;
+      this.updateUI();
+    }
   }
 
   onMaterialChanged( event ) {
@@ -1322,17 +1363,101 @@ class MeshProperties extends Properties {
 class LightProperties extends Properties {
   constructor( editor, light ) {
     super( editor );
+    this.light = light;
 
-    // TODO
+    this.objectProperties = new PropertyGroup( this.container, "Object" );
+    this.setupObjectProperties( this.objectProperties.container );
+
+    this.lightProperties = new PropertyGroup( this.container, "Light" );
+    this.setupLightProperties( this.lightProperties.container );
+  }
+
+  setupEventListeners() {
+    this.eventDispatcher.addEventListener(
+      this.events.objectChanged.type,
+      this.onObjectChanged.bind( this )
+    )
+  }
+
+  setupObjectProperties( parent ) {
+    const editor = this.editor;
+    const object = this.light;
+
+    this.objectName = new ReadOnlyProperty( parent, "Name", object.name, "text" );
+    this.objectUuid = new ReadOnlyProperty( parent, "UUID", object.uuid, "text" );
+    this.objectType = new ReadOnlyProperty( parent, "Type", object.type, "text" );
+    this.objectPosition = new Vector3Property( editor, parent, object, "position", "Position", object.position );
+    this.objectVisible = new BooleanProperty( editor, parent, object, "visible", "Visible", object.visible );
+  }
+
+  setupLightProperties( parent ) {
+    const editor = this.editor;
+    const light = this.light;
+
+    this.lightColor = new ColorProperty( editor, parent, light, "color", "Color", light.color );
+    this.lightIntesity = new ValueSliderProperty( editor, parent, light, "intensity", "Intensity", light.intensity, 0, 10, 0.001 );
+
+    switch ( light.type ) {
+      case "DirectionalLight":
+        this.directionalLightCastShadow = new BooleanProperty( editor, parent, light, "castShadow", "Cast Shadow", light.castShadow );
+
+        break;
+    }
+  }
+
+  updateUI() {
+    const objectProps = this.getObjectProperties();
+    for ( const prop in objectProps ) {
+      if ( this.light.hasOwnProperty( prop ) ) {
+        this.setPropertyValue( objectProps[ prop ], this.light[ prop ] );
+      }
+    }
+
+    this.setPropertyValue( this.lightColor, this.light.color );
+    this.setPropertyValue( this.lightIntesity, this.light.intensity );
+
+    const lightProps = this.getLightProperties( this.light.type );
+    for ( const prop in lightProps ) {
+      if ( this.light.hasOwnProperty( prop ) ) {
+        this.setPropertyValue( lightProps[ prop ], this.light[ prop ] );
+      }
+    }
+  }
+
+  getObjectProperties() {
+    const objectPropertiesMap = {
+      name: this.objectName,
+      uuid: this.objectUuid,
+      type: this.objectType,
+      position: this.objectPosition,
+      visible: this.objectVisible,
+    }
+    return objectPropertiesMap;
+  }
+
+  getLightProperties( type ) {
+    const lightProperties = {
+      DirectionalLight: {
+        castShadow: this.directionalLightCastShadow,
+      }
+    }
+    return lightProperties[ type ];
+  }
+
+  setPropertyValue( property, value ) {
+    property.setValue( value );
+  }
+
+  // Event handlers
+
+  onObjectChanged( event ) {
+    const object = event.detail.object;
+
+    if ( object.isLight ) {
+      this.light = object;
+      this.updateUI();
+    }
   }
 }
 
-class LightShadowProperties extends Properties {
-  constructor( editor, lightShadow ) {
-    super( editor );
-
-    // TODO
-  }
-}
-
-export { Properties, MeshProperties };
+export { Properties, MeshProperties, LightProperties };

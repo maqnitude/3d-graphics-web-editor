@@ -1,5 +1,5 @@
 import { Editor } from "./editor/editor.js";
-import { MeshProperties } from "./editor/properties.js";
+import { LightProperties, MeshProperties } from "./editor/properties.js";
 import { SceneTree } from "./editor/scene-tree.js";
 import { VerticalResizer } from "./editor/vertical-resizer.js";
 import { Viewport } from "./editor/viewport.js";
@@ -7,6 +7,7 @@ import { Viewport } from "./editor/viewport.js";
 import { Cube } from "./threejs/objects/cube.js";
 import { Plane } from "./threejs/objects/plane.js";
 import { Sphere } from "./threejs/objects/sphere.js";
+import { DirectionalLight } from "./threejs/lights/directional-light.js";
 
 /*
  * Put together the editor here
@@ -85,11 +86,16 @@ editor.eventDispatcher.addEventListener(
       return;
     }
 
-    if (object.isMesh) {
+    if ( object.isMesh ) {
       if (properties) { properties.remove(); }
 
       const meshProperties = new MeshProperties( editor, object );
       rightSideBar.appendChild( meshProperties.container );
+    } else if ( object.isLight ) {
+      if (properties) { properties.remove(); }
+
+      const lightProperties = new LightProperties( editor, object );
+      rightSideBar.appendChild( lightProperties.container );
     }
 
     viewport.render();
@@ -129,6 +135,9 @@ addObjectButton.addEventListener( "click", function() {
       case "Plane":
         viewport.addObject( new Plane() );
 
+        break;
+      case "DirectionalLight":
+        viewport.addObject( new DirectionalLight() );
         break;
     }
   }
