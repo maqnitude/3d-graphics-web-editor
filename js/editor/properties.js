@@ -807,7 +807,7 @@ class EulerProperty {
 }
 
 class ColorProperty {
-  constructor( editor, parent, object, property, propertyLabel, color ) {
+  constructor( editor, parent, object, propertyString, propertyLabel, color ) {
     this.editor = editor,
     this.history = editor.history,
     this.eventDispatcher = editor.eventDispatcher,
@@ -815,7 +815,7 @@ class ColorProperty {
 
     this.parent = parent;
     this.object = object;
-    this.property = property;
+    this.properties = propertyString.split( "." );
 
     this.label = document.createElement("label");
     this.label.textContent = propertyLabel;
@@ -845,25 +845,59 @@ class ColorProperty {
   }
 
   setupEventListeners() {
-    // TODO: Need to fix this
     this.inputColor.addEventListener(
       "input",
       ( event ) => {
-        const color = new THREE.Color( event.target.value );
-        this.inputText.value = color.getStyle();
+        const colorStyle = event.target.value;
+        this.inputText.value = colorStyle;
+
+        if ( this.properties.lenght === 1 ) {
+          this.object[ this.properties[ 0 ] ].setStyle( colorStyle );
+        } else {
+          switch ( this.properties[ 0 ] ) {
+            case "material":
+              const material = this.object.material;
+
+              this.setColor( material, this.properties[ 1 ], colorStyle );
+
+              break;
+          }
+        }
       }
     );
     this.inputText.addEventListener(
-      "input",
+      "keyup",
       ( event ) => {
-        const colorHex = event.target.value;
-        this.inputColor.value = colorHex;
+        const colorStyle = event.target.value;
+        this.inputColor.value = colorStyle;
+
+        if ( event.key === "Enter" ) {
+          if ( this.properties.lenght === 1 ) {
+            this.object[ this.properties[ 0 ] ].setStyle( colorStyle );
+          } else {
+            switch ( this.properties[ 0 ] ) {
+              case "material":
+                const material = this.object.material;
+
+                this.setColor( material, this.properties[ 1 ],  colorStyle );
+
+                break;
+            }
+          }
+        }
       }
     )
   }
 
   setValue( color ) {
     this.inputColor.value = color.getStyle();
+    this.inputText.value = color.getStyle();
+  }
+
+  setColor( material, property, colorStyle ) {
+    material[ property ].setStyle( colorStyle );
+
+    this.eventDispatcher.dispatchEvent( this.events.materialChanged );
   }
 }
 
