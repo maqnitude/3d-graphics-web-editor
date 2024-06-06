@@ -1,5 +1,4 @@
 import { Editor } from "./editor/editor.js";
-import { LightProperties, MeshProperties } from "./editor/properties.js";
 import { SceneTree } from "./editor/scene-tree.js";
 import { VerticalResizer } from "./editor/vertical-resizer.js";
 import { Viewport } from "./editor/viewport.js";
@@ -8,6 +7,9 @@ import { Cube } from "./threejs/objects/cube.js";
 import { Plane } from "./threejs/objects/plane.js";
 import { Sphere } from "./threejs/objects/sphere.js";
 import { DirectionalLight } from "./threejs/lights/directional-light.js";
+
+import { MeshProperties } from "./editor/mesh-properties.js";
+import { LightProperties } from "./editor/light-properties.js";
 
 /*
  * Put together the editor here
