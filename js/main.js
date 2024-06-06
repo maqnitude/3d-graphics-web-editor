@@ -139,7 +139,7 @@ addObjectButton.addEventListener( "click", function() {
 
         break;
       case "DirectionalLight":
-        viewport.addObject( new DirectionalLight() );
+        viewport.addObject( new DirectionalLight( editor ) );
         break;
     }
   }

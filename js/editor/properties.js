@@ -141,11 +141,9 @@ class ValueSliderProperty {
     const value = Number( event.target.value );
 
     if ( this.properties.length === 1 ) {
-      if ( this.object.isMesh ) {
-        // Do nothing
-      } else if ( this.object.isLight ) {
-        // Do nothing
-      }
+      this.object[ this.properties[ 0 ] ] = value;
+
+      this.dispatchObjectChangedEvent( this.object );
     } else {
       if ( this.object.isMesh ) {
         switch ( this.properties[ 0 ] ) {
@@ -204,6 +202,19 @@ class ValueSliderProperty {
         }
       }
     }
+  }
+
+  // Dispatch custom events
+
+  dispatchObjectChangedEvent( object ) {
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.objectChanged.type,
+      {
+        detail: {
+          object: object,
+        }
+      }
+    ));
   }
 }
 
