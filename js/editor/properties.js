@@ -83,12 +83,6 @@ class ValueSliderProperty {
     this.inputNumber.classList.add(
       "form-control",
     );
-    this.inputNumber.addEventListener(
-      "input",
-      () => {
-        this.inputSlider.value = this.inputNumber.value;
-      }
-    )
 
     this.inputSlider = document.createElement( "input" );
     this.inputSlider.readOnly = false;
@@ -101,12 +95,6 @@ class ValueSliderProperty {
     this.inputSlider.classList.add(
       "form-range",
     );
-    this.inputSlider.addEventListener(
-      "input",
-      () => {
-        this.inputNumber.value = this.inputSlider.value;
-      }
-    )
 
     this.inputGroup.appendChild( this.span );
     this.inputGroup.appendChild( this.inputSlider );
@@ -139,6 +127,9 @@ class ValueSliderProperty {
 
   onInput( event ) {
     const value = Number( event.target.value );
+
+    this.inputNumber.value = value;
+    this.inputSlider.value = value;
 
     if ( this.properties.length === 1 ) {
       this.object[ this.properties[ 0 ] ] = value;
@@ -303,6 +294,13 @@ class ValueSliderProperty {
 
             break;
           case "material":
+            const material = this.object.material;
+
+            material[ this.properties[ 1 ] ] = value;
+
+            material.needsUpdate = true;
+            this.dispatchObjectChangedEvent( this.object );
+
             break;
           default:
             break;
@@ -395,20 +393,22 @@ class BooleanProperty {
           this.dispatchObjectChangedEvent( this.object );
 
           this.object[ this.properties[ 0 ] ] = checked;
-
-          this.dispatchObjectChangedEvent( this.object );
         } else {
           if ( this.object.isMesh ) {
             switch ( this.properties[ 0 ] ) {
               case "material":
-                this.object.material[ this.properties[ 1 ] ] = checked;
+                const material = this.object.material;
 
-                this.eventDispatcher.dispatchEvent( this.events.materialChanged );
+                material[ this.properties[ 1 ] ] = checked;
+
+                material.needsUpdate = true;
 
                 break;
             }
           }
         }
+
+        this.dispatchObjectChangedEvent( this.object );
       }
     )
   }
@@ -492,55 +492,56 @@ class DropdownProperty {
       ( event ) => {
         const selectedOption = event.target.value;
 
-        if (this.property === "material") {
-          this.object.material.dispose();
+        switch ( this.property ) {
+          case "material":
+            this.object.material.dispose();
 
-          switch ( selectedOption ) {
-            case "MeshBasicMaterial":
-              this.object.material = new THREE.MeshBasicMaterial({ color: 0x808080 });
+            switch ( selectedOption ) {
+              case "MeshBasicMaterial":
+                this.object.material = new THREE.MeshBasicMaterial({ color: 0x808080 });
 
-              break;
-            case "MeshStandardMaterial":
-              this.object.material = new THREE.MeshStandardMaterial({ color: 0x808080 });
+                break;
+              case "MeshStandardMaterial":
+                this.object.material = new THREE.MeshStandardMaterial({ color: 0x808080 });
 
-              break;
-            case "MeshNormalMaterial":
-              this.object.material = new THREE.MeshNormalMaterial();
+                break;
+              case "MeshNormalMaterial":
+                this.object.material = new THREE.MeshNormalMaterial();
 
-              break;
-            case "MeshPhongMaterial":
-              this.object.material = new THREE.MeshPhongMaterial({ color: 0x808080 });
+                break;
+              case "MeshPhongMaterial":
+                this.object.material = new THREE.MeshPhongMaterial({ color: 0x808080 });
 
-              break;
-            case "MeshDepthMaterial":
-              this.object.material = new THREE.MeshDepthMaterial({ color: 0x808080 });
+                break;
+              case "MeshDepthMaterial":
+                this.object.material = new THREE.MeshDepthMaterial({ color: 0x808080 });
 
-              break;
-            case "MeshLambertMaterial":
-              this.object.material = new THREE.MeshLambertMaterial({ color: 0x808080 });
-              
-              break;
-            case "MeshMatcapMaterial":
-              this.object.material = new THREE.MeshMatcapMaterial({ color: 0x808080 });
+                break;
+              case "MeshLambertMaterial":
+                this.object.material = new THREE.MeshLambertMaterial({ color: 0x808080 });
 
-              break;
-            case "MeshPhysicalMaterial":
-              this.object.material = new THREE.MeshPhysicalMaterial({ color: 0x808080 });
+                break;
+              case "MeshMatcapMaterial":
+                this.object.material = new THREE.MeshMatcapMaterial({ color: 0x808080 });
 
-              break;
-            case "MeshToonMaterial":
-              this.object.material = new THREE.MeshToonMaterial({ color: 0x808080 });
+                break;
+              case "MeshPhysicalMaterial":
+                this.object.material = new THREE.MeshPhysicalMaterial({ color: 0x808080 });
 
-              break;
-          }
+                break;
+              case "MeshToonMaterial":
+                this.object.material = new THREE.MeshToonMaterial({ color: 0x808080 });
 
-          this.eventDispatcher.dispatchEvent( this.events.materialChanged );
+                break;
+            }
+
+            this.object.material.needsUpdate = true;
+            this.eventDispatcher.dispatchEvent( this.events.materialChanged );
+
+            break;
         }
 
-        // Ensure the material updates correctly
-        this.object.material.needsUpdate = true;
-
-        this.dispatchObjectChangedEvent( this.object );
+        // this.dispatchObjectChangedEvent( this.object );
       }
     )
   }
@@ -1025,6 +1026,7 @@ class ColorProperty {
   setColor( material, property, colorStyle ) {
     material[ property ].setStyle( colorStyle );
 
+    material.needsUpdate = true;
     this.eventDispatcher.dispatchEvent( this.events.materialChanged );
   }
 }
@@ -1134,8 +1136,11 @@ class PropertyGroup {
   }
 
   clear() {
-    while (this.container.firstChild) {
-      this.container.removeChild(this.container.firstChild);
+    const children = Array.from( this.container.children );
+    for ( const child of children ) {
+      if ( child !== this.header ) {
+        this.container.removeChild( child );
+      }
     }
   }
 }
