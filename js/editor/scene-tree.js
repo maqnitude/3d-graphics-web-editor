@@ -12,18 +12,28 @@ class Node {
     //
 
     this.container = document.createElement( "li" );
-    this.container.setAttribute( "id", `Node-${ object.uuid }` );
+    this.container.id = `Node-${ object.uuid }`;
     this.container.setAttribute( "style", "list-style-type: none;" );
+    this.container.classList.add(
+      "m-0"
+    );
     this.container.draggable = draggable;
 
     const listGroupId = `ListGroup-${ object.uuid }`;
 
     this.listGroupItem = document.createElement( "div" );
-    this.listGroupItem.setAttribute( "class", "list-group-item list-group-item-action" );
+    this.listGroupItem.classList.add(
+      "list-group-item",
+      "list-group-item-action",
+    );
 
     this.collapseButton = document.createElement( "button" );
-    this.collapseButton.setAttribute( "class", "btn btn-dark btn-sm" );
-    this.collapseButton.setAttribute( "type", "button" );
+    this.collapseButton.classList.add(
+      "btn",
+      "btn-sm",
+      "btn-collapse-node"
+    );
+    this.collapseButton.type = "button";
     this.collapseButton.setAttribute( "data-bs-toggle", "collapse" );
     this.collapseButton.setAttribute( "data-bs-target", `#${listGroupId}` );
     this.collapseButton.innerText = "+";
@@ -114,6 +124,7 @@ class Node {
     ));
   }
 
+  // BUG: have to double click collapse the node initially
   onCollapseButtonClick() {
     this.updateCollapseButton();
   }
@@ -144,20 +155,31 @@ class SceneTree {
 
     this.container = document.createElement( "div" );
     this.container.setAttribute( "id", "SceneTree" );
+    this.container.classList.add(
+      "overflow-y-scroll",
+      "overflow-x-hidden",
+      "d-flex",
+      "flex-column",
+    );
 
     this.row = document.createElement( "div" );
-    this.row.setAttribute( "class", "row" );
+    this.row.classList.add(
+      "row",
+    );
 
     this.col = document.createElement( "div" );
-    this.col.setAttribute( "class", "col" );
+    this.col.classList.add(
+      "col",
+      "p-0"
+    );
 
     this.rootListGroup = document.createElement( "div" );
     this.rootListGroup.setAttribute( "id", "RootListGroup" );
     this.rootListGroup.setAttribute( "class", "list-group" );
 
-    this.container.appendChild( this.row );
-    this.row.appendChild( this.col );
     this.col.appendChild( this.rootListGroup );
+    this.row.appendChild( this.col );
+    this.container.appendChild( this.row );
 
     //
 
@@ -187,13 +209,13 @@ class SceneTree {
     }
 
     // IIFE, recursively update every node
-    (( nodes ) => {
+    (function update( nodes ) {
       for ( let i = 0; i < nodes.length; i++ ) {
         const node = nodes[ i ];
         node.updateCollapseButton();
 
-        if ( nodes.children !== undefined ) {
-          update( nodes.children );
+        if ( node.children ) {
+          update( node.children );
         }
       }
     })( nodes );
@@ -217,21 +239,21 @@ class SceneTree {
     const sceneNode = new Node( this, scene, false );
 
     // Recursive function to create the nodes and establish parent-child relationships
-    const addNodes = ( objects, parentNode, level ) => {
+    const addNodes = ( objects, parentNode ) => {
       for (let i = 0; i < objects.length; i++) {
         const object = objects[ i ];
 
         const node = new Node( this, object, true );
-        node.container.style.paddingLeft = `${ level + 1 }rem`;
+        node.container.style.paddingLeft = `${ 32 }px`;
 
         parentNode.addChildNode( node );
 
         this.nodes.push( node );
 
-        addNodes( object.children, node, level + 1 );
+        addNodes( object.children, node );
       }
     };
-    addNodes( scene.children, sceneNode, 0 );
+    addNodes( scene.children, sceneNode );
 
     // Only need to push top-level nodes thanks to addChildNode()
     nodes.push( cameraNode );

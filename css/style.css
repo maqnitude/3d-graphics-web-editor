@@ -9,6 +9,11 @@
   --bs-btn-padding-x: .5rem;
   --bs-btn-padding-y: .125rem;
 }
+.btn-collapse-node {
+  --bs-btn-padding-x: .25rem;
+  --bs-btn-padding-y: .125rem;
+  --bs-btn-line-height: .75rem;
+}
 
 /*
 * Extensions
