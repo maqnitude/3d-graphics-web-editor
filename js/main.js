@@ -1,3 +1,6 @@
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+
 import { Editor } from "./editor/editor.js";
 import { SceneTree } from "./editor/scene-tree.js";
 import { VerticalResizer } from "./editor/vertical-resizer.js";
@@ -59,6 +62,43 @@ window.addEventListener("resize", function() {
 });
 
 // Handle shit on the menubar
+
+// Load glb files
+const gltfLoader = new GLTFLoader();
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath( "../lib/three.js-r164/jsm/libs/draco/" );
+gltfLoader.setDRACOLoader( dracoLoader );
+
+const fileImport = document.getElementById( "FileImport" );
+fileImport.addEventListener(
+  "change",
+  function( event ) {
+    const file = event.target.files[ 0 ];
+
+    if ( file ) {
+      const reader = new FileReader();
+      reader.onload = ( readerEvent ) => {
+        const dataURL = readerEvent.target.result;
+
+        gltfLoader.load(
+          dataURL,
+          async function( gltf ) {
+            const model = gltf.scene;
+            const camera = viewport.camera;
+            const scene = viewport.scene;
+
+            await viewport.renderer.compileAsync( model, camera, scene );
+
+            viewport.addObject( model );
+          }
+        )
+      }
+
+      reader.readAsDataURL( file );
+    }
+  }
+)
+
 const editUndo = document.getElementById( "EditUndo" );
 const editRedo = document.getElementById( "EditRedo" );
 editUndo.addEventListener(
