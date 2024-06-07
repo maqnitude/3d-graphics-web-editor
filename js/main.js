@@ -9,7 +9,24 @@ import { Viewport } from "./editor/viewport.js";
 import { Cube } from "./threejs/objects/cube.js";
 import { Plane } from "./threejs/objects/plane.js";
 import { Sphere } from "./threejs/objects/sphere.js";
+import { Capsule } from "./threejs/objects/capsule.js";
+import { Circle } from "./threejs/objects/circle.js";
+import { Cone } from "./threejs/objects/cone.js";
+import { Cylinder } from "./threejs/objects/cylinder.js"
+import { Dodecahedron } from "./threejs/objects/dodecahedron.js"
+import { Extrude } from "./threejs/objects/extrude.js"
+import { Icosahedron } from "./threejs/objects/icosahedron.js"
+import { Lathe } from "./threejs/objects/lathe.js"
+import { Octahedron } from "./threejs/objects/octahedron.js"
+import { Ring } from "./threejs/objects/ring.js"
+import { Tetrahedron } from "./threejs/objects/tetrahedron.js"
+import { TorusKnot } from "./threejs/objects/torus-knot.js"
+import { Torus } from "./threejs/objects/torus.js"
+import { Tube } from "./threejs/objects/tube.js"
+
 import { DirectionalLight } from "./threejs/lights/directional-light.js";
+import { PointLight } from './threejs/lights/point-light.js';
+import { SpotLight } from './threejs/lights/spot-light.js';
 
 import { MeshProperties } from "./editor/mesh-properties.js";
 import { LightProperties } from "./editor/light-properties.js";
@@ -168,18 +185,63 @@ addObjectButton.addEventListener( "click", function() {
     switch ( selectedObject ) {
       case "Cube":
         viewport.addObject( new Cube() );
-
         break;
       case "Sphere":
         viewport.addObject( new Sphere() );
-
         break;
       case "Plane":
         viewport.addObject( new Plane() );
-
         break;
+      case "Capsule":
+        viewport.addObject( new Capsule() );
+        break;
+      case "Circle":
+        viewport.addObject( new Circle() );
+        break;
+      case "Cone":
+        viewport.addObject( new Cone() );
+        break;
+      case "Cylinder":
+        viewport.addObject( new Cylinder() );
+        break;
+      case "Dodecahedron":
+        viewport.addObject( new Dodecahedron() );
+        break;
+      case "Extrude":
+        viewport.addObject( new Extrude() );
+        break;
+      case "Icosahedron":
+        viewport.addObject( new Icosahedron() );
+        break;
+      case "Lathe":
+        viewport.addObject( new Lathe() );
+        break;
+      case "Octahedron":
+        viewport.addObject( new Octahedron() );
+        break;
+      case "Ring":
+        viewport.addObject( new Ring() );
+        break;
+      case"Tetrahedron":
+        viewport.addObject( new Tetrahedron() );
+        break;
+      case "TorusKnot":
+        viewport.addObject( new TorusKnot() );
+        break;
+      case "Torus":
+        viewport.addObject( new Torus() );
+        break;
+      case "Tube":
+        viewport.addObject( new Tube() );
+        break; 
       case "DirectionalLight":
         viewport.addObject( new DirectionalLight( editor ) );
+        break;
+      case "PointLight":
+        viewport.addObject( new PointLight( editor ));
+        break;
+      case "SpotLight":
+        viewport.addObject( new SpotLight( editor ));
         break;
     }
   }
