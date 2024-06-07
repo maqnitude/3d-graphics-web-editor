@@ -181,6 +181,113 @@ class ValueSliderProperty {
                       params.heightSegments
                     )
                     break;
+                  case "CapsuleGeometry":
+                    newGeometry = new THREE.CapsuleGeometry(
+                      params.radius,
+                      params.length,
+                      params.capSegments,
+                      params.radialSegments,
+                    )
+                    break;
+                  case "ConeGeometry":
+                    newGeometry = new THREE.ConeGeometry(
+                      params.radius,
+                      params.height,
+                      params.radialSegments,
+                      params.heightSegments,
+                      params.openEnded,
+                    )
+                    break;
+                  case "CircleGeometry":
+                    newGeometry = new THREE.CircleGeometry(
+                      params.radius,
+                      params.segments,
+                    )
+                    break;
+                  case "CylinderGeometry":
+                    newGeometry = new THREE.CylinderGeometry(
+                      params.radiusBottom,
+                      params.radiusTop,
+                      params.height,
+                      params.radialSegments,
+                      params.heightSegments,
+                      params.openEnded,
+                    )
+                    break;
+                  case "RingGeometry":
+                    newGeometry = new THREE.RingGeometry(
+                      params.innerRadius,
+                      params.outerRadius,
+                      params.thetaSegments,
+                      params.phiSegments,
+                    )
+                    break;
+                  case "TorusGeometry":
+                    newGeometry = new THREE.TorusGeometry(
+                      params.radius,
+                      params.tube,
+                      params.radialSegments,
+                      params.tubularSegments,
+                    )
+                    break;
+                  case "TorusKnotGeometry":
+                    newGeometry = new THREE.TorusKnotGeometry(
+                      params.radius,
+                      params.tube,
+                      params.tubularSegments,
+                      params.radialSegments,
+                      params.p,
+                      params.q,
+                    )
+                    break;
+                  case "DodecahedronGeometry":
+                    newGeometry = new THREE.DodecahedronGeometry(
+                      params.radius,
+                      params.detail,
+                    )
+                    break;
+                  case "ExtrudeGeometry":
+                    newGeometry = new THREE.ExtrudeGeometry(
+                      params.steps,
+                      params.depth,
+                      params.bevelThickness,
+                      params.bevelSize,
+                      params.bevelOffset,
+                      params.bevelSegments,
+                    )
+                    break;
+                  case "IcosahedronGeometry":
+                    newGeometry =  new THREE.IcosahedronGeometry(
+                      params.radius,
+                      params.detail,
+                    )
+                    break;
+                  case "LatheGeometry":
+                    newGeometry = new THREE.LatheGeometry(
+                      params.points,
+                      params.segments,
+                    )
+                    break;
+                  case "OctahedronGeometry":
+                    newGeometry = new THREE.OctahedronGeometry(
+                      params.radius,
+                      params.detail,
+                    )
+                    break;
+                  case "TetrahedronGeometry":
+                    newGeometry = new THREE.TetrahedronGeometry(
+                      params.radius,
+                      params.detail,
+                    )
+                    break;
+                  case "TubeGeometry":
+                    newGeometry = new THREE.TubeGeometry(
+                      params.path,
+                      params.segments,
+                      params.radius,
+                      params.radialSegments,
+                    )
+                    break;
                 }
 
                 this.object.geometry.dispose();
@@ -350,17 +457,18 @@ class DropdownProperty {
       "form-select"
     );
 
-    options.forEach(option => {
+    for (const key in options) {
       let optionElement = document.createElement("option");
+      const option = options[key];
       optionElement.value = option;
-      optionElement.text = option;
+      optionElement.text = key;
 
       if (option === selectedOption) {
         optionElement.selected = true;
       }
 
       this.select.appendChild(optionElement);
-    });
+    };
 
     this.label = document.createElement("label");
     this.label.setAttribute("for", this.select.getAttribute("id"));
@@ -402,6 +510,26 @@ class DropdownProperty {
               break;
             case "MeshPhongMaterial":
               this.object.material = new THREE.MeshPhongMaterial({ color: 0x808080 });
+
+              break;
+            case "MeshDepthMaterial":
+              this.object.material = new THREE.MeshDepthMaterial({ color: 0x808080 });
+
+              break;
+            case "MeshLambertMaterial":
+              this.object.material = new THREE.MeshLambertMaterial({ color: 0x808080 });
+              
+              break;
+            case "MeshMatcapMaterial":
+              this.object.material = new THREE.MeshMatcapMaterial({ color: 0x808080 });
+
+              break;
+            case "MeshPhysicalMaterial":
+              this.object.material = new THREE.MeshPhysicalMaterial({ color: 0x808080 });
+
+              break;
+            case "MeshToonMaterial":
+              this.object.material = new THREE.MeshToonMaterial({ color: 0x808080 });
 
               break;
           }
@@ -872,7 +1000,7 @@ class ColorProperty {
         this.inputColor.value = colorStyle;
 
         if ( event.key === "Enter" ) {
-          if ( this.properties.lenght === 1 ) {
+          if ( this.properties.length === 1 ) {
             this.object[ this.properties[ 0 ] ].setStyle( colorStyle );
           } else {
             switch ( this.properties[ 0 ] ) {
