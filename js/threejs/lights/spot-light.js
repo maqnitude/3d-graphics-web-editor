@@ -1,19 +1,17 @@
 import * as THREE from "three";
 
-class DirectionalLight extends THREE.DirectionalLight {
+class SpotLight extends THREE.SpotLight {
   constructor( editor ) {
-    super( 0xffffff, 1 );
+    super( 0xffffff );
 
     this.editor = editor;
     this.eventDispatcher = editor.eventDispatcher;
     this.events = editor.events;
 
-    this.name = "Directional Light";
+    this.name = "Spot Light";
 
-    this.helper = new THREE.DirectionalLightHelper( this, 1 );
+    this.helper = new THREE.SpotLightHelper( this );
     this.editor.sceneHelper.add( this.helper );
-
-    //
 
     this.setupEventListeners();
   }
@@ -28,10 +26,10 @@ class DirectionalLight extends THREE.DirectionalLight {
   onObjectChanged( event ) {
     const object = event.detail.object;
 
-    if ( object.isDirectionalLight ) {
+    if ( object.isSpotLight ) {
       this.helper.update();
     }
   }
 }
 
-export { DirectionalLight };
+export { SpotLight };
