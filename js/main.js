@@ -13,6 +13,7 @@ import { DirectionalLight } from "./threejs/lights/directional-light.js";
 
 import { MeshProperties } from "./editor/mesh-properties.js";
 import { LightProperties } from "./editor/light-properties.js";
+import { SceneProperties } from './editor/scene-properties.js';
 
 /*
  * Put together the editor here
@@ -128,7 +129,12 @@ editor.eventDispatcher.addEventListener(
       return;
     }
 
-    if ( object.isMesh ) {
+    if ( object.isScene ) {
+      if (properties) { properties.remove(); }
+
+      const sceneProperties = new SceneProperties( editor, object );
+      rightSideBar.appendChild( sceneProperties.container );
+    } else if ( object.isMesh ) {
       if (properties) { properties.remove(); }
 
       const meshProperties = new MeshProperties( editor, object );
@@ -140,6 +146,7 @@ editor.eventDispatcher.addEventListener(
       rightSideBar.appendChild( lightProperties.container );
     }
 
+    // Is this needed?
     viewport.render();
   }
 );
