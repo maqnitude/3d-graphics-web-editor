@@ -26,7 +26,7 @@ class SceneProperties extends ObjectProperties {
     this.eventDispatcher.addEventListener(
       this.events.objectChanged.type,
       this.onObjectChanged.bind( this )
-    )
+    );
   }
 
   setupSceneProperties( parent ) {
@@ -68,7 +68,6 @@ class SceneProperties extends ObjectProperties {
   }
 
   // Event handlers
-
 
   onObjectChanged( event ) {
     const object = event.detail.object;

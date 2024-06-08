@@ -17,7 +17,7 @@ class Selector {
   }
 
   // Methods
-  
+
   setupEventListeners() {
     this.eventDispatcher.addEventListener(
       this.events.intersectionsDetected.type,
@@ -39,7 +39,7 @@ class Selector {
     // Convert mouse position to NDC
     mouse.set( (point.x * 2) - 1, -(point.y * 2) + 1);
     raycaster.setFromCamera( mouse, camera );
-    
+
     return this.getIntersects( raycaster );
   }
 
@@ -53,7 +53,7 @@ class Selector {
           }
         }
       )
-    )    
+    );
   }
 
   deselect() {
@@ -61,7 +61,7 @@ class Selector {
   }
 
   // Event handlers
-  
+
   onIntersectionsDetected( event ) {
     if (this.ignore) { return; }
 
