@@ -39,6 +39,8 @@ class Editor {
     this.scene = new THREE.Scene();
     this.scene.name = "Scene";
 
+    this.selectedObject = undefined;
+
     this.sceneHelper = new THREE.Scene();
     this.sceneHelper.add( new THREE.HemisphereLight( 0xffffff, 0x888888, 2 ) );
   }

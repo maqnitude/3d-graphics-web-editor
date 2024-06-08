@@ -44,6 +44,10 @@ class Selector {
   }
 
   select ( object ) {
+    if ( this.editor.selectedObject === object ) return;
+
+    this.editor.selectedObject = object;
+
     this.eventDispatcher.dispatchEvent(
       new CustomEvent(
         this.events.objectSelected.type,

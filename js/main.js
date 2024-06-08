@@ -79,6 +79,11 @@ window.addEventListener("resize", function() {
   mainContent.style.height = `${ 100 * availableHeight / window.innerHeight }%`;
 });
 
+// Confirm reloading
+window.addEventListener('beforeunload', function (e) {
+  e.preventDefault();
+});
+
 // Handle shit on the menubar
 
 // Load glb files
@@ -133,7 +138,6 @@ editRedo.addEventListener(
 )
 
 // Handle shit in the right sidebar
-// TODO: hide the properties container instead of removing it
 editor.eventDispatcher.addEventListener(
   editor.events.objectSelected.type,
   function( event ) {
@@ -240,7 +244,7 @@ addObjectButton.addEventListener( "click", function() {
         break;
       case "Tube":
         viewport.addObject( new Tube() );
-        break; 
+        break;
       case "DirectionalLight":
         viewport.addObject( new DirectionalLight( editor ) );
         break;

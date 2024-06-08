@@ -20,9 +20,17 @@ class Viewport {
     this.orbitControls = new OrbitControls( this.camera, this.renderer.domElement );
 
     this.scene = editor.scene;
-
     this.sceneHelper = editor.sceneHelper;
+
     this.grid = this.createGrid();
+
+    // Selection box
+    this.box = new THREE.Box3();
+    this.selectionBox = new THREE.Box3Helper( this.box );
+    this.selectionBox.material.depthTest = false;
+    this.selectionBox.material.transparent = true;
+    this.selectionBox.visible = false;
+    this.sceneHelper.add( this.selectionBox );
 
     this.transformControls = new TransformControls( this.camera, this.renderer.domElement );
     this.sceneHelper.add( this.transformControls );
@@ -295,9 +303,16 @@ class Viewport {
   onObjectSelected( event ) {
     const object = event.detail.object;
 
+    this.selectionBox.visible = false;
     this.transformControls.detach();
 
     if (object && object !== this.scene && object !== this.camera) {
+      this.box.setFromObject( object, true );
+
+      if ( !this.box.isEmpty() ) {
+        this.selectionBox.visible = true;
+      }
+
       this.transformControls.attach( object );
     }
 
@@ -305,10 +320,22 @@ class Viewport {
   }
 
   onObjectChanged( event ) {
+    const object = event.detail.object;
+
+    if ( this.editor.selectedObject === object ) {
+      this.box.setFromObject( object, true );
+    }
+
     this.render();
   }
 
   onGeometryChanged( event ) {
+    const object = event.detail.object;
+
+    if ( object ) {
+      this.box.setFromObject( object, true );
+    }
+
     this.render();
   }
 

@@ -295,7 +295,7 @@ class ValueSliderProperty {
                 mesh.geometry = newGeometry;
                 mesh.geometry.computeBoundingSphere();
 
-                this.eventDispatcher.dispatchEvent( this.events.geometryChanged );
+                this.dispatchGeometryChangedEvent( mesh );
 
                 break;
               default:
@@ -330,6 +330,17 @@ class ValueSliderProperty {
         }
       }
     ));
+  }
+
+  dispatchGeometryChangedEvent( object ) {
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.geometryChanged.type,
+      {
+        detail: {
+          object: object,
+        }
+      }
+    ))
   }
 }
 
