@@ -32,6 +32,7 @@ import { MeshProperties } from "./editor/mesh-properties.js";
 import { LightProperties } from "./editor/light-properties.js";
 import { SceneProperties } from './editor/scene-properties.js';
 import { CameraProperties } from './editor/camera-properties.js';
+import { GroupProperties } from './editor/group-properties.js';
 
 import { PerspectiveCamera } from './threejs/cameras/perspective-camera.js';
 import { OrthographicCamera } from './threejs/cameras/orthographic-camera.js';
@@ -168,6 +169,9 @@ editor.eventManager.add(
     } else if ( object.isLight ) {
       const lightProperties = new LightProperties( editor, object );
       rightSideBar.appendChild( lightProperties.container );
+    } else {
+      const groupProperties = new GroupProperties( editor, object );
+      rightSideBar.appendChild( groupProperties.container );
     }
 
     // Is this needed?

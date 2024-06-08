@@ -17,7 +17,7 @@ class SpotLight extends THREE.SpotLight {
   }
 
   setupEvents() {
-    this.event.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
+    this.eventManager.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
   }
 
   onObjectChanged( event ) {

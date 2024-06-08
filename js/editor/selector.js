@@ -19,10 +19,7 @@ class Selector {
   // Methods
 
   setupEvents() {
-    this.eventManager.add(
-      this.events.intersectionsDetected,
-      this.onIntersectionsDetected.bind( this )
-    )
+    this.eventManager.add( this.events.intersectionsDetected, this.onIntersectionsDetected.bind( this ) );
   }
 
   getIntersects( raycaster ) {
