@@ -6,7 +6,7 @@ import { TransformControls } from "three/addons/controls/TransformControls.js";
 class Viewport {
   constructor( editor ) {
     this.editor = editor;
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.history = editor.history;
@@ -20,61 +20,46 @@ class Viewport {
     this.orbitControls = new OrbitControls( this.camera, this.renderer.domElement );
 
     this.scene = editor.scene;
-
     this.sceneHelper = editor.sceneHelper;
+
     this.grid = this.createGrid();
+
+    // Selection box
+    this.box = new THREE.Box3();
+    this.selectionBox = new THREE.Box3Helper( this.box );
+    this.selectionBox.material.depthTest = false;
+    this.selectionBox.material.transparent = true;
+    this.selectionBox.visible = false;
+    this.sceneHelper.add( this.selectionBox );
 
     this.transformControls = new TransformControls( this.camera, this.renderer.domElement );
     this.sceneHelper.add( this.transformControls );
 
     //
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
   // Initializers
 
-  setupEventListeners() {
+  setupEvents() {
     document.addEventListener("mousedown", (event) => this.onMouseDown(event));
 
     document.addEventListener("mouseup", (event) => this.onMouseUp(event));
 
-    this.eventDispatcher.addEventListener(
-      this.events.rendererCreated.type,
-      this.render.bind( this )
-    );
+    this.eventManager.add( this.events.windowResized, this.render.bind( this ) );
 
-    this.eventDispatcher.addEventListener(
-      this.events.windowResized.type,
-      this.render.bind( this )
-    );
+    this.eventManager.add( this.events.rendererCreated, this.render.bind( this ) );
 
-    this.eventDispatcher.addEventListener(
-      this.events.objectAdded.type,
-      this.onObjectAdded.bind( this )
-    );
-    this.eventDispatcher.addEventListener(
-      this.events.objectSelected.type,
-      this.onObjectSelected.bind( this )
-    );
-    this.eventDispatcher.addEventListener(
-      this.events.objectChanged.type,
-      this.onObjectChanged.bind( this )
-    );
-    this.eventDispatcher.addEventListener(
-      this.events.objectRemoved.type,
-      this.onObjectRemoved.bind( this )
-    );
+    this.eventManager.add( this.events.objectAdded, this.onObjectAdded.bind( this ) );
+    this.eventManager.add( this.events.objectSelected, this.onObjectSelected.bind( this ) );
+    this.eventManager.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
+    this.eventManager.add( this.events.objectRemoved, this.onObjectRemoved.bind( this ) );
 
-    this.eventDispatcher.addEventListener(
-      this.events.geometryChanged.type,
-      this.onGeometryChanged.bind( this )
-    );
+    this.eventManager.add( this.events.geometryChanged, this.onGeometryChanged.bind( this ) );
 
-    this.eventDispatcher.addEventListener(
-      this.events.materialChanged.type,
-      this.onMaterialChanged.bind( this )
-    );
+    this.eventManager.add( this.events.materialSelected, this.onMaterialSelected.bind( this ) )
+    this.eventManager.add( this.events.materialChanged, this.onMaterialChanged.bind( this ) );
 
     this.orbitControls.addEventListener(
       "change",
@@ -85,19 +70,17 @@ class Viewport {
       "change",
       this.render.bind( this )
     );
-
     this.transformControls.addEventListener(
       "dragging-changed",
       ( event ) => {
         this.orbitControls.enabled = !event.value;
       }
     );
-
     // Change in viewport, update in properties
     this.transformControls.addEventListener(
       "objectChange",
       ( event ) => {
-        this.dispatchObjectChangedEvent( this.transformControls.object );
+        this.eventManager.dispatch( this.events.objectChanged, { object: this.transformControls.object } );
       }
     );
     this.transformControls.addEventListener(
@@ -106,7 +89,7 @@ class Viewport {
         this.history.recordChange = true;
         this.history.newUndoBranch = true;
 
-        this.dispatchObjectChangedEvent( this.transformControls.object );
+        this.eventManager.dispatch( this.events.objectChanged, { object: this.transformControls.object } );
       }
     );
     this.transformControls.addEventListener(
@@ -132,22 +115,12 @@ class Viewport {
         }
         button.classList.remove('btn-secondary');
         button.classList.add('btn-primary');
-        this.eventDispatcher.dispatchEvent(new CustomEvent (
-            this.events.transformModeChanged.type,
-            {
-              detail: {
-                mode: button.id.toLowerCase(),
-              }
-            }
-          )
-        )
+
+        this.eventManager.dispatch( this.events.transformModeChanged, { mode: button.id.toLowerCase() } );
       }
     }
 
-    this.eventDispatcher.addEventListener(
-      this.events.transformModeChanged.type,
-      this.onTransformModeChanged.bind(this)
-    )
+    this.eventManager.add( this.events.transformModeChanged, this.onTransformModeChanged.bind(this) );
 
     this.container.addEventListener(
       "mouseenter",
@@ -186,7 +159,7 @@ class Viewport {
 
     this.container.appendChild( renderer.domElement );
 
-    this.eventDispatcher.dispatchEvent( this.events.rendererCreated );
+    this.eventManager.dispatch( this.events.rendererCreated );
 
     return renderer;
   }
@@ -214,41 +187,16 @@ class Viewport {
 
   // Methods
 
-  dispatchObjectChangedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectChanged.type,
-      {
-        detail: {
-          object: object,
-        }
-      }
-    ));
-  }
-
   addObject( object ) {
     this.scene.add( object );
-    // this.eventDispatcher.dispatchEvent( this.events.objectAdded );
-    this.eventDispatcher.dispatchEvent( new CustomEvent(
-      this.events.objectAdded.type,
-      {
-        detail: {
-          object: object
-        }
-      }
-    ));
+
+    this.eventManager.dispatch( this.events.objectAdded, { object: object } );
   }
 
   removeObject( object ) {
     this.scene.remove( object );
-    // this.eventDispatcher.dispatchEvent( this.events.objectRemoved );
-    this.eventDispatcher.dispatchEvent( new CustomEvent(
-      this.events.objectRemoved.type,
-      {
-        detail: {
-          object: object
-        }
-      }
-    ));
+
+    this.eventManager.dispatch( this.events.objectRemoved, { object: object } );
   }
 
   getMousePosition( dom, x, y ) {
@@ -295,9 +243,16 @@ class Viewport {
   onObjectSelected( event ) {
     const object = event.detail.object;
 
+    this.selectionBox.visible = false;
     this.transformControls.detach();
 
     if (object && object !== this.scene && object !== this.camera) {
+      this.box.setFromObject( object, true );
+
+      if ( !this.box.isEmpty() ) {
+        this.selectionBox.visible = true;
+      }
+
       this.transformControls.attach( object );
     }
 
@@ -305,10 +260,26 @@ class Viewport {
   }
 
   onObjectChanged( event ) {
+    const object = event.detail.object;
+
+    if ( this.editor.selectedObject === object ) {
+      this.box.setFromObject( object, true );
+    }
+
     this.render();
   }
 
   onGeometryChanged( event ) {
+    const object = event.detail.object;
+
+    if ( object ) {
+      this.box.setFromObject( object, true );
+    }
+
+    this.render();
+  }
+
+  onMaterialSelected( event ) {
     this.render();
   }
 
@@ -330,16 +301,8 @@ class Viewport {
 
     if (this.onDownPosition.distanceTo( this.onUpPosition ) === 0) {
       const intersects = this.selector.getPointerIntersects( this.onUpPosition, this.camera );
-      this.eventDispatcher.dispatchEvent(
-        new CustomEvent(
-          this.events.intersectionsDetected.type,
-          {
-            detail: {
-              intersects: intersects,
-            }
-          }
-        )
-      );
+
+      this.eventManager.dispatch( this.events.intersectionsDetected, { intersects: intersects } );
     }
   }
 

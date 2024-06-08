@@ -2,7 +2,7 @@
 class Node {
   constructor( sceneTree, object, draggable ) {
     this.sceneTree = sceneTree;
-    this.eventDispatcher = sceneTree.eventDispatcher;
+    this.eventManager = sceneTree.eventManager;
     this.events = sceneTree.events;
 
     this.object = object;
@@ -56,10 +56,10 @@ class Node {
 
     this.updateCollapseButton();
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
-  setupEventListeners() {
+  setupEvents() {
     this.listGroupItem.addEventListener(
       "click",
       this.onClick.bind( this )
@@ -70,8 +70,8 @@ class Node {
       this.onCollapseButtonClick.bind( this )
     );
 
-    this.eventDispatcher.addEventListener(
-      this.events.objectSelected.type,
+    this.eventManager.add(
+      this.events.objectSelected,
       this.onObjectSelected.bind( this )
     )
   }
@@ -114,14 +114,7 @@ class Node {
   onClick() {
     this.activate();
 
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectSelected.type,
-      {
-        detail: {
-          object: this.object,
-        }
-      }
-    ));
+    this.eventManager.dispatch( this.events.objectSelected, { object: this.object } );
   }
 
   // BUG: have to double click collapse the node initially
@@ -144,7 +137,7 @@ class SceneTree {
   constructor( editor ) {
     // Make use of a data structure for these fucking nodes?
     this.editor = editor;
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.selectedNode = null; // Don't know what to do with this yet
@@ -185,21 +178,14 @@ class SceneTree {
 
     this.refresh();
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
   // Methods
 
-  setupEventListeners() {
-    this.eventDispatcher.addEventListener(
-      this.events.objectAdded.type,
-      this.onObjectAdded.bind( this )
-    )
-
-    this.eventDispatcher.addEventListener(
-      this.events.objectRemoved.type,
-      this.onObjectRemoved.bind( this )
-    )
+  setupEvents() {
+    this.eventManager.add( this.events.objectAdded, this.onObjectAdded.bind( this ) );
+    this.eventManager.add( this.events.objectRemoved, this.onObjectRemoved.bind( this ) );
   }
 
   setNodes( nodes ) {

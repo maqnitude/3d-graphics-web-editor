@@ -28,7 +28,7 @@ class ChangeEntry extends Entry {
 class History {
   constructor( editor ) {
     this.editor = editor;
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.maxEntries = 100;
@@ -40,24 +40,13 @@ class History {
 
     //
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
-  setupEventListeners() {
-    this.eventDispatcher.addEventListener(
-      this.events.objectAdded.type,
-      this.onObjectAdded.bind( this )
-    );
-
-    this.eventDispatcher.addEventListener(
-      this.events.objectRemoved.type,
-      this.onObjectRemoved.bind( this )
-    );
-
-    this.eventDispatcher.addEventListener(
-      this.events.objectChanged.type,
-      this.onObjectChanged.bind( this )
-    );
+  setupEvents() {
+    this.eventManager.add( this.events.objectAdded, this.onObjectAdded.bind( this ) );
+    this.eventManager.add( this.events.objectRemoved, this.onObjectRemoved.bind( this ) );
+    this.eventManager.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
   }
 
   undo() {
@@ -69,7 +58,7 @@ class History {
       case "add":
         this.editor.scene.remove( entry.object );
 
-        this.dispatchObjectRemovedEvent( null );
+        this.eventManager.dispatch( this.events.objectRemoved, { object: null } );
 
         this.redos.push( entry );
 
@@ -77,7 +66,7 @@ class History {
       case "remove":
         this.editor.scene.add( entry.object );
 
-        this.dispatchObjectAddedEvent( null );
+        this.eventManager.dispatch( this.events.objectAdded, { object: null } );
 
         this.redos.push( entry );
 
@@ -96,7 +85,7 @@ class History {
           object.visible = entry.visible;
         }
 
-        this.dispatchObjectChangedEvent( object );
+        this.eventManager.dispatch( this.events.objectChanged, { object: object } );
 
         break;
     }
@@ -114,7 +103,7 @@ class History {
       case "add":
         this.editor.scene.add( entry.object );
 
-        this.dispatchObjectAddedEvent( null );
+        this.eventManager.dispatch( this.events.objectAdded, { object: null } );
 
         this.undos.push( entry );
 
@@ -122,7 +111,7 @@ class History {
       case "remove":
         this.editor.scene.remove( entry.object );
 
-        this.dispatchObjectRemovedEvent( null );
+        this.eventManager.dispatch( this.events.objectRemoved, { object: null } );
 
         this.undos.push( entry );
 
@@ -141,7 +130,7 @@ class History {
           object.visible = entry.visible;
         }
 
-        this.dispatchObjectChangedEvent( object );
+        this.eventManager.dispatch( this.events.objectChanged, { object: object } );
 
         break;
     }
@@ -153,7 +142,7 @@ class History {
   // Event handlers
 
   onObjectAdded( event ) {
-    if (!event.detail.object) { return; }
+    if ( !event.detail.object ) { return; }
 
     const object = event.detail.object;
 
@@ -175,7 +164,7 @@ class History {
   }
 
   onObjectRemoved( event ) {
-    if (!event.detail.object) { return; }
+    if ( !event.detail.object ) { return; }
 
     const object = event.detail.object;
 
@@ -197,8 +186,7 @@ class History {
   }
 
   onObjectChanged( event ) {
-    if (!this.recordChange) { return; }
-    if (!event.detail.object) { return; }
+    if ( !this.recordChange || !event.detail.object ) { return; }
 
     const object = event.detail.object;
 
@@ -224,41 +212,6 @@ class History {
 
     // console.log("undos:", this.undos);
     // console.log("redos:", this.redos);
-  }
-
-  // Dispatch custom events
-
-  dispatchObjectAddedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectAdded.type,
-      {
-        detail: {
-          object: object
-        }
-      }
-    ));
-  }
-
-  dispatchObjectRemovedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectRemoved.type,
-      {
-        detail: {
-          object: object
-        }
-      }
-    ));
-  }
-
-  dispatchObjectChangedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectChanged.type,
-      {
-        detail: {
-          object: object
-        }
-      }
-    ));
   }
 }
 

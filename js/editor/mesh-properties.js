@@ -18,19 +18,14 @@ class MeshProperties extends ObjectProperties {
 
     //
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
-  setupEventListeners() {
-    this.eventDispatcher.addEventListener(
-      this.events.objectChanged.type,
-      this.onObjectChanged.bind( this )
-    );
+  setupEvents() {
+    this.eventManager.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
 
-    this.eventDispatcher.addEventListener(
-      this.events.materialChanged.type,
-      this.onMaterialChanged.bind( this )
-    );
+    this.eventManager.add( this.events.materialSelected, this.onMaterialSelected.bind( this ) );
+    this.eventManager.add( this.events.materialChanged, this.onMaterialChanged.bind( this ) );
   }
 
   setupGeometryProperties( parent ) {
@@ -593,9 +588,18 @@ class MeshProperties extends ObjectProperties {
     }
   }
 
-  onMaterialChanged( event ) {
+  onMaterialSelected( event ) {
     this.materialProperties.clear();
     this.setupMaterialProperties( this.materialProperties.container );
+  }
+
+  onMaterialChanged( event ) {
+    const object = event.detail.object;
+
+    if ( object.isMesh ) {
+      this.mesh = object;
+      this.updateUI();
+    }
   }
 }
 

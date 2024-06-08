@@ -15,11 +15,8 @@ class LightProperties extends ObjectProperties {
     this.setupLightProperties( this.lightProperties.container );
   }
 
-  setupEventListeners() {
-    this.eventDispatcher.addEventListener(
-      this.events.objectChanged.type,
-      this.onObjectChanged.bind( this )
-    )
+  setupEvents() {
+    this.eventManager.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
   }
 
   setupLightProperties( parent ) {

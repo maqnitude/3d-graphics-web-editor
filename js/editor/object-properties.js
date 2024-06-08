@@ -11,14 +11,11 @@ class ObjectProperties extends Properties {
 
     //
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
-  setupEventListeners() {
-    this.eventDispatcher.addEventListener(
-      this.events.objectChanged.type,
-      this.onObjectChanged.bind( this )
-    );
+  setupEvents() {
+    this.eventManager.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
   }
 
   setupObjectProperties( parent ) {

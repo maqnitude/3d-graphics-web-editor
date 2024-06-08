@@ -6,21 +6,21 @@ const raycaster = new THREE.Raycaster();
 class Selector {
   constructor( editor ) {
     this.editor = editor;
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.ignore = false;
 
     //
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
   // Methods
 
-  setupEventListeners() {
-    this.eventDispatcher.addEventListener(
-      this.events.intersectionsDetected.type,
+  setupEvents() {
+    this.eventManager.add(
+      this.events.intersectionsDetected,
       this.onIntersectionsDetected.bind( this )
     )
   }
@@ -44,15 +44,23 @@ class Selector {
   }
 
   select ( object ) {
-    this.eventDispatcher.dispatchEvent(
-      new CustomEvent(
-        this.events.objectSelected.type,
-        {
-          detail: {
-            object: object,
-          }
-        }
-      )
+    if ( this.editor.selectedObject === object ) return;
+
+    this.editor.selectedObject = object;
+
+    // this.eventDispatcher.dispatchEvent(
+    //   new CustomEvent(
+    //     this.events.objectSelected.type,
+    //     {
+    //       detail: {
+    //         object: object,
+    //       }
+    //     }
+    //   )
+    // );
+    this.eventManager.dispatch(
+      this.events.objectSelected,
+      { object: object }
     );
   }
 
