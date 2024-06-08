@@ -5,7 +5,7 @@ class DirectionalLight extends THREE.DirectionalLight {
     super( 0xffffff, 1 );
 
     this.editor = editor;
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.name = "Directional Light";
@@ -15,14 +15,11 @@ class DirectionalLight extends THREE.DirectionalLight {
 
     //
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
-  setupEventListeners() {
-    this.eventDispatcher.addEventListener(
-      this.events.objectChanged.type,
-      this.onObjectChanged.bind( this )
-    );
+  setupEvents() {
+    this.eventManager.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
   }
 
   onObjectChanged( event ) {

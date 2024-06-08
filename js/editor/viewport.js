@@ -266,6 +266,10 @@ class Viewport {
       this.box.setFromObject( object, true );
     }
 
+    if ( object.isCamera ) {
+      object.updateProjectionMatrix();
+    }
+
     this.render();
   }
 

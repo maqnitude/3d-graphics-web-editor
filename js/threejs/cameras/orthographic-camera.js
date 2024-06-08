@@ -1,17 +1,22 @@
 import * as THREE from "three";
 
-class PointLight extends THREE.PointLight {
+class OrthographicCamera extends THREE.OrthographicCamera {
   constructor( editor ) {
-    super( 0xffffff, 1, 0 );
+    const width = window.innerWidth / 400;
+    const height = window.innerHeight / 400;
+
+    super( width / -2, width / 2, height / 2, height / -2, 1, 1000 );
 
     this.editor = editor;
     this.eventManager = editor.eventManager;
     this.events = editor.events;
 
-    this.name = "Point Light";
+    this.name = "Orthographic Camera";
 
-    this.helper = new THREE.PointLightHelper( this, 1 );
+    this.helper = new THREE.CameraHelper( this );
     this.editor.sceneHelper.add( this.helper );
+
+    //
 
     this.setupEvents();
   }
@@ -23,10 +28,10 @@ class PointLight extends THREE.PointLight {
   onObjectChanged( event ) {
     const object = event.detail.object;
 
-    if ( object.isPointLight ) {
+    if ( object.isOrthographicCamera ) {
       this.helper.update();
     }
   }
 }
 
-export { PointLight };
+export { OrthographicCamera };

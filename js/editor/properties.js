@@ -136,6 +136,10 @@ class ValueSliderProperty {
     if ( this.properties.length === 1 ) {
       this.object[ this.properties[ 0 ] ] = value;
 
+      if ( this.object.isCamera ) {
+        this.object.updateProjectionMatrix();
+      }
+
       this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
     } else {
       if ( this.object.isScene ) {

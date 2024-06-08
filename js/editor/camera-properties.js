@@ -28,6 +28,7 @@ class CameraProperties extends ObjectProperties {
         this.perspectiveCameraFOV = new ValueSliderProperty( editor, parent, camera, "fov", "FOV", camera.fov, 0, 180, 0.01 );
         this.perspectiveCameraNear = new ValueSliderProperty( editor, parent, camera, "near", "Near", camera.near, 0, 1000000, 0.01 );
         this.perspectiveCameraFar = new ValueSliderProperty( editor, parent, camera, "far", "Far", camera.near, 0, 1000000, 0.01 );
+
         break;
       case "OrthographicCamera":
         this.orthographicCameraLeft = new ValueSliderProperty( editor, parent, camera, "left", "Left", camera.left, 0, 1000000, 0.01 );
@@ -46,11 +47,9 @@ class CameraProperties extends ObjectProperties {
 
     const camera = this.camera;
     const cameraProps = this.getCameraProperties( camera.type );
-    if ( cameraProps ) {
-      for ( const prop in cameraProps ) {
-        if ( camera.hasOwnProperty( prop ) ) {
-          this.setPropertyValue( cameraProps[ prop ], camera[ prop ] );
-        }
+    for ( const prop in cameraProps ) {
+      if ( camera.hasOwnProperty( prop ) ) {
+        this.setPropertyValue( cameraProps[ prop ], camera[ prop ] );
       }
     }
   }
@@ -82,7 +81,10 @@ class CameraProperties extends ObjectProperties {
     const object = event.detail.object;
 
     if ( object.isCamera ) {
-      this.camera = object;
+      if ( object !== this.editor.viewportCamera ) {
+        this.camera = object;
+      }
+
       this.updateUI();
     }
   }
