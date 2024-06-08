@@ -1,6 +1,6 @@
 class VerticalResizer {
   constructor( editor, leftSibling, rightSibling ) {
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.leftSibling = leftSibling;
@@ -76,7 +76,7 @@ class VerticalResizer {
         child.style.width = "100%";
       }
 
-      this.eventDispatcher.dispatchEvent(this.events.windowResized);
+      this.eventManager.dispatch( this.events.windowResized );
     });
 
     window.addEventListener("mouseup", ( event ) => {

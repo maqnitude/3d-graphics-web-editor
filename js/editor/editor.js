@@ -2,11 +2,34 @@ import * as THREE from "three";
 import { History } from "./history.js";
 import { Selector } from "./selector.js";
 
-class Editor {
+class EventManager {
   constructor() {
     // This enables all the events in here to be "global"
     // Publish/subscribe pattern
     this.eventDispatcher = new EventTarget();
+  }
+
+  add( event, callback ) {
+    this.eventDispatcher.addEventListener( event.type, callback );
+  }
+
+  dispatch( event, detail = undefined ) {
+    if ( detail ) {
+      this.eventDispatcher.dispatchEvent(new CustomEvent(
+        event.type,
+        {
+          detail: detail
+        }
+      ));
+    } else {
+      this.eventDispatcher.dispatchEvent( event );
+    }
+  }
+}
+
+class Editor {
+  constructor() {
+    this.eventManager = new EventManager();
 
     this.events = {
       rendererCreated: new Event( "rendererCreated" ),
@@ -21,6 +44,8 @@ class Editor {
       objectRemoved: new Event( "objectRemoved" ),
 
       geometryChanged: new Event( "geometryChanged" ),
+
+      materialSelected: new Event( "materialSelected" ),
       materialChanged: new Event( "materialChanged" ),
 
       transformModeChanged: new Event( "transformModeChanged" ),

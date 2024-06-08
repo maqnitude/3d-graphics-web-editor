@@ -48,7 +48,7 @@ class ValueSliderProperty {
   constructor( editor, parent, object, propertyString, propertyLabel, value, min, max, step ) {
     this.editor = editor;
     this.history = editor.history;
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.parent = parent;
@@ -107,7 +107,7 @@ class ValueSliderProperty {
 
     //
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
   setValue( value ) {
@@ -115,7 +115,7 @@ class ValueSliderProperty {
     this.inputSlider.value = `${ value }`;
   }
 
-  setupEventListeners() {
+  setupEvents() {
     this.inputNumber.addEventListener(
       "input",
       this.onInput.bind( this )
@@ -136,14 +136,14 @@ class ValueSliderProperty {
     if ( this.properties.length === 1 ) {
       this.object[ this.properties[ 0 ] ] = value;
 
-      this.dispatchObjectChangedEvent( this.object );
+      this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
     } else {
       if ( this.object.isScene ) {
         const scene = this.object;
 
         scene[ this.properties[ 0 ] ] = value;
 
-        this.dispatchObjectChangedEvent( scene );
+        this.eventManager.dispatch( this.events.objectChanged, { object: scene } );
       } else if ( this.object.isMesh ) {
         const mesh = this.object;
 
@@ -295,7 +295,7 @@ class ValueSliderProperty {
                 mesh.geometry = newGeometry;
                 mesh.geometry.computeBoundingSphere();
 
-                this.dispatchGeometryChangedEvent( mesh );
+                this.eventManager.dispatch( this.events.geometryChanged, { object: mesh } );
 
                 break;
               default:
@@ -309,7 +309,7 @@ class ValueSliderProperty {
             material[ this.properties[ 1 ] ] = value;
 
             material.needsUpdate = true;
-            this.dispatchObjectChangedEvent( this.object );
+            this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
 
             break;
           default:
@@ -318,37 +318,13 @@ class ValueSliderProperty {
       }
     }
   }
-
-  // Dispatch custom events
-
-  dispatchObjectChangedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectChanged.type,
-      {
-        detail: {
-          object: object,
-        }
-      }
-    ));
-  }
-
-  dispatchGeometryChangedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.geometryChanged.type,
-      {
-        detail: {
-          object: object,
-        }
-      }
-    ))
-  }
 }
 
 class BooleanProperty {
   constructor( editor, parent, object, propertyString, propertyLabel, value ) {
     this.editor = editor;
     this.history = editor.history;
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.parent = parent;
@@ -393,14 +369,14 @@ class BooleanProperty {
 
     //
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
   setValue( value ) {
     this.input.checked = value;
   }
 
-  setupEventListeners() {
+  setupEvents() {
     this.input.addEventListener(
       "input",
       ( event ) => {
@@ -411,9 +387,11 @@ class BooleanProperty {
           this.history.recordChange = true;
           this.history.newUndoBranch = true;
 
-          this.dispatchObjectChangedEvent( this.object );
+          this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
 
           this.object[ this.properties[ 0 ] ] = checked;
+
+          this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
         } else {
           if ( this.object.isMesh ) {
             switch ( this.properties[ 0 ] ) {
@@ -421,30 +399,16 @@ class BooleanProperty {
                 const material = this.object.material;
 
                 material[ this.properties[ 1 ] ] = checked;
-
                 material.needsUpdate = true;
+
+                this.eventManager.dispatch( this.events.materialChanged, { object: this.object } );
 
                 break;
             }
           }
         }
-
-        this.dispatchObjectChangedEvent( this.object );
       }
-    )
-  }
-
-  // Dispatch custom events
-
-  dispatchObjectChangedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectChanged.type,
-      {
-        detail: {
-          object: object,
-        }
-      }
-    ));
+    );
   }
 }
 
@@ -452,7 +416,7 @@ class DropdownProperty {
   constructor( editor, parent, object, property, propertyLabel, options, selectedOption ) {
     this.editor = editor;
     this.history = editor.history;
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.parent = parent;
@@ -503,10 +467,10 @@ class DropdownProperty {
 
     //
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
-  setupEventListeners() {
+  setupEvents() {
     // TODO: This needs refactoring
     this.select.addEventListener(
       "change",
@@ -557,31 +521,16 @@ class DropdownProperty {
             }
 
             this.object.material.needsUpdate = true;
-            this.eventDispatcher.dispatchEvent( this.events.materialChanged );
-
-            this.dispatchObjectChangedEvent( this.object );
+            this.eventManager.dispatch( this.events.materialSelected );
 
             break;
         }
       }
-    )
+    );
   }
 
   setValue( value ) {
     this.select.value = value;
-  }
-
-  // Dispatch custom events
-
-  dispatchObjectChangedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectChanged.type,
-      {
-        detail: {
-          object: object,
-        }
-      }
-    ));
   }
 }
 
@@ -590,7 +539,7 @@ class Vector3Property {
   constructor( editor, parent, object, property, propertyLabel, vector3 ) {
     this.editor = editor;
     this.history = editor.history;
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.parent = parent;
@@ -675,7 +624,7 @@ class Vector3Property {
 
     this.parent.appendChild(this.container);
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
   setValue( vector3 ) {
@@ -685,7 +634,7 @@ class Vector3Property {
   }
 
   // Change in properties, update in viewport
-  setupEventListeners() {
+  setupEvents() {
     this.inputNumberX.addEventListener(
       "input",
       ( event ) => {
@@ -693,7 +642,7 @@ class Vector3Property {
 
         this.object[ this.property ].setComponent(0, value);
 
-        this.dispatchObjectChangedEvent( this.object );
+        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
       }
     )
     this.inputNumberX.addEventListener(
@@ -712,7 +661,7 @@ class Vector3Property {
 
         this.object[ this.property ].setComponent(1, value);
 
-        this.dispatchObjectChangedEvent( this.object );
+        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
       }
     )
     this.inputNumberY.addEventListener(
@@ -731,7 +680,7 @@ class Vector3Property {
 
         this.object[ this.property ].setComponent(2, value);
 
-        this.dispatchObjectChangedEvent( this.object );
+        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
 
       }
     )
@@ -751,24 +700,11 @@ class Vector3Property {
     this.history.recordChange = true;
     this.history.newUndoBranch = true;
 
-    this.dispatchObjectChangedEvent( this.object );
+    this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
   }
 
   onBlur() {
     this.history.recordChange = false;
-  }
-
-  // Dispatch custome events
-
-  dispatchObjectChangedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectChanged.type,
-      {
-        detail: {
-          object: object,
-        }
-      }
-    ));
   }
 }
 
@@ -776,7 +712,7 @@ class EulerProperty {
   constructor( editor, parent, object, property, propertyLabel, euler ) {
     this.editor = editor;
     this.history = editor.history;
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.parent = parent;
@@ -860,7 +796,7 @@ class EulerProperty {
 
     //
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
   setValue( euler ) {
@@ -870,7 +806,7 @@ class EulerProperty {
   }
 
   // Change in properties, update in viewport
-  setupEventListeners() {
+  setupEvents() {
     this.inputNumberX.addEventListener(
       "input",
       (event) => {
@@ -878,7 +814,7 @@ class EulerProperty {
 
         this.object.rotation.x = (value * (Math.PI / 180));
 
-        this.dispatchObjectChangedEvent( this.object );
+        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
       }
     )
     this.inputNumberX.addEventListener(
@@ -897,7 +833,7 @@ class EulerProperty {
 
         this.object.rotation.y = (value * (Math.PI / 180));
 
-        this.dispatchObjectChangedEvent( this.object );
+        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
       }
     )
     this.inputNumberY.addEventListener(
@@ -916,7 +852,7 @@ class EulerProperty {
 
         this.object.rotation.z = (value * (Math.PI / 180));
 
-        this.dispatchObjectChangedEvent( this.object );
+        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
       }
     )
     this.inputNumberZ.addEventListener(
@@ -935,24 +871,11 @@ class EulerProperty {
     this.history.recordChange = true;
     this.history.newUndoBranch = true;
 
-    this.dispatchObjectChangedEvent( this.object );
+    this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
   }
 
   onBlur() {
     this.history.recordChange = false;
-  }
-
-  // Dispatch custom events
-
-  dispatchObjectChangedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectChanged.type,
-      {
-        detail: {
-          object: object,
-        }
-      }
-    ));
   }
 }
 
@@ -960,7 +883,7 @@ class ColorProperty {
   constructor( editor, parent, object, propertyString, propertyLabel, color ) {
     this.editor = editor,
     this.history = editor.history,
-    this.eventDispatcher = editor.eventDispatcher,
+    this.eventManager = editor.eventManager,
     this.events = editor.events;
 
     this.parent = parent;
@@ -991,10 +914,10 @@ class ColorProperty {
 
     //
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
-  setupEventListeners() {
+  setupEvents() {
     this.inputColor.addEventListener(
       "input",
       ( event ) => {
@@ -1049,20 +972,7 @@ class ColorProperty {
 
     material.needsUpdate = true;
 
-    this.dispatchObjectChangedEvent( this.object );
-  }
-
-  // Dispatch custom events
-
-  dispatchObjectChangedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectChanged.type,
-      {
-        detail: {
-          object: object,
-        }
-      }
-    ));
+    this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
   }
 }
 
@@ -1070,7 +980,7 @@ class TextureProperty {
   constructor( editor, parent, object, propertyString, propertyLabel ) {
     this.editor = editor,
     this.history = editor.history,
-    this.eventDispatcher = editor.eventDispatcher,
+    this.eventManager = editor.eventManager,
     this.events = editor.events,
 
     this.parent = parent,
@@ -1108,10 +1018,10 @@ class TextureProperty {
 
     //
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
-  setupEventListeners() {
+  setupEvents() {
     this.inputFile.addEventListener(
       "change",
       ( event ) => {
@@ -1192,7 +1102,7 @@ class TextureProperty {
           object.needsUpdate = true;
         }
 
-        this.dispatchObjectChangedEvent( this.object );
+        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
       });
     }
 
@@ -1224,12 +1134,14 @@ class TextureProperty {
         if ( object.isScene ) {
           object.background = texture;
           object.environment = texture;
+
+          this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
         } else if ( object.isMaterial ) {
           object[ property ] = texture;
           object.needsUpdate = true;
-        }
 
-        this.dispatchObjectChangedEvent( this.object );
+          this.eventManager.dispatch( this.events.materialChanged, { object: this.object } );
+        }
       });
     }
 
@@ -1239,19 +1151,6 @@ class TextureProperty {
   // Must be named setValue
   setValue( texture ) {
     this.span.textContent = texture?.name;
-  }
-
-  // Dispatch custom events
-
-  dispatchObjectChangedEvent( object ) {
-    this.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.events.objectChanged.type,
-      {
-        detail: {
-          object: object,
-        }
-      }
-    ));
   }
 }
 
@@ -1289,7 +1188,7 @@ class PropertyGroup {
 class Properties {
   constructor( editor ) {
     this.editor = editor;
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.history = editor.history;

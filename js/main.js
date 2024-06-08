@@ -66,14 +66,14 @@ leftSideBar.appendChild( sceneTree.container );
 
 // Dispatching this doesn't really make sense,
 // but we need to call render after adding the viewport
-editor.eventDispatcher.dispatchEvent( editor.events.rendererCreated );
+editor.eventManager.dispatch( editor.events.rendererCreated );
 
 /*
  * Event handlers, mostly for interactivity
  */
 
 window.addEventListener("resize", function() {
-  editor.eventDispatcher.dispatchEvent(editor.events.windowResized);
+  editor.eventManager.dispatch( editor.events.windowResized );
 
   availableHeight = window.innerHeight - (menuBar.offsetHeight + mainToolBar.offsetHeight);
   mainContent.style.height = `${ 100 * availableHeight / window.innerHeight }%`;
@@ -138,8 +138,8 @@ editRedo.addEventListener(
 )
 
 // Handle shit in the right sidebar
-editor.eventDispatcher.addEventListener(
-  editor.events.objectSelected.type,
+editor.eventManager.add(
+  editor.events.objectSelected,
   function( event ) {
     const object = event.detail.object;
     const properties = document.getElementById( "Properties" );
