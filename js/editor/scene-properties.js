@@ -7,13 +7,6 @@ class SceneProperties extends ObjectProperties {
 
     this.scene = scene;
 
-    this.objectPosition.container.classList.add( "d-none" );
-    this.objectRotation.container.classList.add( "d-none" );
-    this.objectScale.container.classList.add( "d-none" );
-    this.objectVisible.container.classList.add( "d-none" );
-    this.objectCastShadow.container.classList.add( "d-none" );
-    this.objectReceiveShadow.container.classList.add( "d-none" );
-
     this.sceneProperties = new PropertyGroup( this.container, "Scene" );
     this.setupSceneProperties( this.sceneProperties.container );
 
