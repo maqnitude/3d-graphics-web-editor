@@ -114,8 +114,8 @@ class Node {
   onClick() {
     this.activate();
 
-    this.sceneTree.eventDispatcher.dispatchEvent(new CustomEvent(
-      this.sceneTree.events.objectSelected.type,
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.objectSelected.type,
       {
         detail: {
           object: this.object,

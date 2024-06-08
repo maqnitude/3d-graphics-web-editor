@@ -149,7 +149,6 @@ class Viewport {
       this.onTransformModeChanged.bind(this)
     )
 
-    // Make selector only work in viewport
     this.container.addEventListener(
       "mouseenter",
       ( event ) => {
@@ -298,7 +297,7 @@ class Viewport {
 
     this.transformControls.detach();
 
-    if (object !== null && object !== this.scene && object !== this.camera) {
+    if (object && object !== this.scene && object !== this.camera) {
       this.transformControls.attach( object );
     }
 

@@ -87,7 +87,7 @@ class MeshProperties extends ObjectProperties {
       case "CircleGeometry":
         this.circleGeometryRadius = new ValueSliderProperty( editor, parent, object, "geometry.parameters.radius", "Radius", params.radius, 1, 20, 0.001 );
         this.circleGeometrySegments = new ValueSliderProperty( editor, parent, object, "geometry.parameters.segments", "Segments", params.segments, 0, 128, 1 );
-        
+
         break;
 
       case "CylinderGeometry":
@@ -105,7 +105,7 @@ class MeshProperties extends ObjectProperties {
         this.ringGeometryOuterRadius = new ValueSliderProperty( editor, parent, object, "geometry.parameters.outerRadius", "Outer Radius", params.outerRadius, 1, 30, 0.001 );
         this.ringGeometryThetaSegments = new ValueSliderProperty( editor, parent, object, "geometry.parameters.thetaSegments", "Theta Segments", params.thetaSegments, 1, 3, 1 );
         this.ringGeometryPhiSegments = new ValueSliderProperty( editor, parent, object, "geometry.parameters.phiSegments", "Phi Segments", params.phiSegments, 1, 30, 1 ); 
-        
+
         break;
 
       case "TorusGeometry":
@@ -150,7 +150,7 @@ class MeshProperties extends ObjectProperties {
 
       case "LatheGeometry":
         this.latheGeometrySegments = new ValueSliderProperty( editor, parent, object, "geometry.parameters.segments", "Segments", params.segments, 1, 30, 1 );
-        
+
         break;
 
       case "OctahedronGeometry":
@@ -210,7 +210,7 @@ class MeshProperties extends ObjectProperties {
         this.basicMaterialCombine = new DropdownProperty( editor, parent, object, "material.combine", "Combine",
           {
             MultiplyOperation: THREE.MultiplyOperation,
-            MisOperation: THREE.MixOperation,
+            MixOperation: THREE.MixOperation,
             AddOperation: THREE.AddOperation,
           }, material.combine);
         this.basicMaterialReflectivity = new ValueSliderProperty( editor, parent, object, "material.reflectivity", "Reflectivity", material.reflectivity, 0, 1, 0.001 );
@@ -236,7 +236,7 @@ class MeshProperties extends ObjectProperties {
         this.phongMaterialCombine = new DropdownProperty( editor, parent, object, "material.combine", "Combine",
           {
             MultiplyOperation: THREE.MultiplyOperation,
-            MisOperation: THREE.MixOperation,
+            MixOperation: THREE.MixOperation,
             AddOperation: THREE.AddOperation,
           }, material.combine);
         this.phongMaterialReflectivity = new ValueSliderProperty( editor, parent, object, "material.reflectivity", "Reflectivity", material.reflectivity, 0, 1, 0.001 );
@@ -261,7 +261,7 @@ class MeshProperties extends ObjectProperties {
       case "MeshDepthMaterial":
         this.depthMaterialFlatShading = new BooleanProperty( editor, parent, object, "material.flatShading", "Flat Shading", material.flatShading );
         this.depthMaterialWireframe = new BooleanProperty( editor, parent, object, "material.wireframe", "Wireframe", material.wireframe );
-        
+
         break;
       case "MeshLambertMaterial":
         this.lambertMaterialColor = new ColorProperty( editor, parent, object, "material.color", "Color", material.color );
@@ -274,12 +274,12 @@ class MeshProperties extends ObjectProperties {
         this.lambertMaterialCombine = new DropdownProperty( editor, parent, object, "material.combine", "Combine", 
           {
             MultiplyOperation: THREE.MultiplyOperation,
-            MisOperation: THREE.MixOperation,
+            MixOperation: THREE.MixOperation,
             AddOperation: THREE.AddOperation,
           }, material.combine);
         this.lambertMaterialReflectivity = new ValueSliderProperty( editor, parent, object, "material.reflectivity", "Reflectivity", material.reflectivity, 0, 1, 0.001 );
         this.lambertMaterialRefractionRatio = new ValueSliderProperty( editor, parent, object, "material.refractionRatio", "Refraction Ratio", material.refractionRatio, 0, 1, 0.001 );
-        
+
         break;
 
       case "MeshMatcapMaterial":
@@ -287,9 +287,9 @@ class MeshProperties extends ObjectProperties {
         this.matcapMaterialflatShading = new BooleanProperty( editor, parent, object, "material.flatShading", "Flat Shading", material.flatShading );
         this.matcapMaterialMatcap = new TextureProperty( editor, parent, object, "material.matcap", "Matcap", material.matcap );
         this.matcapMaterialAlphaMap = new TextureProperty( editor, parent, object, "material.alphaMap", "Alpha Map", material.alphaMap );
-        
+
         break;
-      
+
       case "MeshPhysicalMaterial":
         this.physicalMaterialColor = new ColorProperty( editor, parent, object, "material.color", "Color", material.color );
         this.physicalMaterialEmissive = new ColorProperty( editor, parent, object, "material.emissive", "Emissive", material.emissive );
@@ -351,7 +351,7 @@ class MeshProperties extends ObjectProperties {
     this.setPropertyValue( this.materialDepthTest, material.depthTest );
     this.setPropertyValue( this.materialDepthWrite, material.depthWrite );
     this.setPropertyValue( this.materialAlphaTest, material.alphaTest );
-    this.setPropertyValue( this.materialAlphaHash, material.alphaHas );
+    this.setPropertyValue( this.materialAlphaHash, material.alphaHash );
     this.setPropertyValue( this.materialVisible, material.visible );
 
     const materialProps = this.getMaterialProperties( material.type );

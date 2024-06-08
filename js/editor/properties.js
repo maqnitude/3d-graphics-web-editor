@@ -1,5 +1,7 @@
 import * as THREE from "three";
 
+import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
+
 class ReadOnlyProperty {
   constructor( parent, propertyLabel, value, type ) {
     this.parent = parent;
@@ -83,12 +85,6 @@ class ValueSliderProperty {
     this.inputNumber.classList.add(
       "form-control",
     );
-    this.inputNumber.addEventListener(
-      "input",
-      () => {
-        this.inputSlider.value = this.inputNumber.value;
-      }
-    )
 
     this.inputSlider = document.createElement( "input" );
     this.inputSlider.readOnly = false;
@@ -101,12 +97,6 @@ class ValueSliderProperty {
     this.inputSlider.classList.add(
       "form-range",
     );
-    this.inputSlider.addEventListener(
-      "input",
-      () => {
-        this.inputNumber.value = this.inputSlider.value;
-      }
-    )
 
     this.inputGroup.appendChild( this.span );
     this.inputGroup.appendChild( this.inputSlider );
@@ -140,22 +130,33 @@ class ValueSliderProperty {
   onInput( event ) {
     const value = Number( event.target.value );
 
+    this.inputNumber.value = value;
+    this.inputSlider.value = value;
+
     if ( this.properties.length === 1 ) {
       this.object[ this.properties[ 0 ] ] = value;
 
       this.dispatchObjectChangedEvent( this.object );
     } else {
-      if ( this.object.isMesh ) {
+      if ( this.object.isScene ) {
+        const scene = this.object;
+
+        scene[ this.properties[ 0 ] ] = value;
+
+        this.dispatchObjectChangedEvent( scene );
+      } else if ( this.object.isMesh ) {
+        const mesh = this.object;
+
         switch ( this.properties[ 0 ] ) {
           case "geometry":
             switch ( this.properties[ 1 ] ) {
               case "parameters":
                 // Change geometry parameters
-                const params = this.object.geometry.parameters;
+                const params = mesh.geometry.parameters;
                 params[ this.properties[ 2 ] ] = value;
 
                 var newGeometry = null;
-                switch ( this.object.geometry.type ) {
+                switch ( mesh.geometry.type ) {
                   case "BoxGeometry":
                     newGeometry = new THREE.BoxGeometry(
                       params.width,
@@ -290,9 +291,9 @@ class ValueSliderProperty {
                     break;
                 }
 
-                this.object.geometry.dispose();
-                this.object.geometry = newGeometry;
-                this.object.geometry.computeBoundingSphere();
+                mesh.geometry.dispose();
+                mesh.geometry = newGeometry;
+                mesh.geometry.computeBoundingSphere();
 
                 this.eventDispatcher.dispatchEvent( this.events.geometryChanged );
 
@@ -303,6 +304,13 @@ class ValueSliderProperty {
 
             break;
           case "material":
+            const material = this.object.material;
+
+            material[ this.properties[ 1 ] ] = value;
+
+            material.needsUpdate = true;
+            this.dispatchObjectChangedEvent( this.object );
+
             break;
           default:
             break;
@@ -395,20 +403,22 @@ class BooleanProperty {
           this.dispatchObjectChangedEvent( this.object );
 
           this.object[ this.properties[ 0 ] ] = checked;
-
-          this.dispatchObjectChangedEvent( this.object );
         } else {
           if ( this.object.isMesh ) {
             switch ( this.properties[ 0 ] ) {
               case "material":
-                this.object.material[ this.properties[ 1 ] ] = checked;
+                const material = this.object.material;
 
-                this.eventDispatcher.dispatchEvent( this.events.materialChanged );
+                material[ this.properties[ 1 ] ] = checked;
+
+                material.needsUpdate = true;
 
                 break;
             }
           }
         }
+
+        this.dispatchObjectChangedEvent( this.object );
       }
     )
   }
@@ -492,55 +502,56 @@ class DropdownProperty {
       ( event ) => {
         const selectedOption = event.target.value;
 
-        if (this.property === "material") {
-          this.object.material.dispose();
+        switch ( this.property ) {
+          case "material":
+            this.object.material.dispose();
 
-          switch ( selectedOption ) {
-            case "MeshBasicMaterial":
-              this.object.material = new THREE.MeshBasicMaterial({ color: 0x808080 });
+            switch ( selectedOption ) {
+              case "MeshBasicMaterial":
+                this.object.material = new THREE.MeshBasicMaterial({ color: 0x808080 });
 
-              break;
-            case "MeshStandardMaterial":
-              this.object.material = new THREE.MeshStandardMaterial({ color: 0x808080 });
+                break;
+              case "MeshStandardMaterial":
+                this.object.material = new THREE.MeshStandardMaterial({ color: 0x808080 });
 
-              break;
-            case "MeshNormalMaterial":
-              this.object.material = new THREE.MeshNormalMaterial();
+                break;
+              case "MeshNormalMaterial":
+                this.object.material = new THREE.MeshNormalMaterial();
 
-              break;
-            case "MeshPhongMaterial":
-              this.object.material = new THREE.MeshPhongMaterial({ color: 0x808080 });
+                break;
+              case "MeshPhongMaterial":
+                this.object.material = new THREE.MeshPhongMaterial({ color: 0x808080 });
 
-              break;
-            case "MeshDepthMaterial":
-              this.object.material = new THREE.MeshDepthMaterial({ color: 0x808080 });
+                break;
+              case "MeshDepthMaterial":
+                this.object.material = new THREE.MeshDepthMaterial({ color: 0x808080 });
 
-              break;
-            case "MeshLambertMaterial":
-              this.object.material = new THREE.MeshLambertMaterial({ color: 0x808080 });
-              
-              break;
-            case "MeshMatcapMaterial":
-              this.object.material = new THREE.MeshMatcapMaterial({ color: 0x808080 });
+                break;
+              case "MeshLambertMaterial":
+                this.object.material = new THREE.MeshLambertMaterial({ color: 0x808080 });
 
-              break;
-            case "MeshPhysicalMaterial":
-              this.object.material = new THREE.MeshPhysicalMaterial({ color: 0x808080 });
+                break;
+              case "MeshMatcapMaterial":
+                this.object.material = new THREE.MeshMatcapMaterial({ color: 0x808080 });
 
-              break;
-            case "MeshToonMaterial":
-              this.object.material = new THREE.MeshToonMaterial({ color: 0x808080 });
+                break;
+              case "MeshPhysicalMaterial":
+                this.object.material = new THREE.MeshPhysicalMaterial({ color: 0x808080 });
 
-              break;
-          }
+                break;
+              case "MeshToonMaterial":
+                this.object.material = new THREE.MeshToonMaterial({ color: 0x808080 });
 
-          this.eventDispatcher.dispatchEvent( this.events.materialChanged );
+                break;
+            }
+
+            this.object.material.needsUpdate = true;
+            this.eventDispatcher.dispatchEvent( this.events.materialChanged );
+
+            this.dispatchObjectChangedEvent( this.object );
+
+            break;
         }
-
-        // Ensure the material updates correctly
-        this.object.material.needsUpdate = true;
-
-        this.dispatchObjectChangedEvent( this.object );
       }
     )
   }
@@ -1025,7 +1036,22 @@ class ColorProperty {
   setColor( material, property, colorStyle ) {
     material[ property ].setStyle( colorStyle );
 
-    this.eventDispatcher.dispatchEvent( this.events.materialChanged );
+    material.needsUpdate = true;
+
+    this.dispatchObjectChangedEvent( this.object );
+  }
+
+  // Dispatch custom events
+
+  dispatchObjectChangedEvent( object ) {
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.objectChanged.type,
+      {
+        detail: {
+          object: object,
+        }
+      }
+    ));
   }
 }
 
@@ -1042,15 +1068,30 @@ class TextureProperty {
 
     this.container = document.createElement( "div" );
 
-    this.inputFile = document.createElement( "input" );
-    this.inputFile.type = "file";
-    this.inputFile.accept = "image/*"; // Accept image files only
-    this.inputFile.classList.add( "form-control" );
+    // This span is used to display the texture name
+    this.span = document.createElement( "span" );
+    if ( this.properties.length === 1 ) {
+      this.span.textContent = this.object[ this.properties[ 0 ] ]?.name;
+    } else {
+      switch ( this.properties[ 0 ] ) {
+        case "material":
+          this.span.textContent = this.object.material[ this.properties[ 1 ] ]?.name;
+          break;
+      }
+    }
 
     this.label = document.createElement( "label" );
+    this.label.classList.add(
+      "d-block"
+    );
     this.label.textContent = propertyLabel;
 
+    this.inputFile = document.createElement( "input" );
+    this.inputFile.type = "file";
+    this.inputFile.classList.add( "form-control" );
+
     this.container.appendChild( this.label );
+    this.container.appendChild( this.span );
     this.container.appendChild( this.inputFile );
     this.parent.appendChild( this.container );
 
@@ -1063,52 +1104,143 @@ class TextureProperty {
     this.inputFile.addEventListener(
       "change",
       ( event ) => {
-        if ( this.properties.length === 1 ) {
-          // Do nothing
-        } else {
-          switch ( this.properties[ 0 ] ) {
-            case "material":
-              const material = this.object.material;
-              const file = event.target.files[ 0 ];
+        const file = event.target.files[ 0 ];
 
+        if ( this.properties.length === 1 ) {
+          switch ( this.properties[ 0 ] ) {
+            case "background":
               if ( file ) {
-                this.loadTexture( material, this.properties[ 1 ], file );
+                this.loadTexture( this.object, this.properties[ 0 ], file );
               }
 
               break;
-            default:
+            case "environment":
+              if ( file ) {
+                this.loadRGBE( this.object, this.properties[ 0 ], file );
+              }
+
               break;
+          }
+        } else {
+          if ( this.object.isMesh ) {
+            switch ( this.properties[ 0 ] ) {
+              case "material":
+                const material = this.object.material;
+
+                if ( file ) {
+                  this.loadTexture( material, this.properties[ 1 ], file );
+                }
+
+                break;
+              default:
+                break;
+            }
           }
         }
       }
     )
   }
 
-  loadTexture( material, property, image ) {
-    if ( material[ property ] ) {
-      material[ property ].dispose();
+  loadTexture( object, property, image ) {
+    const validExtensions = [ "jpeg", "jpg", "png", "gif", "bmp" ];
+    const extension = image.name.split( "." ).pop().toLowerCase();
+
+    if ( !validExtensions.includes( extension ) ) {
+      alert( "Unsupported image format!" );
+      return;
+    }
+
+    if ( object[ property ] ) {
+      object[ property ].dispose();
     }
 
     const reader = new FileReader();
     reader.onload = ( event ) => {
       const dataURL = event.target.result;
 
-      const texture = new THREE.TextureLoader().load( dataURL, () => {
-        material[ property ] = texture;
+      const textureLoader = new THREE.TextureLoader();
+      textureLoader.load( dataURL, ( texture ) => {
+        texture.name = image.name;
+        texture.colorSpace = THREE.SRGBColorSpace;
+        object[ property ] = texture;
 
-        material.needsUpdate = true;
-        this.eventDispatcher.dispatchEvent( this.events.materialChanged );
+        if ( object.isScene ) {
+          switch ( property ) {
+            case "background":
+              object.environment = object.background;
+              object.environment.mapping = THREE.EquirectangularReflectionMapping;
+              object.environmentRotation.y = object.backgroundRotation.y;
+
+              break;
+            case "environment":
+              object.environment.mapping = THREE.EquirectangularReflectionMapping;
+
+              break;
+          }
+        } else if ( object.isMaterial ) {
+          object.needsUpdate = true;
+        }
+
+        this.dispatchObjectChangedEvent( this.object );
       });
-      texture.colorSpace = THREE.SRGBColorSpace;
     }
 
     reader.readAsDataURL( image );
   }
 
-  // TODO: find a better way to deal with setting shit up in the properties
-  // Keep this to prevent errors
-  setValue( value ) {
-    return;
+  // This should only be used to load environment map
+  loadRGBE( object, property, hdr ) {
+    const extension = hdr.name.split( "." ).pop().toLowerCase();
+
+    if ( extension !== "hdr" ) {
+      alert( "Uploaded file must be in HDR format! (.hdr)" );
+      return;
+    }
+
+    if ( object[ property ] ) {
+      object[ property ].dispose();
+    }
+
+    const reader = new FileReader();
+    reader.onload = ( event ) => {
+      const dataURL = event.target.result;
+
+      const rgbeLoader = new RGBELoader();
+      rgbeLoader.load( dataURL, ( texture ) => {
+        texture.name = hdr.name;
+        texture.mapping = THREE.EquirectangularReflectionMapping;
+
+        if ( object.isScene ) {
+          object.background = texture;
+          object.environment = texture;
+        } else if ( object.isMaterial ) {
+          object[ property ] = texture;
+          object.needsUpdate = true;
+        }
+
+        this.dispatchObjectChangedEvent( this.object );
+      });
+    }
+
+    reader.readAsDataURL( hdr );
+  }
+
+  // Must be named setValue
+  setValue( texture ) {
+    this.span.textContent = texture?.name;
+  }
+
+  // Dispatch custom events
+
+  dispatchObjectChangedEvent( object ) {
+    this.eventDispatcher.dispatchEvent(new CustomEvent(
+      this.events.objectChanged.type,
+      {
+        detail: {
+          object: object,
+        }
+      }
+    ));
   }
 }
 
@@ -1134,8 +1266,11 @@ class PropertyGroup {
   }
 
   clear() {
-    while (this.container.firstChild) {
-      this.container.removeChild(this.container.firstChild);
+    const children = Array.from( this.container.children );
+    for ( const child of children ) {
+      if ( child !== this.header ) {
+        this.container.removeChild( child );
+      }
     }
   }
 }
