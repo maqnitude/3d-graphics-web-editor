@@ -5,7 +5,7 @@ class SpotLight extends THREE.SpotLight {
     super( 0xffffff );
 
     this.editor = editor;
-    this.eventDispatcher = editor.eventDispatcher;
+    this.eventManager = editor.eventManager;
     this.events = editor.events;
 
     this.name = "Spot Light";
@@ -13,14 +13,11 @@ class SpotLight extends THREE.SpotLight {
     this.helper = new THREE.SpotLightHelper( this );
     this.editor.sceneHelper.add( this.helper );
 
-    this.setupEventListeners();
+    this.setupEvents();
   }
 
-  setupEventListeners() {
-    this.eventDispatcher.addEventListener(
-      this.events.objectChanged.type,
-      this.onObjectChanged.bind( this )
-    );
+  setupEvents() {
+    this.eventManager.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
   }
 
   onObjectChanged( event ) {

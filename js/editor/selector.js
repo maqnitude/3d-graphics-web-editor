@@ -19,10 +19,7 @@ class Selector {
   // Methods
 
   setupEvents() {
-    this.eventManager.add(
-      this.events.intersectionsDetected,
-      this.onIntersectionsDetected.bind( this )
-    )
+    this.eventManager.add( this.events.intersectionsDetected, this.onIntersectionsDetected.bind( this ) );
   }
 
   getIntersects( raycaster ) {
@@ -44,24 +41,11 @@ class Selector {
   }
 
   select ( object ) {
-    if ( this.editor.selectedObject === object ) return;
+    if ( object && this.editor.selectedObject === object ) { return };
 
     this.editor.selectedObject = object;
 
-    // this.eventDispatcher.dispatchEvent(
-    //   new CustomEvent(
-    //     this.events.objectSelected.type,
-    //     {
-    //       detail: {
-    //         object: object,
-    //       }
-    //     }
-    //   )
-    // );
-    this.eventManager.dispatch(
-      this.events.objectSelected,
-      { object: object }
-    );
+    this.eventManager.dispatch( this.events.objectSelected, { object: object } );
   }
 
   deselect() {
@@ -71,7 +55,7 @@ class Selector {
   // Event handlers
 
   onIntersectionsDetected( event ) {
-    if (this.ignore) { return; }
+    if ( this.ignore ) { return; }
 
     const intersects = event.detail.intersects;
 

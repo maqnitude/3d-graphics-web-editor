@@ -63,7 +63,7 @@ class Viewport {
 
     this.orbitControls.addEventListener(
       "change",
-      this.render.bind( this )
+      this.onOrbitControlsChanged.bind( this )
     );
 
     this.transformControls.addEventListener(
@@ -266,6 +266,10 @@ class Viewport {
       this.box.setFromObject( object, true );
     }
 
+    if ( object.isCamera ) {
+      object.updateProjectionMatrix();
+    }
+
     this.render();
   }
 
@@ -304,6 +308,10 @@ class Viewport {
 
       this.eventManager.dispatch( this.events.intersectionsDetected, { intersects: intersects } );
     }
+  }
+
+  onOrbitControlsChanged( event ) {
+    this.eventManager.dispatch( this.events.objectChanged, { object: this.orbitControls.object } );
   }
 
   onTransformModeChanged( event ) {

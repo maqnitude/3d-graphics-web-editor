@@ -31,6 +31,11 @@ import { SpotLight } from './threejs/lights/spot-light.js';
 import { MeshProperties } from "./editor/mesh-properties.js";
 import { LightProperties } from "./editor/light-properties.js";
 import { SceneProperties } from './editor/scene-properties.js';
+import { CameraProperties } from './editor/camera-properties.js';
+import { GroupProperties } from './editor/group-properties.js';
+
+import { PerspectiveCamera } from './threejs/cameras/perspective-camera.js';
+import { OrthographicCamera } from './threejs/cameras/orthographic-camera.js';
 
 /*
  * Put together the editor here
@@ -150,21 +155,23 @@ editor.eventManager.add(
       return;
     }
 
-    if ( object.isScene ) {
-      if (properties) { properties.remove(); }
+    if (properties) { properties.remove(); }
 
+    if ( object.isScene ) {
       const sceneProperties = new SceneProperties( editor, object );
       rightSideBar.appendChild( sceneProperties.container );
+    } else if ( object.isCamera ) {
+      const cameraProperties = new CameraProperties( editor, object );
+      rightSideBar.appendChild( cameraProperties.container );
     } else if ( object.isMesh ) {
-      if (properties) { properties.remove(); }
-
       const meshProperties = new MeshProperties( editor, object );
       rightSideBar.appendChild( meshProperties.container );
     } else if ( object.isLight ) {
-      if (properties) { properties.remove(); }
-
       const lightProperties = new LightProperties( editor, object );
       rightSideBar.appendChild( lightProperties.container );
+    } else {
+      const groupProperties = new GroupProperties( editor, object );
+      rightSideBar.appendChild( groupProperties.container );
     }
 
     // Is this needed?
@@ -194,6 +201,23 @@ addObjectButton.addEventListener( "click", function() {
     const selectedObject = activeItems[0].getAttribute( "object-name" );
 
     switch ( selectedObject ) {
+      case "PerspectiveCamera":
+        viewport.addObject( new PerspectiveCamera( editor ) );
+        break;
+      case "OrthographicCamera":
+        viewport.addObject( new OrthographicCamera( editor ) );
+        break;
+
+      case "DirectionalLight":
+        viewport.addObject( new DirectionalLight( editor ) );
+        break;
+      case "PointLight":
+        viewport.addObject( new PointLight( editor ));
+        break;
+      case "SpotLight":
+        viewport.addObject( new SpotLight( editor ));
+        break;
+
       case "Cube":
         viewport.addObject( new Cube() );
         break;
@@ -244,15 +268,6 @@ addObjectButton.addEventListener( "click", function() {
         break;
       case "Tube":
         viewport.addObject( new Tube() );
-        break;
-      case "DirectionalLight":
-        viewport.addObject( new DirectionalLight( editor ) );
-        break;
-      case "PointLight":
-        viewport.addObject( new PointLight( editor ));
-        break;
-      case "SpotLight":
-        viewport.addObject( new SpotLight( editor ));
         break;
     }
   }

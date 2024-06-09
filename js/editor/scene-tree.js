@@ -2,6 +2,7 @@
 class Node {
   constructor( sceneTree, object, draggable ) {
     this.sceneTree = sceneTree;
+    this.editor = sceneTree.editor;
     this.eventManager = sceneTree.eventManager;
     this.events = sceneTree.events;
 
@@ -125,8 +126,10 @@ class Node {
   onObjectSelected( event ) {
     const object = event.detail.object;
 
-    if (object && object.uuid === this.object.uuid) {
+    if ( object && object.uuid === this.object.uuid ) {
       this.activate();
+
+      this.editor.selectedObject = object;
     } else {
       this.deactivate();
     }

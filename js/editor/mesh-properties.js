@@ -6,6 +6,7 @@ import { BooleanProperty, ColorProperty, DropdownProperty, PropertyGroup, ReadOn
 class MeshProperties extends ObjectProperties {
   constructor( editor, mesh ) {
     super( editor, mesh );
+
     this.mesh = mesh;
 
     this.geometryProperties = new PropertyGroup( this.container, "Geometry" );

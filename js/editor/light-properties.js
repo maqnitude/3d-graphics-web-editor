@@ -31,6 +31,14 @@ class LightProperties extends ObjectProperties {
         this.directionalLightCastShadow = new BooleanProperty( editor, parent, light, "castShadow", "Cast Shadow", light.castShadow );
 
         break;
+      case "PointLight":
+        this.pointLightCastShadow = new BooleanProperty( editor, parent, light, "castShadow", "Cast Shadow", light.castShadow );
+
+        break;
+      case "SpotLight":
+        this.spotLightCastShadow = new BooleanProperty( editor, parent, light, "castShadow", "Cast Shadow", light.castShadow );
+
+        break;
     }
   }
 
@@ -52,7 +60,13 @@ class LightProperties extends ObjectProperties {
     const lightProperties = {
       DirectionalLight: {
         castShadow: this.directionalLightCastShadow,
-      }
+      },
+      PointLight: {
+        castShadow: this.pointLightCastShadow,
+      },
+      SpotLight: {
+        castShadow: this.spotLightCastShadow,
+      },
     }
     return lightProperties[ type ];
   }

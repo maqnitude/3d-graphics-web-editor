@@ -136,6 +136,10 @@ class ValueSliderProperty {
     if ( this.properties.length === 1 ) {
       this.object[ this.properties[ 0 ] ] = value;
 
+      if ( this.object.isCamera ) {
+        this.object.updateProjectionMatrix();
+      }
+
       this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
     } else {
       if ( this.object.isScene ) {
@@ -921,11 +925,11 @@ class ColorProperty {
     this.inputColor.addEventListener(
       "input",
       ( event ) => {
-        const colorStyle = event.target.value;
+        const colorStyle = new THREE.Color( event.target.value ).getStyle();
         this.inputText.value = colorStyle;
 
         if ( this.properties.lenght === 1 ) {
-          this.object[ this.properties[ 0 ] ].setStyle( colorStyle );
+          this.setColor( this.object, this.properties[ 0 ], colorStyle );
         } else {
           switch ( this.properties[ 0 ] ) {
             case "material":
@@ -946,7 +950,7 @@ class ColorProperty {
 
         if ( event.key === "Enter" ) {
           if ( this.properties.length === 1 ) {
-            this.object[ this.properties[ 0 ] ].setStyle( colorStyle );
+            this.setColor( this.object, this.properties[ 0 ], colorStyle );
           } else {
             switch ( this.properties[ 0 ] ) {
               case "material":
@@ -967,10 +971,12 @@ class ColorProperty {
     this.inputText.value = color.getStyle();
   }
 
-  setColor( material, property, colorStyle ) {
-    material[ property ].setStyle( colorStyle );
+  setColor( object, property, colorStyle ) {
+    object[ property ].setStyle( colorStyle );
 
-    material.needsUpdate = true;
+    if ( object.isMaterial ) {
+      object.needsUpdate = true;
+    }
 
     this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
   }
