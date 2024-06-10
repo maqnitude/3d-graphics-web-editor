@@ -116,18 +116,14 @@ class ValueSliderProperty {
   }
 
   setupEvents() {
-    this.inputNumber.addEventListener(
-      "input",
-      this.onInput.bind( this )
-    );
-
-    this.inputSlider.addEventListener(
-      "input",
-      this.onInput.bind( this )
-    );
+    // number input must listen to "change" instead of "input",
+    // otherwise you can only enter integer
+    this.inputNumber.addEventListener( "change", this.onInputChanged.bind( this ) );
+    this.inputSlider.addEventListener( "input", this.onInputChanged.bind( this ) );
   }
 
-  onInput( event ) {
+  // TODO: implement undo/redo for this shit
+  onInputChanged( event ) {
     const value = Number( event.target.value );
 
     this.inputNumber.value = value;
@@ -639,76 +635,28 @@ class Vector3Property {
 
   // Change in properties, update in viewport
   setupEvents() {
-    this.inputNumberX.addEventListener(
-      "input",
-      ( event ) => {
-        const value = Number( event.target.value );
+    const inputNumbers = [
+      this.inputNumberX,
+      this.inputNumberY,
+      this.inputNumberZ
+    ];
 
-        this.object[ this.property ].setComponent(0, value);
+    inputNumbers.forEach((inputNumber, index) => {
+      inputNumber.addEventListener(
+        "change",
+        (event) => {
+          const value = Number(event.target.value);
 
-        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-      }
-    )
-    this.inputNumberX.addEventListener(
-      "focus",
-      this.onFocus.bind( this )
-    )
-    this.inputNumberX.addEventListener(
-      "blur",
-      this.onBlur.bind( this )
-    )
+          this.history.recordChange = true;
+          this.history.newUndoBranch = true;
 
-    this.inputNumberY.addEventListener(
-      "input",
-      ( event ) => {
-        const value = Number( event.target.value );
+          this.eventManager.dispatch(this.events.objectChanged, { object: this.object });
 
-        this.object[ this.property ].setComponent(1, value);
+          this.object[this.property].setComponent(index, value);
 
-        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-      }
-    )
-    this.inputNumberY.addEventListener(
-      "focus",
-      this.onFocus.bind( this )
-    )
-    this.inputNumberY.addEventListener(
-      "blur",
-      this.onBlur.bind( this )
-    )
-
-    this.inputNumberZ.addEventListener(
-      "input",
-      (event) => {
-        const value = Number( event.target.value );
-
-        this.object[ this.property ].setComponent(2, value);
-
-        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-
-      }
-    )
-    this.inputNumberZ.addEventListener(
-      "focus",
-      this.onFocus.bind( this )
-    )
-    this.inputNumberZ.addEventListener(
-      "blur",
-      this.onBlur.bind( this )
-    )
-  }
-
-  // Event handlers
-
-  onFocus() {
-    this.history.recordChange = true;
-    this.history.newUndoBranch = true;
-
-    this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-  }
-
-  onBlur() {
-    this.history.recordChange = false;
+          this.eventManager.dispatch(this.events.objectChanged, { object: this.object });
+        });
+    });
   }
 }
 
@@ -811,75 +759,25 @@ class EulerProperty {
 
   // Change in properties, update in viewport
   setupEvents() {
-    this.inputNumberX.addEventListener(
-      "input",
-      (event) => {
-        const value = Number( event.target.value );
+    const inputNumbers = [this.inputNumberX, this.inputNumberY, this.inputNumberZ];
+    const rotationAxes = ['x', 'y', 'z'];
 
-        this.object.rotation.x = (value * (Math.PI / 180));
+    inputNumbers.forEach((inputNumber, index) => {
+      inputNumber.addEventListener(
+        "change",
+        (event) => {
+          const value = Number(event.target.value);
 
-        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-      }
-    )
-    this.inputNumberX.addEventListener(
-      "focus",
-      this.onFocus.bind( this )
-    )
-    this.inputNumberX.addEventListener(
-      "blur",
-      this.onBlur.bind( this )
-    )
+          this.history.recordChange = true;
+          this.history.newUndoBranch = true;
 
-    this.inputNumberY.addEventListener(
-      "input",
-      (event) => {
-        const value = Number( event.target.value );
+          this.eventManager.dispatch(this.events.objectChanged, { object: this.object });
 
-        this.object.rotation.y = (value * (Math.PI / 180));
+          this.object.rotation[rotationAxes[index]] = (value * (Math.PI / 180));
 
-        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-      }
-    )
-    this.inputNumberY.addEventListener(
-      "focus",
-      this.onFocus.bind( this )
-    )
-    this.inputNumberY.addEventListener(
-      "blur",
-      this.onBlur.bind( this )
-    )
-
-    this.inputNumberZ.addEventListener(
-      "input",
-      (event) => {
-        const value = Number( event.target.value );
-
-        this.object.rotation.z = (value * (Math.PI / 180));
-
-        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-      }
-    )
-    this.inputNumberZ.addEventListener(
-      "focus",
-      this.onFocus.bind( this )
-    )
-    this.inputNumberZ.addEventListener(
-      "blur",
-      this.onBlur.bind( this )
-    )
-  }
-
-  // Event handlers
-
-  onFocus() {
-    this.history.recordChange = true;
-    this.history.newUndoBranch = true;
-
-    this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-  }
-
-  onBlur() {
-    this.history.recordChange = false;
+          this.eventManager.dispatch(this.events.objectChanged, { object: this.object });
+        });
+    });
   }
 }
 
@@ -895,6 +793,9 @@ class ColorProperty {
     this.properties = propertyString.split( "." );
 
     this.label = document.createElement("label");
+    this.label.classList.add(
+      "me-2"
+    );
     this.label.textContent = propertyLabel;
 
     this.container = document.createElement("div");
@@ -922,49 +823,8 @@ class ColorProperty {
   }
 
   setupEvents() {
-    // BUG: Cannot set color from this
-    this.inputColor.addEventListener(
-      "input",
-      ( event ) => {
-        const colorStyle = new THREE.Color( event.target.value ).getStyle();
-        this.inputText.value = colorStyle;
-
-        if ( this.properties.lenght === 1 ) {
-          this.setColor( this.object, this.properties[ 0 ], colorStyle );
-        } else {
-          switch ( this.properties[ 0 ] ) {
-            case "material":
-              const material = this.object.material;
-
-              this.setColor( material, this.properties[ 1 ], colorStyle );
-
-              break;
-          }
-        }
-      }
-    );
-    this.inputText.addEventListener(
-      "keyup",
-      ( event ) => {
-        const colorStyle = event.target.value;
-        this.inputColor.value = colorStyle;
-
-        if ( event.key === "Enter" ) {
-          if ( this.properties.length === 1 ) {
-            this.setColor( this.object, this.properties[ 0 ], colorStyle );
-          } else {
-            switch ( this.properties[ 0 ] ) {
-              case "material":
-                const material = this.object.material;
-
-                this.setColor( material, this.properties[ 1 ],  colorStyle );
-
-                break;
-            }
-          }
-        }
-      }
-    )
+    this.inputColor.addEventListener( "change", this.onInputChanged.bind( this ) );
+    this.inputText.addEventListener( "change", this.onInputChanged.bind( this ) );
   }
 
   setValue( color ) {
@@ -980,6 +840,28 @@ class ColorProperty {
     }
 
     this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
+  }
+
+  // Event handlers
+
+  onInputChanged( event ) {
+    const colorStyle = new THREE.Color( event.target.value ).getStyle();
+
+    this.inputColor.value = colorStyle;
+    this.inputText.value = colorStyle;
+
+    if ( this.properties.length === 1 ) {
+      this.setColor( this.object, this.properties[ 0 ], colorStyle );
+    } else {
+      switch ( this.properties[ 0 ] ) {
+        case "material":
+          const material = this.object.material;
+
+          this.setColor( material, this.properties[ 1 ],  colorStyle );
+
+          break;
+      }
+    }
   }
 }
 
@@ -1047,6 +929,8 @@ class TextureProperty {
                 this.loadRGBE( this.object, this.properties[ 0 ], file );
               }
 
+              break;
+            default:
               break;
           }
         } else {
@@ -1216,22 +1100,6 @@ class Properties {
 
   setPropertyValue( property, value ) {
     property?.setValue( value );
-  }
-}
-
-class CameraProperties extends Properties {
-  constructor( editor, camera ) {
-    super( editor );
-
-    // TODO
-  }
-}
-
-class SceneProperties extends Properties {
-  constructor( editor, scene ) {
-    super( editor );
-
-    // TODO
   }
 }
 

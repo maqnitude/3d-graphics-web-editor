@@ -97,7 +97,7 @@ gridHelperCheckbox.addEventListener(
   function( event ) {
     const checked = Boolean( event.target.checked );
 
-    viewport.grid.visible = checked;
+    viewport.gridHelper.visible = checked;
     viewport.render();
   }
 );

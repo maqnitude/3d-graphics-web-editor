@@ -22,9 +22,8 @@ class Viewport {
     this.scene = editor.scene;
     this.sceneHelper = editor.sceneHelper;
 
-    this.grid = this.createGrid();
-    this.axesHelper = new THREE.AxesHelper( 1000 );
-    this.sceneHelper.add( this.axesHelper );
+    this.gridHelper = this.createGridHelper();
+    this.axesHelper = this.createAxesHelper( 1000 );
 
     // Selection box
     this.box = new THREE.Box3();
@@ -166,7 +165,7 @@ class Viewport {
     return renderer;
   }
 
-  createGrid() {
+  createGridHelper() {
     const GRID_COLORS = [
       0x555555,
       0x888888
@@ -185,6 +184,12 @@ class Viewport {
     grid.add( grid2 );
 
     return grid;
+  }
+
+  createAxesHelper( size ) {
+    const axesHelper = new THREE.AxesHelper( size );
+
+    return axesHelper
   }
 
   // Methods
@@ -212,7 +217,7 @@ class Viewport {
   }
 
   render() {
-    this.renderer.setSize( this.container.clientWidth, this.container.clientHeight ); 
+    this.renderer.setSize( this.container.clientWidth, this.container.clientHeight );
 
     this.updateAspectRatio();
 
@@ -222,7 +227,8 @@ class Viewport {
     if ( this.camera === this.editor.viewportCamera ) {
       this.renderer.autoClear = false;
 
-      if ( this.grid.visible ) { this.renderer.render( this.grid, this.camera ) };
+      if ( this.gridHelper.visible ) { this.renderer.render( this.gridHelper, this.camera ) };
+      if (this.axesHelper.visible ) { this.renderer.render( this.axesHelper, this.camera ) };
       if ( this.sceneHelper.visible ) { this.renderer.render( this.sceneHelper, this.camera ) };
 
       this.renderer.autoClear = true;
