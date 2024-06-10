@@ -922,6 +922,7 @@ class ColorProperty {
   }
 
   setupEvents() {
+    // BUG: Cannot set color from this
     this.inputColor.addEventListener(
       "input",
       ( event ) => {

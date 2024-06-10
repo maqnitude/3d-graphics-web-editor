@@ -23,6 +23,8 @@ class Viewport {
     this.sceneHelper = editor.sceneHelper;
 
     this.grid = this.createGrid();
+    this.axesHelper = new THREE.AxesHelper( 1000 );
+    this.sceneHelper.add( this.axesHelper );
 
     // Selection box
     this.box = new THREE.Box3();

@@ -118,12 +118,14 @@
 
       <div id="LevelViewport" class="flex-grow-1 flex-shrink-1 position-relative d-flex flex-column m-1" style="flex-basis: 60%;">
         <div id="ViewportControls" class="container-fluid border-bottom p-0 m-0">
-          <ul class="d-flex flex-row p-1 m-0">
-            <li class="d-flex align-items-center">
+          <ul class="d-flex flex-row justify-content-between px-0 pb-1 m-0">
+            <li class="d-flex flex-row align-items-center">
               <a id="Select" class="btn btn-secondary btn-control" role="button" aria-disabled="true">
                 <i class="bi bi-cursor-fill"></i>
               </a>
+
               <div class="vr mx-1"></div>
+
               <a id="Translate" class="btn btn-secondary btn-control" role="button" aria-disabled="true">
                 <i class="bi bi-arrows-move"></i>
               </a>
@@ -133,6 +135,24 @@
               <a id="Scale" class="btn btn-secondary btn-control ms-1" role="button" aria-disabled="true">
                 <i class="bi bi-arrows-angle-expand"></i>
               </a>
+            </li>
+            <!-- TODO: implement this -->
+            <li class="d-flex flex-row">
+              <div class="me-2">
+                <input id="ToggleGridHelper" type="checkbox" name="ToggleGridHelper" checked />
+                <label for="ToggleGridHelper">Grid Helper</label>
+              </div>
+              <div class="me-2">
+                <input id="ToggleAxesHelper" type="checkbox" name="ToggleAxesHelper" checked />
+                <label for="ToggleAxesHelper">Axes Helper</label>
+              </div>
+              <div class="h-75">
+                <select id="SelectCamera" class="form-select form-select-sm py-0" aria-label="SelectCamera">
+                  <option selected>Viewport Camera</option>
+                  <option value="1">Perspective Camera</option>
+                  <option value="2">Orthographic Camera</option>
+                </select>
+              </div>
             </li>
           </ul>
         </div>
