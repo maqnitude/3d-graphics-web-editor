@@ -14,6 +14,7 @@ class OrthographicCamera extends THREE.OrthographicCamera {
     this.name = "Orthographic Camera";
 
     this.helper = new THREE.CameraHelper( this );
+    this.helper.visible = false;
     this.editor.sceneHelper.add( this.helper );
 
     //
@@ -23,6 +24,13 @@ class OrthographicCamera extends THREE.OrthographicCamera {
 
   setupEvents() {
     this.eventManager.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
+
+    this.addEventListener( "added", () => {
+      this.helper.visible = true;
+    })
+    this.addEventListener( "removed", () => {
+      this.helper.visible = false;
+    });
   }
 
   onObjectChanged( event ) {

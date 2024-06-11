@@ -11,6 +11,7 @@ class SpotLight extends THREE.SpotLight {
     this.name = "Spot Light";
 
     this.helper = new THREE.SpotLightHelper( this );
+    this.helper.visible = false;
     this.editor.sceneHelper.add( this.helper );
 
     this.setupEvents();
@@ -18,6 +19,13 @@ class SpotLight extends THREE.SpotLight {
 
   setupEvents() {
     this.eventManager.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
+
+    this.addEventListener( "added", () => {
+      this.helper.visible = true;
+    })
+    this.addEventListener( "removed", () => {
+      this.helper.visible = false;
+    });
   }
 
   onObjectChanged( event ) {

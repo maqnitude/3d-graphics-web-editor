@@ -11,6 +11,7 @@ class PerspectiveCamera extends THREE.PerspectiveCamera {
     this.name = "Perspective Camera";
 
     this.helper = new THREE.CameraHelper( this );
+    this.helper.visible = false;
     this.editor.sceneHelper.add( this.helper );
 
     //
@@ -20,6 +21,13 @@ class PerspectiveCamera extends THREE.PerspectiveCamera {
 
   setupEvents() {
     this.eventManager.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
+
+    this.addEventListener( "added", () => {
+      this.helper.visible = true;
+    })
+    this.addEventListener( "removed", () => {
+      this.helper.visible = false;
+    });
   }
 
   onObjectChanged( event ) {

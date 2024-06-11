@@ -111,7 +111,9 @@ class ValueSliderProperty {
     // number input must listen to "change" instead of "input",
     // otherwise you can only enter integer
     this.inputNumber.addEventListener( "change", this.onInputChanged.bind( this ) );
-    this.inputSlider.addEventListener( "input", this.onInputChanged.bind( this ) );
+
+    this.inputSlider.addEventListener( "change", this.onInputChanged.bind( this ) );
+    this.inputSlider.addEventListener( "input", this.onInputChanged.bind( this ) ); // Need this to see changes in real-time
   }
 
   // TODO: implement undo/redo for this shit

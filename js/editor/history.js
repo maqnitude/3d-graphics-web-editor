@@ -22,9 +22,16 @@ class ChangeEntry extends Entry {
     this.scale = object.scale.clone();
 
     this.visible = object.visible;
+
+    // if ( object.isMesh ) {
+    //   this.geometry = object.geometry.clone();
+    // } else if ( object.isLight ) {
+    //   this.intensity = object.intensity;
+    // }
   }
 }
 
+// TODO: Reimplement this so that we don't have to manually save before applying changes
 class History {
   constructor( editor ) {
     this.editor = editor;
@@ -79,10 +86,16 @@ class History {
         this.redos.push( new ChangeEntry( object ) );
 
         if (object) {
-          if (entry.position) { object.position.copy( entry.position ) }
-          if (entry.rotation) { object.rotation.copy( entry.rotation ) }
-          if (entry.scale) { object.scale.copy( entry.scale ) }
+          if (entry.position) { object.position.copy( entry.position ); }
+          if (entry.rotation) { object.rotation.copy( entry.rotation ); }
+          if (entry.scale) { object.scale.copy( entry.scale ); }
           object.visible = entry.visible;
+
+          // if ( object.isMesh ) {
+          //   if ( entry.geometry ) { object.geometry.copy( entry.geometry ); }
+          // } else if ( object.isLight ) {
+          //   object.intensity = entry.intensity;
+          // }
         }
 
         this.eventManager.dispatch( this.events.objectChanged, { object: object } );
@@ -124,10 +137,16 @@ class History {
         this.undos.push( new ChangeEntry( object ) );
 
         if (object) {
-          if (entry.position) { object.position.copy( entry.position ) }
-          if (entry.rotation) { object.rotation.copy( entry.rotation ) }
-          if (entry.scale) { object.scale.copy( entry.scale ) }
+          if (entry.position) { object.position.copy( entry.position ); }
+          if (entry.rotation) { object.rotation.copy( entry.rotation ); }
+          if (entry.scale) { object.scale.copy( entry.scale ); }
           object.visible = entry.visible;
+
+          // if ( object.isMesh ) {
+          //   if ( entry.geometry ) { object.geometry.copy( entry.geometry ); }
+          // } else if ( object.isLight ) {
+          //   object.intensity = entry.intensity;
+          // }
         }
 
         this.eventManager.dispatch( this.events.objectChanged, { object: object } );

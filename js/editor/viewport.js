@@ -276,6 +276,8 @@ class Viewport {
 
     if ( object.isCamera ) {
       object.updateProjectionMatrix();
+    } else if ( object.isLight ) {
+      object.helper?.update();
     }
 
     this.render();
