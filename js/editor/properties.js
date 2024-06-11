@@ -7,17 +7,9 @@ class ReadOnlyProperty {
     this.parent = parent;
 
     this.container = document.createElement( "div" );
-
-    this.listItem = document.createElement( "div" );
-    this.listItem.classList.add(
-      "list-group-item",
-      "p-0"
-    );
-
-    this.formFloating = document.createElement( "div" );
-    this.formFloating.classList.add(
-      "form-floating"
-    );
+    this.container.classList.add(
+      "input-group"
+    )
 
     this.input = document.createElement( "input" );
     this.input.readOnly = true;
@@ -25,17 +17,18 @@ class ReadOnlyProperty {
     this.input.type = type;
     this.input.value = `${ value }`;
     this.input.classList.add(
-      "form-control-plaintext"
+      "form-control"
     );
 
     this.label = document.createElement( "label" );
-    this.label.setAttribute( "for", this.input.getAttribute( "id" ) );
+    this.label.classList.add(
+      "input-group-text",
+      "fw-bold"
+    );
     this.label.textContent = propertyLabel;
 
-    this.formFloating.appendChild( this.input );
-    this.formFloating.appendChild( this.label );
-    this.listItem.appendChild( this.formFloating );
-    this.container.appendChild( this.listItem );
+    this.container.appendChild( this.label );
+    this.container.appendChild( this.input );
     this.parent.appendChild( this.container );
   }
 
@@ -56,22 +49,22 @@ class ValueSliderProperty {
     this.properties = propertyString.split( "." );
 
     this.container = document.createElement( "div" );
-
-    this.listItem = document.createElement( "div" );
-    this.listItem.classList.add(
-      "list-group-item",
-      "p-0"
-    );
-
-    this.inputGroup = document.createElement( "div" );
-    this.inputGroup.classList.add(
+    this.container.classList.add(
       "input-group",
+      "flex-column"
     );
 
     this.span = document.createElement( "span" );
     this.span.textContent = propertyLabel;
     this.span.classList.add(
-      "input-group-text"
+      "input-group-text",
+      "fw-bold"
+    );
+
+    this.inputContainer = document.createElement( "div" );
+    this.inputContainer.classList.add(
+      "input-group",
+      "flex-nowrap"
     );
 
     this.inputNumber = document.createElement( "input" );
@@ -98,11 +91,10 @@ class ValueSliderProperty {
       "form-range",
     );
 
-    this.inputGroup.appendChild( this.span );
-    this.inputGroup.appendChild( this.inputSlider );
-    this.inputGroup.appendChild( this.inputNumber );
-    this.listItem.appendChild( this.inputGroup );
-    this.container.appendChild( this.listItem );
+    this.inputContainer.appendChild( this.span );
+    this.inputContainer.appendChild( this.inputNumber );
+    this.container.appendChild( this.inputContainer );
+    this.container.appendChild( this.inputSlider );
     this.parent.appendChild( this.container );
 
     //
@@ -116,18 +108,14 @@ class ValueSliderProperty {
   }
 
   setupEvents() {
-    this.inputNumber.addEventListener(
-      "input",
-      this.onInput.bind( this )
-    );
-
-    this.inputSlider.addEventListener(
-      "input",
-      this.onInput.bind( this )
-    );
+    // number input must listen to "change" instead of "input",
+    // otherwise you can only enter integer
+    this.inputNumber.addEventListener( "change", this.onInputChanged.bind( this ) );
+    this.inputSlider.addEventListener( "input", this.onInputChanged.bind( this ) );
   }
 
-  onInput( event ) {
+  // TODO: implement undo/redo for this shit
+  onInputChanged( event ) {
     const value = Number( event.target.value );
 
     this.inputNumber.value = value;
@@ -336,17 +324,25 @@ class BooleanProperty {
     this.properties = propertyString.split( "." );
 
     this.container = document.createElement( "div" );
-
-    this.listItem = document.createElement("div");
-    this.listItem.classList.add(
-      "list-group-item",
-      "p-1"
+    this.container.classList.add(
+      "input-group"
     );
 
-    this.formCheck = document.createElement("div")
-    this.formCheck.classList.add(
-      "form-check",
-      "m-2"
+    // this.formCheck = document.createElement("div")
+    // this.formCheck.classList.add(
+    //   "form-check",
+    // );
+
+    this.label = document.createElement("label");
+    this.label.textContent = propertyLabel;
+    this.label.classList.add(
+      "input-group-text",
+      "fw-bold"
+    );
+
+    this.inputContainer = document.createElement( "div" );
+    this.inputContainer.classList.add(
+      "input-group-text"
     );
 
     this.input = document.createElement( "input" );
@@ -358,17 +354,9 @@ class BooleanProperty {
       "form-check-input"
     );
 
-    this.label = document.createElement("label");
-    this.label.setAttribute("for", this.input.getAttribute( "id" ))
-    this.label.textContent = propertyLabel;
-    this.label.classList.add(
-      "form-check-label"
-    );
-
-    this.formCheck.appendChild( this.input );
-    this.formCheck.appendChild( this.label );
-    this.listItem.appendChild( this.formCheck );
-    this.container.appendChild( this.listItem );
+    this.inputContainer.appendChild( this.input );
+    this.container.appendChild( this.label );
+    this.container.appendChild( this.inputContainer );
     this.parent.appendChild( this.container );
 
     //
@@ -428,16 +416,8 @@ class DropdownProperty {
     this.property = property;
 
     this.container = document.createElement( "div" );
-
-    this.listItem = document.createElement("div");
-    this.listItem.classList.add(
-      "list-group-item",
-      "p-0"
-    );
-
-    this.formFloating = document.createElement("div");
-    this.formFloating.classList.add(
-      "form-floating"
+    this.container.classList.add(
+      "input-group"
     );
 
     this.select = document.createElement("select");
@@ -446,9 +426,17 @@ class DropdownProperty {
       "form-select"
     );
 
+    this.label = document.createElement("label");
+    this.label.classList.add(
+      "input-group-text",
+      "fw-bold"
+    );
+    this.label.textContent = propertyLabel;
+
     for (const key in options) {
       let optionElement = document.createElement("option");
       const option = options[key];
+
       optionElement.value = option;
       optionElement.text = key;
 
@@ -459,14 +447,8 @@ class DropdownProperty {
       this.select.appendChild(optionElement);
     };
 
-    this.label = document.createElement("label");
-    this.label.setAttribute("for", this.select.getAttribute("id"));
-    this.label.textContent = propertyLabel;
-
-    this.formFloating.appendChild( this.select );
-    this.formFloating.appendChild( this.label );
-    this.listItem.appendChild( this.formFloating );
-    this.container.appendChild( this.listItem );
+    this.container.appendChild( this.label );
+    this.container.appendChild( this.select );
     this.parent.appendChild( this.container );
 
     //
@@ -551,164 +533,69 @@ class Vector3Property {
     this.property = property;
 
     this.label = document.createElement( "label" );
+    this.label.classList.add( "fw-bold" );
     this.label.textContent = propertyLabel;
 
     this.container = document.createElement( "div" );
 
-    this.inputGroupX = document.createElement( "div" );
-    this.inputGroupX.classList.add(
-      "input-group",
-    );
-    this.inputGroupY = document.createElement( "div" );
-    this.inputGroupY.classList.add(
-      "input-group",
-    );
-    this.inputGroupZ = document.createElement( "div" );
-    this.inputGroupZ.classList.add(
-      "input-group",
-    );
+    this.inputGroup = document.createElement( "div" );
+    this.inputGroup.classList.add( "input-group" );
 
-    this.spanX = document.createElement( "span" );
-    this.spanX.textContent = "X";
-    this.spanX.classList.add(
-      "input-group-text"
-    );
-    this.spanY = document.createElement( "span" );
-    this.spanY.textContent = "Y";
-    this.spanY.classList.add(
-      "input-group-text"
-    );
-    this.spanZ = document.createElement( "span" );
-    this.spanZ.textContent = "Z";
-    this.spanZ.classList.add(
-      "input-group-text"
-    );
+    const axes = [ 'x', 'y', 'z' ];
 
-    this.inputNumberX = document.createElement( "input" );
-    this.inputNumberX.readOnly = false;
-    this.inputNumberX.id = "input-x";
-    this.inputNumberX.type = "number";
-    this.inputNumberX.value = `${ vector3.getComponent(0) }`;
-    this.inputNumberX.step = "0.001";
-    this.inputNumberX.classList.add(
-      "form-control",
-    );
-    this.inputNumberY = document.createElement( "input" );
-    this.inputNumberY.readOnly = false;
-    this.inputNumberY.id = "input-y";
-    this.inputNumberY.type = "number";
-    this.inputNumberY.value = `${ vector3.getComponent(1) }`;
-    this.inputNumberY.step = "0.001";
-    this.inputNumberY.classList.add(
-      "form-control",
-    );
-    this.inputNumberZ = document.createElement( "input" );
-    this.inputNumberZ.readOnly = false;
-    this.inputNumberZ.id = "input-z";
-    this.inputNumberZ.type = "number";
-    this.inputNumberZ.value = `${ vector3.getComponent(2) }`;
-    this.inputNumberZ.step = "0.001";
-    this.inputNumberZ.classList.add(
-      "form-control",
-    );
+    axes.forEach( ( axis, index ) => {
+      const span = document.createElement( "span" );
+      span.textContent = axis.toUpperCase();
+      span.classList.add("input-group-text");
 
-    this.inputGroupX.appendChild(this.spanX);
-    this.inputGroupX.appendChild(this.inputNumberX);
+      const inputNumber = document.createElement( "input" );
+      inputNumber.readOnly = false;
+      inputNumber.id = `input-${axis}`;
+      inputNumber.type = "number";
+      inputNumber.value = `${ vector3.getComponent( index ) }`;
+      inputNumber.step = "0.001";
+      inputNumber.classList.add( "form-control" );
 
-    this.inputGroupY.appendChild(this.spanY);
-    this.inputGroupY.appendChild(this.inputNumberY);
+      this.inputGroup.appendChild( span );
+      this.inputGroup.appendChild( inputNumber );
+    }  );
 
-    this.inputGroupZ.appendChild(this.spanZ);
-    this.inputGroupZ.appendChild(this.inputNumberZ);
+    this.container.appendChild( this.label );
+    this.container.appendChild( this.inputGroup );
 
-    this.container.appendChild(this.label);
-    this.container.appendChild(this.inputGroupX);
-    this.container.appendChild(this.inputGroupY);
-    this.container.appendChild(this.inputGroupZ);
+    this.parent.appendChild( this.container );
 
-    this.parent.appendChild(this.container);
+    //
 
     this.setupEvents();
   }
 
   setValue( vector3 ) {
-    this.inputNumberX.value = `${ vector3.getComponent(0) }`;
-    this.inputNumberY.value = `${ vector3.getComponent(1) }`;
-    this.inputNumberZ.value = `${ vector3.getComponent(2) }`;
+    const inputNumbers = Array.from( this.inputGroup.getElementsByTagName( "input" ) );
+
+    inputNumbers.forEach( ( inputNumber, index ) => {
+      inputNumber.value = `${ vector3.getComponent( index ) }`;
+    } );
   }
 
   // Change in properties, update in viewport
   setupEvents() {
-    this.inputNumberX.addEventListener(
-      "input",
-      ( event ) => {
-        const value = Number( event.target.value );
+    const inputNumbers = Array.from( this.inputGroup.getElementsByTagName( "input" ) );
 
-        this.object[ this.property ].setComponent(0, value);
+    inputNumbers.forEach( ( inputNumber, index ) => {
+      inputNumber.addEventListener( "change", ( event ) => {
+        const value = Number(event.target.value);
 
-        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-      }
-    )
-    this.inputNumberX.addEventListener(
-      "focus",
-      this.onFocus.bind( this )
-    )
-    this.inputNumberX.addEventListener(
-      "blur",
-      this.onBlur.bind( this )
-    )
-
-    this.inputNumberY.addEventListener(
-      "input",
-      ( event ) => {
-        const value = Number( event.target.value );
-
-        this.object[ this.property ].setComponent(1, value);
-
-        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-      }
-    )
-    this.inputNumberY.addEventListener(
-      "focus",
-      this.onFocus.bind( this )
-    )
-    this.inputNumberY.addEventListener(
-      "blur",
-      this.onBlur.bind( this )
-    )
-
-    this.inputNumberZ.addEventListener(
-      "input",
-      (event) => {
-        const value = Number( event.target.value );
-
-        this.object[ this.property ].setComponent(2, value);
+        this.history.recordChange = true;
+        this.history.newUndoBranch = true;
 
         this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
 
-      }
-    )
-    this.inputNumberZ.addEventListener(
-      "focus",
-      this.onFocus.bind( this )
-    )
-    this.inputNumberZ.addEventListener(
-      "blur",
-      this.onBlur.bind( this )
-    )
-  }
+        this.object[ this.property ].setComponent(index, value);
 
-  // Event handlers
-
-  onFocus() {
-    this.history.recordChange = true;
-    this.history.newUndoBranch = true;
-
-    this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-  }
-
-  onBlur() {
-    this.history.recordChange = false;
+        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
+      } );
+    } );
   }
 }
 
@@ -724,162 +611,70 @@ class EulerProperty {
     this.property = property;
 
     this.label = document.createElement( "label" );
+    this.label.classList.add(
+      "fw-bold",
+    );
     this.label.textContent = propertyLabel;
 
     this.container = document.createElement( "div" );
 
-    this.inputGroupX = document.createElement( "div" );
-    this.inputGroupX.classList.add(
-      "input-group",
-    );
-    this.inputGroupY = document.createElement( "div" );
-    this.inputGroupY.classList.add(
-      "input-group",
-    );
-    this.inputGroupZ = document.createElement( "div" );
-    this.inputGroupZ.classList.add(
-      "input-group",
-    );
+    this.inputGroup = document.createElement( "div" );
+    this.inputGroup.classList.add( "input-group" );
 
-    this.spanX = document.createElement( "span" );
-    this.spanX.textContent = "X";
-    this.spanX.classList.add(
-      "input-group-text"
-    );
-    this.spanY = document.createElement( "span" );
-    this.spanY.textContent = "Y";
-    this.spanY.classList.add(
-      "input-group-text"
-    );
-    this.spanZ = document.createElement( "span" );
-    this.spanZ.textContent = "Z";
-    this.spanZ.classList.add(
-      "input-group-text"
-    );
+    const axes = [ 'x', 'y', 'z' ];
 
-    this.inputNumberX = document.createElement( "input" );
-    this.inputNumberX.readOnly = false;
-    this.inputNumberX.id = "input-x";
-    this.inputNumberX.type = "number";
-    this.inputNumberX.value = `${ Number((euler.x * (180 / Math.PI)).toFixed(2))}`;
-    this.inputNumberX.classList.add(
-      "form-control",
-    );
-    this.inputNumberY = document.createElement( "input" );
-    this.inputNumberY.readOnly = false;
-    this.inputNumberY.id = "input-y";
-    this.inputNumberY.type = "number";
-    this.inputNumberY.value = `${ Number((euler.y * (180 / Math.PI)).toFixed(2))}`;
-    this.inputNumberY.classList.add(
-      "form-control",
-    );
-    this.inputNumberZ = document.createElement( "input" );
-    this.inputNumberZ.readOnly = false;
-    this.inputNumberZ.id = "input-z";
-    this.inputNumberZ.type = "number";
-    this.inputNumberZ.value = `${ Number((euler.z * (180 / Math.PI)).toFixed(2))}`;
-    this.inputNumberZ.classList.add(
-      "form-control",
-    );
+    axes.forEach( ( axis, index ) => {
+      const span = document.createElement( "span" );
+      span.textContent = axis.toUpperCase(  );
+      span.classList.add( "input-group-text" );
 
-    this.inputGroupX.appendChild(this.spanX);
-    this.inputGroupX.appendChild(this.inputNumberX);
+      const inputNumber = document.createElement( "input" );
+      inputNumber.readOnly = false;
+      inputNumber.id = `input-${ axis }`;
+      inputNumber.type = "number";
+      inputNumber.value = `${ Number( ( euler[ axis ] * ( 180 / Math.PI ) ).toFixed( 2 ) ) }`;
+      inputNumber.classList.add( "form-control" );
 
-    this.inputGroupY.appendChild(this.spanY);
-    this.inputGroupY.appendChild(this.inputNumberY);
+      this.inputGroup.appendChild( span );
+      this.inputGroup.appendChild( inputNumber );
+     } );
 
-    this.inputGroupZ.appendChild(this.spanZ);
-    this.inputGroupZ.appendChild(this.inputNumberZ);
+    this.container.appendChild( this.label );
+    this.container.appendChild( this.inputGroup );
 
-    this.container.appendChild(this.label);
-    this.container.appendChild(this.inputGroupX);
-    this.container.appendChild(this.inputGroupY);
-    this.container.appendChild(this.inputGroupZ);
-
-    this.parent.appendChild(this.container);
-
-    //
+    this.parent.appendChild( this.container );
 
     this.setupEvents();
   }
 
   setValue( euler ) {
-    this.inputNumberX.value = `${ Number((euler.x * (180 / Math.PI)).toFixed(2)) }`;
-    this.inputNumberY.value = `${ Number((euler.y * (180 / Math.PI)).toFixed(2)) }`;
-    this.inputNumberZ.value = `${ Number((euler.z * (180 / Math.PI)).toFixed(2)) }`;
+    const axes = ['x', 'y', 'z'];
+    const inputNumbers = Array.from( this.inputGroup.getElementsByTagName( 'input' ) );
+
+    inputNumbers.forEach( ( inputNumber, index ) => {
+      inputNumber.value = `${ Number( ( euler[axes[index]] * ( 180 / Math.PI ) ).toFixed( 2 ) ) }`;
+    } );
   }
 
   // Change in properties, update in viewport
   setupEvents() {
-    this.inputNumberX.addEventListener(
-      "input",
-      (event) => {
+    const inputNumbers = Array.from( this.inputGroup.getElementsByTagName( 'input' ) );
+    const rotationAxes = ['x', 'y', 'z'];
+
+    inputNumbers.forEach( ( inputNumber, index ) => {
+      inputNumber.addEventListener( "change", ( event ) => {
         const value = Number( event.target.value );
 
-        this.object.rotation.x = (value * (Math.PI / 180));
+        this.history.recordChange = true;
+        this.history.newUndoBranch = true;
 
-        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-      }
-    )
-    this.inputNumberX.addEventListener(
-      "focus",
-      this.onFocus.bind( this )
-    )
-    this.inputNumberX.addEventListener(
-      "blur",
-      this.onBlur.bind( this )
-    )
+        this.eventManager.dispatch( this.events.objectChanged, {  object: this.object  } );
 
-    this.inputNumberY.addEventListener(
-      "input",
-      (event) => {
-        const value = Number( event.target.value );
+        this.object.rotation[ rotationAxes[ index ] ] = ( value * ( Math.PI / 180 ) );
 
-        this.object.rotation.y = (value * (Math.PI / 180));
-
-        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-      }
-    )
-    this.inputNumberY.addEventListener(
-      "focus",
-      this.onFocus.bind( this )
-    )
-    this.inputNumberY.addEventListener(
-      "blur",
-      this.onBlur.bind( this )
-    )
-
-    this.inputNumberZ.addEventListener(
-      "input",
-      (event) => {
-        const value = Number( event.target.value );
-
-        this.object.rotation.z = (value * (Math.PI / 180));
-
-        this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-      }
-    )
-    this.inputNumberZ.addEventListener(
-      "focus",
-      this.onFocus.bind( this )
-    )
-    this.inputNumberZ.addEventListener(
-      "blur",
-      this.onBlur.bind( this )
-    )
-  }
-
-  // Event handlers
-
-  onFocus() {
-    this.history.recordChange = true;
-    this.history.newUndoBranch = true;
-
-    this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
-  }
-
-  onBlur() {
-    this.history.recordChange = false;
+        this.eventManager.dispatch( this.events.objectChanged, {  object: this.object  } );
+      } );
+    } );
   }
 }
 
@@ -894,27 +689,47 @@ class ColorProperty {
     this.object = object;
     this.properties = propertyString.split( "." );
 
-    this.label = document.createElement("label");
+    this.container = document.createElement( "div" );
+    this.container.classList.add(
+      "input-group",
+      "flex-nowrap"
+    );
+
+    this.label = document.createElement( "label" );
+    this.label.classList.add(
+      "input-group-text",
+      "fw-bold"
+    );
     this.label.textContent = propertyLabel;
 
-    this.container = document.createElement("div");
-    this.container.classList.add("input-group");
+    this.inputContainer = document.createElement( "div" );
+    this.inputContainer.classList.add(
+      "input-group",
+      "flex-nowrap"
+    );
 
-    this.inputColor = document.createElement("input");
+    this.inputColor = document.createElement( "input" );
     this.inputColor.id = "input-color";
     this.inputColor.type = "color";
     this.inputColor.value = color.getStyle();
-    this.inputColor.classList.add("form-control");
+    this.inputColor.classList.add(
+      "form-control",
+      "w-50"
+    );
 
-    this.inputText = document.createElement("input");
+    this.inputText = document.createElement( "input" );
     this.inputText.id = "input-text";
     this.inputText.type = "text";
-    this.inputText.classList.add("form-control");
+    this.inputText.classList.add(
+      "form-control",
+      "w-50"
+    );
 
-    this.container.appendChild(this.label);
-    this.container.appendChild(this.inputColor);
-    this.container.appendChild(this.inputText);
-    this.parent.appendChild(this.container);
+    this.inputContainer.appendChild( this.inputColor );
+    this.inputContainer.appendChild( this.inputText );
+    this.container.appendChild( this.label );
+    this.container.appendChild( this.inputContainer );
+    this.parent.appendChild( this.container );
 
     //
 
@@ -922,48 +737,8 @@ class ColorProperty {
   }
 
   setupEvents() {
-    this.inputColor.addEventListener(
-      "input",
-      ( event ) => {
-        const colorStyle = new THREE.Color( event.target.value ).getStyle();
-        this.inputText.value = colorStyle;
-
-        if ( this.properties.lenght === 1 ) {
-          this.setColor( this.object, this.properties[ 0 ], colorStyle );
-        } else {
-          switch ( this.properties[ 0 ] ) {
-            case "material":
-              const material = this.object.material;
-
-              this.setColor( material, this.properties[ 1 ], colorStyle );
-
-              break;
-          }
-        }
-      }
-    );
-    this.inputText.addEventListener(
-      "keyup",
-      ( event ) => {
-        const colorStyle = event.target.value;
-        this.inputColor.value = colorStyle;
-
-        if ( event.key === "Enter" ) {
-          if ( this.properties.length === 1 ) {
-            this.setColor( this.object, this.properties[ 0 ], colorStyle );
-          } else {
-            switch ( this.properties[ 0 ] ) {
-              case "material":
-                const material = this.object.material;
-
-                this.setColor( material, this.properties[ 1 ],  colorStyle );
-
-                break;
-            }
-          }
-        }
-      }
-    )
+    this.inputColor.addEventListener( "change", this.onInputChanged.bind( this ) );
+    this.inputText.addEventListener( "change", this.onInputChanged.bind( this ) );
   }
 
   setValue( color ) {
@@ -980,6 +755,28 @@ class ColorProperty {
 
     this.eventManager.dispatch( this.events.objectChanged, { object: this.object } );
   }
+
+  // Event handlers
+
+  onInputChanged( event ) {
+    const colorStyle = new THREE.Color( event.target.value ).getStyle();
+
+    this.inputColor.value = colorStyle;
+    this.inputText.value = colorStyle;
+
+    if ( this.properties.length === 1 ) {
+      this.setColor( this.object, this.properties[ 0 ], colorStyle );
+    } else {
+      switch ( this.properties[ 0 ] ) {
+        case "material":
+          const material = this.object.material;
+
+          this.setColor( material, this.properties[ 1 ],  colorStyle );
+
+          break;
+      }
+    }
+  }
 }
 
 class TextureProperty {
@@ -994,9 +791,15 @@ class TextureProperty {
     this.properties = propertyString.split( "." );
 
     this.container = document.createElement( "div" );
+    this.container.classList.add(
+      "input-group"
+    );
 
     // This span is used to display the texture name
     this.span = document.createElement( "span" );
+    this.span.classList.add(
+      "input-group-text",
+    );
     if ( this.properties.length === 1 ) {
       this.span.textContent = this.object[ this.properties[ 0 ] ]?.name;
     } else {
@@ -1009,13 +812,16 @@ class TextureProperty {
 
     this.label = document.createElement( "label" );
     this.label.classList.add(
-      "d-block"
+      "input-group-text",
+      "fw-bold"
     );
     this.label.textContent = propertyLabel;
 
     this.inputFile = document.createElement( "input" );
     this.inputFile.type = "file";
-    this.inputFile.classList.add( "form-control" );
+    this.inputFile.classList.add(
+      "form-control",
+    );
 
     this.container.appendChild( this.label );
     this.container.appendChild( this.span );
@@ -1046,6 +852,8 @@ class TextureProperty {
                 this.loadRGBE( this.object, this.properties[ 0 ], file );
               }
 
+              break;
+            default:
               break;
           }
         } else {
@@ -1166,13 +974,17 @@ class PropertyGroup {
 
     this.container = document.createElement( "div" )
     this.container.classList.add(
-      "list-group"
+      "list-group",
+      "d-flex",
+      "flex-column",
+      "gap-2"
     );
 
     this.header = document.createElement( "h5" );
     this.header.classList.add(
       "list-group-item",
       "list-group-item-primary",
+      "my-0"
     );
     this.header.textContent = title;
 
@@ -1207,7 +1019,8 @@ class Properties {
       // "h-100",
       "overflow-scroll",
       "d-flex",
-      "flex-column"
+      "flex-column",
+      "gap-2"
     );
   }
 
@@ -1215,22 +1028,6 @@ class Properties {
 
   setPropertyValue( property, value ) {
     property?.setValue( value );
-  }
-}
-
-class CameraProperties extends Properties {
-  constructor( editor, camera ) {
-    super( editor );
-
-    // TODO
-  }
-}
-
-class SceneProperties extends Properties {
-  constructor( editor, scene ) {
-    super( editor );
-
-    // TODO
   }
 }
 

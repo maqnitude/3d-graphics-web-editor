@@ -89,6 +89,30 @@ window.addEventListener('beforeunload', function (e) {
   e.preventDefault();
 });
 
+// Handle shit on the viewport controls bar
+
+const gridHelperCheckbox = document.getElementById( "ToggleGridHelper" );
+gridHelperCheckbox.addEventListener(
+  "input",
+  function( event ) {
+    const checked = Boolean( event.target.checked );
+
+    viewport.gridHelper.visible = checked;
+    viewport.render();
+  }
+);
+
+const axesHelperCheckbox = document.getElementById( "ToggleAxesHelper" );
+axesHelperCheckbox.addEventListener(
+  "input",
+  function( event ) {
+    const checked = Boolean( event.target.checked );
+
+    viewport.axesHelper.visible = checked;
+    viewport.render();
+  }
+)
+
 // Handle shit on the menubar
 
 // Load glb files
