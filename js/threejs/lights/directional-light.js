@@ -11,6 +11,7 @@ class DirectionalLight extends THREE.DirectionalLight {
     this.name = "Directional Light";
 
     this.helper = new THREE.DirectionalLightHelper( this, 1 );
+    this.helper.visible = false;
     this.editor.sceneHelper.add( this.helper );
 
     //
@@ -20,6 +21,13 @@ class DirectionalLight extends THREE.DirectionalLight {
 
   setupEvents() {
     this.eventManager.add( this.events.objectChanged, this.onObjectChanged.bind( this ) );
+
+    this.addEventListener( "added", () => {
+      this.helper.visible = true;
+    })
+    this.addEventListener( "removed", () => {
+      this.helper.visible = false;
+    });
   }
 
   onObjectChanged( event ) {
