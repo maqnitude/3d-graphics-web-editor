@@ -714,9 +714,10 @@ class ColorProperty {
     this.inputColor.id = "input-color";
     this.inputColor.type = "color";
     this.inputColor.value = color.getStyle();
+    this.inputColor.style.width = 'auto';
+    this.inputColor.style.height = 'auto';
     this.inputColor.classList.add(
       "form-control",
-      "w-50"
     );
 
     this.inputText = document.createElement( "input" );
@@ -724,7 +725,6 @@ class ColorProperty {
     this.inputText.type = "text";
     this.inputText.classList.add(
       "form-control",
-      "w-50"
     );
 
     this.inputContainer.appendChild( this.inputColor );
@@ -802,6 +802,8 @@ class TextureProperty {
     this.span.classList.add(
       "input-group-text",
     );
+    this.span.style.maxWidth = "120px";
+    this.span.style.overflow = "auto";
     if ( this.properties.length === 1 ) {
       this.span.textContent = this.object[ this.properties[ 0 ] ]?.name;
     } else {
@@ -821,13 +823,22 @@ class TextureProperty {
 
     this.inputFile = document.createElement( "input" );
     this.inputFile.type = "file";
-    this.inputFile.classList.add(
-      "form-control",
+    this.inputFile.style.display = "none";
+
+    this.uploadButton = document.createElement( "button" );
+    this.uploadButton.textContent = "Browse";
+    this.uploadButton.classList.add(
+      "btn",
+      "btn-primary"
     );
+    this.uploadButton.addEventListener("click", () => {
+      this.inputFile.click();
+    });
 
     this.container.appendChild( this.label );
     this.container.appendChild( this.span );
     this.container.appendChild( this.inputFile );
+    this.container.appendChild( this.uploadButton );
     this.parent.appendChild( this.container );
 
     //
@@ -982,24 +993,36 @@ class PropertyGroup {
       "gap-2"
     );
 
-    this.header = document.createElement( "h5" );
+    this.header = document.createElement( "button" );
     this.header.classList.add(
       "list-group-item",
       "list-group-item-primary",
       "my-0"
     );
     this.header.textContent = title;
+    this.header.setAttribute("data-bs-toggle", "collapse");
+    this.header.setAttribute("data-bs-target", `#${title}-content`);
+    this.header.setAttribute("aria-expanded", "true");
+    this.header.setAttribute("aria-controls", `${title}-content`);
+
+    this.content = document.createElement( "div" );
+    this.content.id = `${title}-content`;
+    this.content.classList.add(
+      "collapse",
+      "show"
+    );
 
     this.container.appendChild( this.header );
+    this.container.appendChild( this.content );
 
     this.parent.appendChild( this.container );
   }
 
   clear() {
-    const children = Array.from( this.container.children );
+    const children = Array.from( this.content.children );
     for ( const child of children ) {
       if ( child !== this.header ) {
-        this.container.removeChild( child );
+        this.content.removeChild( child );
       }
     }
   }

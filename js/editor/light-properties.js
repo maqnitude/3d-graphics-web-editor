@@ -12,7 +12,7 @@ class LightProperties extends ObjectProperties {
     this.objectReceiveShadow.container.classList.add( "d-none" );
 
     this.lightProperties = new PropertyGroup( this.container, "Light" );
-    this.setupLightProperties( this.lightProperties.container );
+    this.setupLightProperties( this.lightProperties.content );
   }
 
   setupEvents() {

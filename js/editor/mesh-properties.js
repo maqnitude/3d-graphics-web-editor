@@ -10,10 +10,10 @@ class MeshProperties extends ObjectProperties {
     this.mesh = mesh;
 
     this.geometryProperties = new PropertyGroup( this.container, "Geometry" );
-    this.setupGeometryProperties( this.geometryProperties.container );
+    this.setupGeometryProperties( this.geometryProperties.content );
 
     this.materialProperties = new PropertyGroup( this.container, "Material" );
-    this.setupMaterialProperties( this.materialProperties.container );
+    this.setupMaterialProperties( this.materialProperties.content );
 
     this.physicsProperties = new PropertyGroup( this.container, "Physics" );
 
