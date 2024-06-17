@@ -8,7 +8,7 @@ class CameraProperties extends ObjectProperties {
     this.camera = camera;
 
     this.cameraProperties = new PropertyGroup( this.container, "Camera" );
-    this.setupCameraProperties( this.cameraProperties.container );
+    this.setupCameraProperties( this.cameraProperties.content );
 
     //
 

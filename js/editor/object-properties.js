@@ -7,7 +7,7 @@ class ObjectProperties extends Properties {
     this.object = object;
 
     this.objectProperties = new PropertyGroup( this.container, "Object" );
-    this.setupObjectProperties( this.objectProperties.container );
+    this.setupObjectProperties( this.objectProperties.content );
 
     //
 

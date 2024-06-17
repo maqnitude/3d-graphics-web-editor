@@ -8,7 +8,7 @@ class SceneProperties extends ObjectProperties {
     this.scene = scene;
 
     this.sceneProperties = new PropertyGroup( this.container, "Scene" );
-    this.setupSceneProperties( this.sceneProperties.container );
+    this.setupSceneProperties( this.sceneProperties.content );
 
     //
 
