@@ -591,7 +591,7 @@ class MeshProperties extends ObjectProperties {
 
   onMaterialSelected( event ) {
     this.materialProperties.clear();
-    this.setupMaterialProperties( this.materialProperties.container );
+    this.setupMaterialProperties( this.materialProperties.content );
   }
 
   onMaterialChanged( event ) {
