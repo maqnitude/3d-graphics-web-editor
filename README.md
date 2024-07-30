@@ -1,5 +1,5 @@
 # 3D Graphics Web Editor
-This is a research project. A simple 3D graphics web-based editor built with vanilla JavaScript, Bootstrap 5 for the UI, and [Three.js](https://threejs.org/) for the graphics backend (WebGL).
+This is mainly a project for learning purposes. A simple 3D graphics web-based editor built with vanilla JavaScript, Bootstrap 5 for the UI, and [Three.js](https://threejs.org/) for the graphics backend (WebGL).
 
 To run the project, first clone the repository:
 ```
